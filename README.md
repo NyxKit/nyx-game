@@ -29,7 +29,5 @@ management as the cosmos grows increasingly chaotic.
 - **Score & Survival System**: Instead of traditional levels, the goal could be endurance-based, where players see how long they can survive against increasing cosmic dangers, with score multipliers tied to skillful play.
 - **Procedural Generation**: The universe is infinite, and every playthrough generates a new arrangement of obstacles, black holes, and energy sources, ensuring no two runs are identical.
 
-## Useful links
-- https://screamingbrainstudios.itch.io/seamless-space-backgrounds
-- https://screamingbrainstudios.itch.io/planetpack
-- https://screamingbrainstudios.itch.io/2d-planet-pack-2
+## Links and assets
+- https://screamingbrainstudios.com/downloads/
