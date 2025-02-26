@@ -13,10 +13,12 @@
     "type-check": "vue-tsc --build",
     "lint:oxlint": "oxlint . --fix -D correctness --ignore-path .gitignore",
     "lint:eslint": "eslint . --fix",
-    "lint": "run-s lint:*"
+    "lint": "run-s lint:*",
+    "clean": "rm yarn.lock && rm -rf node_modules"
   },
   "dependencies": {
     "nyx-kit": "^1.0.0",
+    "phaser": "^3.88.2",
     "pinia": "^3.0.1",
     "vue": "^3.5.13"
   },

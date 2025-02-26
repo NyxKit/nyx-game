@@ -12,16 +12,19 @@ const { togglePlaying, toggleHiscores, toggleSettings } = useInterfaceStore()
   <div class="main-menu">
     <section>
       <img src="@/assets/logo.svg" />
-      <NyxButton
-        class="button-play"
-        :theme="NyxTheme.Primary"
-        :size="NyxSize.XLarge"
-        @click="togglePlaying"
-      >Play</NyxButton>
+      <nav>
+        <NyxButton
+          class="button-play"
+          :theme="NyxTheme.Primary"
+          :size="NyxSize.XLarge"
+          @click="togglePlaying"
+        >Play</NyxButton>
+        <NyxButton :size="NyxSize.Small" @click="toggleHiscores">Hiscores</NyxButton>
+        <NyxButton :size="NyxSize.Small" @click="toggleSettings">Settings</NyxButton>
+      </nav>
     </section>
     <footer>
-      <NyxButton :theme="NyxTheme.Secondary" @click="toggleHiscores">Hiscores</NyxButton>
-      <NyxButton @click="toggleSettings"><IconGear class="icon-gear" /></NyxButton>
+
     </footer>
   </div>
 </template>
@@ -38,7 +41,7 @@ footer {
   align-items: center;
   justify-content: center;
   position: absolute;
-  padding: 1rem;
+  padding: 2rem;
 }
 
 section {
@@ -46,14 +49,20 @@ section {
   top: 50%;
   flex-direction: column;
   gap: 5rem;
-  transform: translateY(-75%);
+  transform: translateY(-50%);
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 footer {
   bottom: 0;
   right: 0;
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 h1 {
@@ -70,10 +79,8 @@ img {
 }
 
 .button-play {
-  font-size: 1.5rem;
   font-weight: 600;
-  letter-spacing: 3px;
-  text-transform: uppercase;
+  letter-spacing: 4px;
 }
 
 
