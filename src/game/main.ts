@@ -1,24 +1,21 @@
 import { AUTO, Game } from 'phaser'
-import { Boot } from './scenes/Boot'
-import { GameOver } from './scenes/GameOver'
-import { Game as MainGame } from './scenes/Game'
-import { Idle } from './scenes/Idle'
-import { Preloader } from './scenes/Preloader'
+import { BootScene, PreloaderScene, IdleScene, MainGameScene, GameOverScene } from '@/game/scenes'
+import useClientStore from '@/stores/client'
 
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Phaser.Types.Core.GameConfig = {
   type: AUTO,
-  width: 1024,
-  height: 768,
-  parent: 'game-container',
+  width: window.innerWidth,
+  height: window.innerHeight,
+  parent: 'game',
   backgroundColor: '#028af8',
   scene: [
-    Boot,
-    Preloader,
-    Idle,
-    MainGame,
-    GameOver
+    BootScene,
+    PreloaderScene,
+    IdleScene,
+    MainGameScene,
+    GameOverScene
   ]
 }
 

@@ -1,6 +1,6 @@
 import { Scene } from 'phaser';
 
-export class Preloader extends Scene {
+export class PreloaderScene extends Scene {
   constructor () {
     super('Preloader')
   }

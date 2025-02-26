@@ -1,6 +1,6 @@
 import { Scene } from 'phaser'
 
-export class Boot extends Scene {
+export class BootScene extends Scene {
   constructor () {
     super('Boot')
   }
