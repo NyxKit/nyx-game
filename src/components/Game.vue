@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <main></main>
+  <main class="game"></main>
 </template>
 
 <style lang="scss" scoped>

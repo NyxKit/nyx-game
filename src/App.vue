@@ -8,12 +8,12 @@ import Hiscores from './components/Hiscores.vue'
 import Settings from './components/Settings.vue'
 import GameMenu from './components/GameMenu.vue'
 import useInterfaceStore from '@/stores/interface'
-// import type { MainMenu } from './game/scenes/MainMenu'
+import type { Idle } from './game/scenes/Idle'
 import PhaserGame from './game/PhaserGame.vue'
 
 const { isPlaying } = storeToRefs(useInterfaceStore())
 
-// The sprite can only be moved in the MainMenu Scene
+// The sprite can only be moved in the Idle Scene
 const canMoveSprite = ref()
 
 //  References to the PhaserGame component (game and scene are exposed)
@@ -21,21 +21,21 @@ const phaserRef = ref()
 const spritePosition = ref({ x: 0, y: 0 })
 
 const changeScene = () => {
-  const scene = toRaw(phaserRef.value.scene) as MainMenu
+  const scene = toRaw(phaserRef.value.scene) as Idle
   if (!scene) return
 
-  //  Call the changeScene method defined in the `MainMenu`, `Game` and `GameOver` Scenes
+  //  Call the changeScene method defined in the `Idle`, `Game` and `GameOver` Scenes
   scene.changeScene()
 }
 
 const moveSprite = () => {
   if (!phaserRef.value) return
 
-  const scene = toRaw(phaserRef.value.scene) as MainMenu
+  const scene = toRaw(phaserRef.value.scene) as Idle
   if (!scene) return
 
   // Get the update logo position
-  (scene as MainMenu).moveLogo(({ x, y }) => {
+  (scene as Idle).moveLogo(({ x, y }) => {
     spritePosition.value = { x, y }
   })
 }
@@ -65,14 +65,13 @@ const addSprite = () => {
 }
 
 // Event emitted from the PhaserGame component
-const currentScene = (scene: MainMenu) => {
-  canMoveSprite.value = (scene.scene.key !== "MainMenu")
+const currentScene = (scene: Idle) => {
+  canMoveSprite.value = (scene.scene.key !== "Idle")
 }
 
 </script>
 
 <template>
-  <!--
   <PhaserGame ref="phaserRef" @current-active-scene="currentScene" />
   <div>
       <div>
@@ -88,7 +87,6 @@ const currentScene = (scene: MainMenu) => {
           <button class="button" @click="addSprite">Add New Sprite</button>
       </div>
   </div>
-  -->
   <MainMenu v-if="!isPlaying" class="view" />
   <Settings />
   <Hiscores />

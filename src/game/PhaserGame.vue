@@ -13,9 +13,9 @@ const emit = defineEmits(['current-active-scene'])
 onMounted(() => {
   game.value = StartGame('game-container')
   
-  EventBus.on('current-scene-ready', (scene_instance: Phaser.Scene) => { 
-    emit('current-active-scene', scene_instance)
-    scene.value = scene_instance
+  EventBus.on('current-scene-ready', (sceneInstance: Phaser.Scene) => { 
+    emit('current-active-scene', sceneInstance)
+    scene.value = sceneInstance
   })
 })
 
