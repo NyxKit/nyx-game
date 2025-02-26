@@ -9,7 +9,6 @@ import Settings from './components/Settings.vue'
 import GameMenu from './components/GameMenu.vue'
 import useInterfaceStore from '@/stores/interface'
 import type { Idle } from './game/scenes/Idle'
-import PhaserGame from './game/PhaserGame.vue'
 
 const { isPlaying } = storeToRefs(useInterfaceStore())
 
@@ -72,7 +71,6 @@ const currentScene = (scene: Idle) => {
 </script>
 
 <template>
-  <PhaserGame ref="phaserRef" @current-active-scene="currentScene" />
   <div>
       <div>
           <button class="button" @click="changeScene">Change Scene</button>
@@ -91,7 +89,7 @@ const currentScene = (scene: Idle) => {
   <Settings />
   <Hiscores />
   <GameMenu />
-  <Game />
+  <Game ref="phaserRef" @current-active-scene="currentScene" />
 </template>
 
 <style lang="scss">

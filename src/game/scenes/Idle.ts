@@ -1,5 +1,5 @@
 import { GameObjects, Scene } from 'phaser'
-import { EventBus } from '../EventBus'
+import { EventBus } from '@/classes/EventBus'
 
 export class Idle extends Scene {
   background: GameObjects.Image
