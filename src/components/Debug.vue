@@ -1,40 +1,77 @@
 <script setup lang="ts">
 import useGameStore from '@/stores/game'
 import { storeToRefs } from 'pinia'
-import { NyxButton } from 'nyx-kit/components'
-import { NyxSize } from 'nyx-kit/types'
+import { NyxButton, NyxCard } from 'nyx-kit/components'
+import { NyxPosition, NyxSize, NyxTheme } from 'nyx-kit/types'
+import { useTeleportPosition } from 'nyx-kit/compositions'
+import { ref, useTemplateRef, type DefineComponent } from 'vue'
 
 const gameStore = useGameStore()
 const { changeScene, moveSprite, addSprite } = gameStore
 const { canMoveSprite, spritePosition } = storeToRefs(gameStore)
 
+const nyxButton = useTemplateRef<DefineComponent>('nyxButton')
+const nyxCard = useTemplateRef<DefineComponent>('nyxCard')
+
+const isDebugVisible = ref(false)
+
+const { cssVariables } = useTeleportPosition(nyxButton, nyxCard, {
+  gap: ref(NyxSize.XLarge),
+  position: ref(NyxPosition.TopLeft),
+  offsetX: -5,
+  offsetY: -10
+})
+
+const toggleDebug = (value?: boolean) => {
+  isDebugVisible.value = value === undefined ? !isDebugVisible.value : value
+}
+
 </script>
 
 <template>
   <div class="debug">
-    <div class="debug__wrapper">
-      <NyxButton :size="NyxSize.Small" @click="changeScene">Change Scene</NyxButton>
-      <NyxButton :size="NyxSize.Small" :disabled="canMoveSprite" @click="moveSprite">Toggle Movement</NyxButton>
-      <NyxButton :size="NyxSize.Small" @click="addSprite">Add New Sprite</NyxButton>
-      <pre>{{ spritePosition }}</pre>
-    </div>
+    <NyxButton :theme="NyxTheme.Danger" :size="NyxSize.Medium" @click="toggleDebug" ref="nyxButton">Debug</NyxButton>
+    <Teleport to="body">
+      <NyxCard
+        class="debug__card"
+        :class="{ 'debug__card--visible': isDebugVisible }"
+        :style="cssVariables"
+        ref="nyxCard"
+      >
+        <div class="debug__card-content">
+          <NyxButton :size="NyxSize.Small" @click="changeScene">Change Scene</NyxButton>
+          <NyxButton :size="NyxSize.Small" :disabled="canMoveSprite" @click="moveSprite">Toggle Movement</NyxButton>
+          <NyxButton :size="NyxSize.Small" @click="addSprite">Add New Sprite</NyxButton>
+          <pre>{{ spritePosition }}</pre>
+        </div>
+      </NyxCard>
+    </Teleport>
   </div>
 </template>
 
 <style lang="scss" scoped>
   .debug {
     position: fixed;
-    top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    bottom: 0;
     z-index: 100;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    padding: 1rem;
-    font-family: monospace;
-    display: flex;
-    flex-direction: column;
+    padding: var(--nyx-pad-lg);
+  }
+  
+  .debug__card {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+    position: fixed;
+    top: var(--top, 0);
+    left: var(--left, 0);
+    z-index: 200;
+    padding-top: 2rem;
+
+    &--visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
     pre {
       font-size: 12px;
@@ -43,11 +80,11 @@ const { canMoveSprite, spritePosition } = storeToRefs(gameStore)
       border-radius: 0.5rem;
     }
 
-    &__wrapper {
-      width: 20rem;
+    &-content {
       display: flex;
       flex-direction: column;
       gap: 2rem;
+      padding: 0;
     }
   }
 </style>
