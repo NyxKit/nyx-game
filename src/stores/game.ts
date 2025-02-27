@@ -1,39 +1,38 @@
-import type { IdleScene } from '@/game/scenes'
+import type { GameScene } from '@/game/scenes'
 import { defineStore } from 'pinia'
-import { ref, toRaw } from 'vue'
+import { computed, ref, toRaw } from 'vue'
 
 const useGameStore = defineStore('game', () => {
-  const gameRef = ref()
-  const canMoveSprite = ref(false)
+  const isPlaying = ref(false)
+  const isPreloadComplete = ref(false)
+  const preloadProgress = ref(0)
+  const currentScene = ref<Phaser.Scene>()
   const spritePosition = ref({ x: 0, y: 0 })
 
-  const setGameRef = (ref: HTMLDivElement) => {
-    gameRef.value = ref
-  }
-
+  const togglePlaying = () => isPlaying.value = !isPlaying.value
+  const setPreloadComplete = (val: boolean) => isPreloadComplete.value = val
+  const setPreloadProgress = (progress: number) => preloadProgress.value = progress
+  const setCurrentScene = (scene: Phaser.Scene) => currentScene.value = scene
   const changeScene = () => {
-    const scene = toRaw(gameRef.value.scene) as IdleScene
-    if (!scene) return
-  
-    //  Call the changeScene method defined in the `Idle`, `Game` and `GameOver` Scenes
-    scene.changeScene()
+    const scene = toRaw(currentScene.value) as GameScene
+    scene?.changeScene()
   }
   
   const moveSprite = () => {
-    if (!gameRef.value) return
+    if (!currentScene.value) return
   
-    const scene = toRaw(gameRef.value.scene) as IdleScene
+    const scene = toRaw(currentScene.value) as GameScene
     if (!scene) return
   
     // Get the update logo position
-    (scene as IdleScene).moveLogo(({ x, y }) => {
+    (scene as GameScene).moveLogo(({ x, y }: { x: number, y: number }) => {
       spritePosition.value = { x, y }
     })
   }
   
   const addSprite = () => {
   
-    const scene = toRaw(gameRef.value.scene) as Phaser.Scene
+    const scene = toRaw(currentScene.value) as Phaser.Scene
     if (!scene) return
   
     // Add a new sprite to the current scene at a random position
@@ -55,20 +54,22 @@ const useGameStore = defineStore('game', () => {
     })
   }
   
-  // Event emitted from the PhaserGame component
-  const currentScene = (scene: IdleScene) => {
-    canMoveSprite.value = (scene.scene.key !== 'Idle')
-  }
+  const canMoveSprite = computed(() => currentScene.value?.scene.key === 'Game')
 
   return {
-    gameRef,
-    canMoveSprite,
-    spritePosition, 
-    setGameRef,
-    changeScene,
-    moveSprite,
     addSprite,
-    currentScene
+    canMoveSprite,
+    changeScene,
+    currentScene,
+    isPlaying,
+    isPreloadComplete,
+    moveSprite,
+    preloadProgress,
+    setCurrentScene,
+    setPreloadComplete,
+    setPreloadProgress,
+    spritePosition, 
+    togglePlaying,
   }
 })
 

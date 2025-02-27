@@ -10,14 +10,14 @@ const { hiscores } = storeToRefs(useHiscoresStore())
 const { isHiscoresVisible } = storeToRefs(useInterfaceStore())
 
 const data = computed(() => hiscores.value
-  .map((hiscore) => ({ name: hiscore.name, score: hiscore.score }))
+  .map((hiscore) => ({ name: hiscore.name, country: hiscore.country,score: hiscore.score }))
   .sort((a, b) => b.score - a.score))
 
 </script>
 
 <template>
-  <NyxModal v-model="isHiscoresVisible" customClass="view-hiscores">
-    <NyxTable v-model="data" :size="NyxSize.Small" header="sticky" />
+  <NyxModal v-model="isHiscoresVisible" :size="NyxSize.Large" customClass="view-hiscores">
+    <NyxTable v-model="data" :size="NyxSize.Small" gridTemplateColumns="1fr 1fr 10rem" header="sticky" />
   </NyxModal>
 </template>
 

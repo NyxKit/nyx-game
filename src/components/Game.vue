@@ -3,29 +3,25 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { EventBus } from '@/classes/EventBus'
 import StartGame from '../game/main'
 import Phaser from 'phaser'
+import useGameStore from '@/stores/game'
 
-// Save the current scene instance
-const scene = ref()
+const { setCurrentScene, setPreloadComplete } = useGameStore()
+
 const game = ref()
 
-const emit = defineEmits(['current-active-scene'])
-
-onMounted(() => {
+const init = () => {
   game.value = StartGame('game')
-  
-  EventBus.on('current-scene-ready', (sceneInstance: Phaser.Scene) => { 
-    emit('current-active-scene', sceneInstance)
-    scene.value = sceneInstance
-  })
-})
+  EventBus.on('current-scene-ready', (scene: Phaser.Scene) => setCurrentScene(scene))
+  EventBus.on('preload-complete', () => setPreloadComplete(true))
+}
 
+onMounted(init)
 onUnmounted(() => {
   if (!game.value) return
   game.value.destroy(true)
   game.value = null
 })
 
-defineExpose({ scene, game })
 </script>
 
 <template>

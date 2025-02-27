@@ -1,22 +1,25 @@
 import { GameObjects, Scene } from 'phaser'
 import { EventBus } from '@/classes/EventBus'
+import useClientStore from '@/stores/client'
+import { storeToRefs } from 'pinia'
 
-export class IdleScene extends Scene {
+export class GameScene extends Scene {
   background: GameObjects.Image
   logo: GameObjects.Image
   title: GameObjects.Text
   logoTween: Phaser.Tweens.Tween | null = null
 
   constructor () {
-    super('Idle')
+    super('Game')
   }
 
   create () {
-    this.background = this.add.image(512, 384, 'background')
+    const { SCREEN_CENTER } = storeToRefs(useClientStore())
+    this.background = this.add.image(SCREEN_CENTER.value.x, SCREEN_CENTER.value.y, 'background')
 
-    this.logo = this.add.image(512, 300, 'logo').setDepth(100)
+    this.logo = this.add.image(SCREEN_CENTER.value.x, 300, 'logo').setDepth(100)
 
-    this.title = this.add.text(512, 460, 'Idle', {
+    this.title = this.add.text(SCREEN_CENTER.value.x, SCREEN_CENTER.value.y, 'Game', {
       fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
       stroke: '#000000', strokeThickness: 8,
       align: 'center'
@@ -31,7 +34,7 @@ export class IdleScene extends Scene {
       this.logoTween = null
     }
 
-    this.scene.start('Game')
+    this.scene.start('GameOver')
   }
 
   moveLogo (vueCallback: ({ x, y }: { x: number, y: number }) => void) {

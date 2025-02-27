@@ -30,7 +30,13 @@ const toggleDebug = (value?: boolean) => {
 
 <template>
   <div class="debug">
-    <NyxButton :theme="NyxTheme.Danger" :size="NyxSize.Medium" @click="toggleDebug" ref="nyxButton">Debug</NyxButton>
+    <NyxButton
+      ref="nyxButton"
+      class="debug__button"
+      :theme="NyxTheme.Danger"
+      :size="NyxSize.Small"
+      @click="toggleDebug"
+    >Debug</NyxButton>
     <Teleport to="body">
       <NyxCard
         class="debug__card"
@@ -40,7 +46,7 @@ const toggleDebug = (value?: boolean) => {
       >
         <div class="debug__card-content">
           <NyxButton :size="NyxSize.Small" @click="changeScene">Change Scene</NyxButton>
-          <NyxButton :size="NyxSize.Small" :disabled="canMoveSprite" @click="moveSprite">Toggle Movement</NyxButton>
+          <NyxButton :size="NyxSize.Small" :disabled="!canMoveSprite" @click="moveSprite">Toggle Movement</NyxButton>
           <NyxButton :size="NyxSize.Small" @click="addSprite">Add New Sprite</NyxButton>
           <pre>{{ spritePosition }}</pre>
         </div>
@@ -56,6 +62,10 @@ const toggleDebug = (value?: boolean) => {
     bottom: 0;
     z-index: 100;
     padding: var(--nyx-pad-lg);
+
+    &__button {
+      width: 7.5rem;
+    }
   }
   
   .debug__card {

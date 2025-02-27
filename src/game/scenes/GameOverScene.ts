@@ -1,5 +1,7 @@
 import { EventBus } from '@/classes/EventBus'
+import useClientStore from '@/stores/client'
 import { Scene } from 'phaser'
+import { storeToRefs } from 'pinia'
 
 export class GameOverScene extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera
@@ -11,10 +13,11 @@ export class GameOverScene extends Scene {
   }
 
   create () {
+    const { SCREEN_CENTER } = storeToRefs(useClientStore())
     this.camera = this.cameras.main
     this.camera.setBackgroundColor(0xff0000)
 
-    this.background = this.add.image(512, 384, 'background')
+    this.background = this.add.image(SCREEN_CENTER.value.x, SCREEN_CENTER.value.y, 'background')
     this.background.setAlpha(0.5)
 
     this.gameOverText = this.add.text(512, 384, 'Game Over', {
@@ -27,6 +30,6 @@ export class GameOverScene extends Scene {
   }
 
   changeScene () {
-    this.scene.start('Idle')
+    this.scene.start('Game')
   }
 }

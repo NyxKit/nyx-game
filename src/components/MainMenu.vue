@@ -3,8 +3,10 @@ import { NyxButton } from 'nyx-kit/components'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useInterfaceStore from '@/stores/interface'
 import IconGear from '@/components/icons/IconGear.vue'
+import useGameStore from '@/stores/game'
 
-const { togglePlaying, toggleHiscores, toggleSettings } = useInterfaceStore()
+const { toggleHiscores, toggleSettings } = useInterfaceStore()
+const { togglePlaying } = useGameStore()
 
 </script>
 

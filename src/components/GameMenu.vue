@@ -6,7 +6,7 @@ import { useKeyboardShortcuts } from 'nyx-kit/compositions'
 import { NyxSize } from 'nyx-kit/types'
 import useInterfaceStore from '@/stores/interface'
 
-const { isPlaying, isGameMenuVisible, toggleGameMenu } = storeToRefs(useInterfaceStore())
+const { isGameMenuVisible, toggleGameMenu } = storeToRefs(useInterfaceStore())
 
 useKeyboardShortcuts({
   'ESC': (_event) => toggleGameMenu()
