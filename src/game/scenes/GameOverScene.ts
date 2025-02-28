@@ -4,9 +4,9 @@ import { Scene } from 'phaser'
 import { storeToRefs } from 'pinia'
 
 export class GameOverScene extends Scene {
-  camera: Phaser.Cameras.Scene2D.Camera
-  background: Phaser.GameObjects.Image
-  gameOverText: Phaser.GameObjects.Text
+  camera: Phaser.Cameras.Scene2D.Camera | null = null
+  background: Phaser.GameObjects.Image | null = null
+  gameOverText: Phaser.GameObjects.Text | null = null
 
   constructor () {
     super('GameOver')

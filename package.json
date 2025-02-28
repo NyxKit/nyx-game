@@ -1,8 +1,9 @@
 {
   "name": "nyx-game",
+  "homepage": "http://nyxkit.github.io/nyx-game",
+  "author": "Arne Decant <hello@arnedecant.be>",
   "version": "0.0.0",
-  "private": true,
-  "type": "module",
+  "private": false,
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
@@ -14,7 +15,8 @@
     "lint:oxlint": "oxlint . --fix -D correctness --ignore-path .gitignore",
     "lint:eslint": "eslint . --fix",
     "lint": "run-s lint:*",
-    "clean": "rm yarn.lock && rm -rf node_modules"
+    "clean": "rm yarn.lock && rm -rf node_modules",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "nyx-kit": "^1.0.0",
@@ -36,6 +38,7 @@
     "eslint-plugin-oxlint": "^0.15.10",
     "eslint-plugin-playwright": "^2.2.0",
     "eslint-plugin-vue": "^9.32.0",
+    "gh-pages": "^6.3.0",
     "jiti": "^2.4.2",
     "jsdom": "^26.0.0",
     "npm-run-all2": "^7.0.2",

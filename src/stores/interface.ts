@@ -11,7 +11,6 @@ const useInterfaceStore = defineStore('interface', () => {
   const toggleHiscores = () => isHiscoresVisible.value = !isHiscoresVisible.value
   const toggleSettings = () => isSettingsVisible.value = !isSettingsVisible.value
   const toggleGameMenu = () => {
-    console.log('qsdf')
     if (isPlaying.value) return
     isGameMenuVisible.value = !isGameMenuVisible.value
   }
