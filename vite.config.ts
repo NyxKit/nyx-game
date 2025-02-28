@@ -6,6 +6,10 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/nyx-game/',
+  build: {
+    outDir: 'dist',
+  },
   plugins: [
     vue(),
     vueDevTools(),
