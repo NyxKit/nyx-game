@@ -4,10 +4,13 @@ import useClientStore from '@/stores/client'
 import { storeToRefs } from 'pinia'
 
 export class GameScene extends Scene {
-  background: GameObjects.Image
-  logo: GameObjects.Image
+  bgDust: GameObjects.Image
+  bgStars: GameObjects.Image
+  bgNebulae: GameObjects.Image
+  bgPlanets: GameObjects.Image
+  player: GameObjects.Image
   title: GameObjects.Text
-  logoTween: Phaser.Tweens.Tween | null = null
+  playerTween: Phaser.Tweens.Tween | null = null
 
   constructor () {
     super('Game')
@@ -15,42 +18,52 @@ export class GameScene extends Scene {
 
   create () {
     const { SCREEN_CENTER, SCREEN_WIDTH, SCREEN_HEIGHT } = storeToRefs(useClientStore())
-    this.background = this.add.image(SCREEN_CENTER.value.x, SCREEN_CENTER.value.y, 'background')
-    this.background.setDisplaySize(SCREEN_WIDTH.value, SCREEN_HEIGHT.value)
+    this.bgDust = this.add.image(0, -10, 'bg_dust').setOrigin(0, 0)
+    this.bgDust.setDisplaySize(SCREEN_WIDTH.value * 7.5, SCREEN_HEIGHT.value + 20)
 
-    this.logo = this.add.image(SCREEN_CENTER.value.x, 300, 'logo').setDepth(100)
+    this.bgStars = this.add.image(0, 0, 'bg_stars').setOrigin(0, 0)
+    this.bgStars.setDisplaySize(SCREEN_WIDTH.value * 7.5, SCREEN_HEIGHT.value + 20)
+
+    this.bgNebulae = this.add.image(0, 0, 'bg_nebulae').setOrigin(0, 0)
+    this.bgNebulae.setDisplaySize(SCREEN_WIDTH.value * 7.5, SCREEN_HEIGHT.value + 20)
+
+    this.bgPlanets = this.add.image(0, 0, 'bg_planets').setOrigin(0, 0)
+    this.bgPlanets.setDisplaySize(SCREEN_WIDTH.value * 7.5, SCREEN_HEIGHT.value + 20)
+  
+    this.player = this.add.image(250, SCREEN_CENTER.value.y, 'player').setDepth(100)
 
     EventBus.emit('current-scene-ready', this)
   }
 
   changeScene () {
-    if (this.logoTween) {
-      this.logoTween.stop()
-      this.logoTween = null
+    if (this.playerTween) {
+      this.playerTween.stop()
+      this.playerTween = null
     }
 
     this.scene.start('GameOver')
   }
 
-  moveLogo (vueCallback: ({ x, y }: { x: number, y: number }) => void) {
-    if (this.logoTween) {
-      if (this.logoTween.isPlaying()) {
-        this.logoTween.pause()
+  idlePlayer (vueCallback: ({ x, y }: { x: number, y: number }) => void) {
+    const { SCREEN_CENTER } = storeToRefs(useClientStore())
+    if (this.playerTween) {
+      if (this.playerTween.isPlaying()) {
+        this.playerTween.pause()
       } else {
-        this.logoTween.play()
+        this.playerTween.play()
       }
     } else {
-      this.logoTween = this.tweens.add({
-        targets: this.logo,
-        x: { value: 750, duration: 3000, ease: 'Back.easeInOut' },
-        y: { value: 80, duration: 1500, ease: 'Sine.easeOut' },
+      this.playerTween = this.tweens.add({
+        targets: this.player,
+        x: { value: 260, duration: 3000, ease: 'Back.easeInOut' },
+        y: { value: SCREEN_CENTER.value.y - 80, duration: 1500, ease: 'Sine.easeInOut' },
         yoyo: true,
         repeat: -1,
         onUpdate: () => {
           if (!vueCallback) return
           vueCallback({
-            x: Math.floor(this.logo.x),
-            y: Math.floor(this.logo.y)
+            x: Math.floor(this.player.x),
+            y: Math.floor(this.player.y)
           })
         }
       })

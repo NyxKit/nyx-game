@@ -1,6 +1,6 @@
 import type { GameScene } from '@/game/scenes'
 import { defineStore } from 'pinia'
-import { computed, ref, toRaw } from 'vue'
+import { computed, ref, toRaw, watch } from 'vue'
 
 const useGameStore = defineStore('game', () => {
   const isPlaying = ref(false)
@@ -18,14 +18,14 @@ const useGameStore = defineStore('game', () => {
     scene?.changeScene()
   }
   
-  const moveSprite = () => {
+  const idlePlayer = () => {
     if (!currentScene.value) return
   
     const scene = toRaw(currentScene.value) as GameScene
     if (!scene) return
   
     // Get the update logo position
-    (scene as GameScene).moveLogo(({ x, y }: { x: number, y: number }) => {
+    scene.idlePlayer(({ x, y }: { x: number, y: number }) => {
       spritePosition.value = { x, y }
     })
   }
@@ -54,16 +54,21 @@ const useGameStore = defineStore('game', () => {
     })
   }
   
-  const canMoveSprite = computed(() => currentScene.value?.scene.key === 'Game')
+  const canIdlePlayer = computed(() => currentScene.value?.scene.key === 'Game')
+
+  watch(currentScene, (newScene) => {
+    if (newScene?.scene.key !== 'Game') return
+    idlePlayer()
+  })
 
   return {
     addSprite,
-    canMoveSprite,
+    canIdlePlayer,
     changeScene,
     currentScene,
     isPlaying,
     isPreloadComplete,
-    moveSprite,
+    idlePlayer,
     preloadProgress,
     setCurrentScene,
     setPreloadComplete,

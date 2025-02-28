@@ -30,4 +30,5 @@ management as the cosmos grows increasingly chaotic.
 - **Procedural Generation**: The universe is infinite, and every playthrough generates a new arrangement of obstacles, black holes, and energy sources, ensuring no two runs are identical.
 
 ## Links and assets
+- https://deep-fold.itch.io/space-background-generator
 - https://screamingbrainstudios.com/downloads/

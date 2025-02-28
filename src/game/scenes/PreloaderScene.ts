@@ -16,8 +16,12 @@ export class PreloaderScene extends Scene {
 
   preload () {
     this.load.setPath('assets')
-    this.load.image('logo', 'logo.png')
+    this.load.image('player', 'whale.png')
     this.load.image('star', 'star.png')
+    this.load.image('bg_stars', 'bg_stars.png')
+    this.load.image('bg_dust', 'bg_dust.png')
+    this.load.image('bg_nebulae', 'bg_nebulae.png')
+    this.load.image('bg_planets', 'bg_planets.png')
   }
 
   create () {
