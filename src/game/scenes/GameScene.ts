@@ -14,16 +14,11 @@ export class GameScene extends Scene {
   }
 
   create () {
-    const { SCREEN_CENTER } = storeToRefs(useClientStore())
+    const { SCREEN_CENTER, SCREEN_WIDTH, SCREEN_HEIGHT } = storeToRefs(useClientStore())
     this.background = this.add.image(SCREEN_CENTER.value.x, SCREEN_CENTER.value.y, 'background')
+    this.background.setDisplaySize(SCREEN_WIDTH.value, SCREEN_HEIGHT.value)
 
     this.logo = this.add.image(SCREEN_CENTER.value.x, 300, 'logo').setDepth(100)
-
-    this.title = this.add.text(SCREEN_CENTER.value.x, SCREEN_CENTER.value.y, 'Game', {
-      fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-      stroke: '#000000', strokeThickness: 8,
-      align: 'center'
-    }).setOrigin(0.5).setDepth(100)
 
     EventBus.emit('current-scene-ready', this)
   }

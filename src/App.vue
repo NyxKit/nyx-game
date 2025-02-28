@@ -51,6 +51,10 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 
+body, pre, code {
+  font-family: var(--nyx-font-family-pixel);
+}
+
 main, .view, canvas {
   width: 100%;
   height: 100%;
