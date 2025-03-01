@@ -1,6 +1,6 @@
 import { GameObjects, Scene } from 'phaser'
 import { EventBus } from '@/classes/EventBus'
-import { createBackgroundTiled } from '@/utils'
+import { createTiledImage } from '@/utils'
 
 export class GameScene extends Scene {
   bgDust: GameObjects.TileSprite | null = null
@@ -33,10 +33,10 @@ export class GameScene extends Scene {
   }
 
   setupBackground () {
-    this.bgDust = createBackgroundTiled(this, 'bg_dust', 10)
-    this.bgNebulae = createBackgroundTiled(this, 'bg_nebulae', 20)
-    this.bgStars = createBackgroundTiled(this, 'bg_stars', 30)
-    this.bgPlanets = createBackgroundTiled(this, 'bg_planets', 40)
+    this.bgDust = createTiledImage(this, 'bg_dust', { depth: 10, alpha: 0.5 })
+    this.bgNebulae = createTiledImage(this, 'bg_nebulae', { depth: 20, alpha: 0.5 })
+    this.bgStars = createTiledImage(this, 'bg_stars', { depth: 30, alpha: 1 })
+    this.bgPlanets = createTiledImage(this, 'bg_planets', { depth: 40, alpha: 1 })
   }
 
   changeScene () {
@@ -74,19 +74,19 @@ export class GameScene extends Scene {
   }
 
   update () {
-    this.updateBgPositions()
+    this.updateBackground()
   }
 
-  updateBgPositions () {
+  updateBackground () {
     if (!this.bgDust || !this.bgNebulae || !this.bgStars || !this.bgPlanets) return
 
-    const speed = 2
+    const speed = 1
     let scrollSpeed = speed
 
     if (this.cursors?.left.isDown) {
-      scrollSpeed = -speed * 9
+      scrollSpeed = -speed * 10
     } else if (this.cursors?.right.isDown) {
-      scrollSpeed = speed * 11
+      scrollSpeed = speed * 10
     } else {
       scrollSpeed += speed
     }
@@ -94,6 +94,6 @@ export class GameScene extends Scene {
     this.bgDust.tilePositionX += scrollSpeed * 0.25
     this.bgNebulae.tilePositionX += scrollSpeed * 0.25
     this.bgStars.tilePositionX += scrollSpeed * 0.275
-    this.bgPlanets.tilePositionX += scrollSpeed * 0.375
+    this.bgPlanets.tilePositionX += scrollSpeed * 0.3
   }
 }
