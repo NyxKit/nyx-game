@@ -13,6 +13,7 @@ const useGameStore = defineStore('game', () => {
   const setPreloadComplete = (val: boolean) => isPreloadComplete.value = val
   const setPreloadProgress = (progress: number) => preloadProgress.value = progress
   const setCurrentScene = (scene: Phaser.Scene) => currentScene.value = scene
+
   const changeScene = () => {
     const scene = toRaw(currentScene.value) as GameScene
     scene?.changeScene()

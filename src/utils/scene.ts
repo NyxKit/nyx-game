@@ -1,12 +1,7 @@
-interface CreateTiledImageOptions {
-  depth?: number
-  alpha?: number
-}
-
 export const createTiledImage = (
   scene: Phaser.Scene,
   key: string,
-  options?: CreateTiledImageOptions
+  options?: { depth?: number, alpha?: number }
 ): Phaser.GameObjects.TileSprite => {
   const srcHeight = scene.textures.get(key).getSourceImage().height
   return scene.add.tileSprite(0, 0, scene.scale.width, scene.scale.height, key)
