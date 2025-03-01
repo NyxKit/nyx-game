@@ -32,7 +32,7 @@ onBeforeUnmount(() => {
     />
   </div>
   <transition name="fade">
-    <div class="interface" v-if="isPreloadComplete && !isPlaying">
+    <div class="interface" v-if="isPreloadComplete && !isPlaying && false">
       <MainMenu class="view" />
       <Settings />
       <Hiscores />
