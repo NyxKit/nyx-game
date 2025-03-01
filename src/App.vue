@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Game, MainMenu, Hiscores, Settings, GameMenu, Debug } from '@/components'
 import { NyxProgress } from 'nyx-kit/components'
@@ -9,6 +9,11 @@ import { NyxSize, NyxTheme } from 'nyx-kit/types'
 
 const { isPlaying, isPreloadComplete, preloadProgress } = storeToRefs(useGameStore())
 const { setScreenSize } = useClientStore()
+
+const isDebug = computed(() => {
+  const hash = window.location.hash.substring(1)
+  return hash === 'debug'
+})
 
 onMounted(() => {
   window.addEventListener('resize', setScreenSize)
@@ -32,7 +37,7 @@ onBeforeUnmount(() => {
     />
   </div>
   <transition name="fade">
-    <div class="interface" v-if="isPreloadComplete && !isPlaying && false">
+    <div class="interface" v-if="isPreloadComplete && !isPlaying && !isDebug">
       <MainMenu class="view" />
       <Settings />
       <Hiscores />
