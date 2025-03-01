@@ -1,11 +1,12 @@
 import { GameObjects, Scene } from 'phaser'
 import { EventBus } from '@/classes/EventBus'
+import { createBackgroundTiled } from '@/utils'
 
 export class GameScene extends Scene {
-  bgDust: GameObjects.Image | null = null
-  bgStars: GameObjects.Image | null = null
-  bgNebulae: GameObjects.Image | null = null
-  bgPlanets: GameObjects.Image | null = null
+  bgDust: GameObjects.TileSprite | null = null
+  bgStars: GameObjects.TileSprite | null = null
+  bgNebulae: GameObjects.TileSprite | null = null
+  bgPlanets: GameObjects.TileSprite | null = null
   player: GameObjects.Image | null = null
   title: GameObjects.Text | null = null
   playerTween: Phaser.Tweens.Tween | null = null
@@ -25,7 +26,6 @@ export class GameScene extends Scene {
     this.player = this.add.image(50, this.h * 0.5 - 100, 'player')
       .setOrigin(0, 0).setDepth(100)
       .setScrollFactor(0)
-    this.cameras.main.setBounds(0, 0, this.w * 7.5, this.h)
 
     this.cursors = this.input.keyboard?.createCursorKeys() ?? null
 
@@ -33,19 +33,10 @@ export class GameScene extends Scene {
   }
 
   setupBackground () {
-    const parallax = 0.25
-    this.bgDust = this.add.image(0, 0, 'bg_dust').setOrigin(0, 0)
-      .setDisplaySize(this.w * 7.5, this.h + 20)
-      .setScrollFactor(parallax)
-    this.bgNebulae = this.add.image(0, 0, 'bg_nebulae').setOrigin(0, 0)
-      .setDisplaySize(this.w * 7.5, this.h + 20)
-      .setScrollFactor(parallax * 1.2)
-    this.bgStars = this.add.image(0, 0, 'bg_stars').setOrigin(0, 0)
-      .setDisplaySize(this.w * 7.5, this.h + 20)
-      .setScrollFactor(parallax * 1.3)
-    this.bgPlanets = this.add.image(0, 0, 'bg_planets').setOrigin(0, 0)
-      .setDisplaySize(this.w * 7.5, this.h + 20)
-      .setScrollFactor(parallax * 1.5)
+    this.bgDust = createBackgroundTiled(this, 'bg_dust', 10)
+    this.bgNebulae = createBackgroundTiled(this, 'bg_nebulae', 20)
+    this.bgStars = createBackgroundTiled(this, 'bg_stars', 30)
+    this.bgPlanets = createBackgroundTiled(this, 'bg_planets', 40)
   }
 
   changeScene () {
@@ -83,19 +74,26 @@ export class GameScene extends Scene {
   }
 
   update () {
-    const cam = this.cameras.main
-    const speed = 3
-    const { x, y } = this.player!.getCenter()
+    this.updateBgPositions()
+  }
 
-    cam.scrollX += speed
+  updateBgPositions () {
+    if (!this.bgDust || !this.bgNebulae || !this.bgStars || !this.bgPlanets) return
 
-    if (!this.cursors) return
+    const speed = 2
+    let scrollSpeed = speed
 
-    if (this.cursors.left.isDown) {
-      
-    } else if (this.cursors.right.isDown) {
-
+    if (this.cursors?.left.isDown) {
+      scrollSpeed = -speed * 9
+    } else if (this.cursors?.right.isDown) {
+      scrollSpeed = speed * 11
+    } else {
+      scrollSpeed += speed
     }
-    
+
+    this.bgDust.tilePositionX += scrollSpeed * 0.25
+    this.bgNebulae.tilePositionX += scrollSpeed * 0.25
+    this.bgStars.tilePositionX += scrollSpeed * 0.275
+    this.bgPlanets.tilePositionX += scrollSpeed * 0.375
   }
 }
