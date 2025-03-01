@@ -80,15 +80,14 @@ export class GameScene extends Scene {
   updateBackground () {
     if (!this.bgDust || !this.bgNebulae || !this.bgStars || !this.bgPlanets) return
 
-    const speed = 1
-    let scrollSpeed = speed
+    const speed = 2
+    let scrollSpeed = 0.2
+    const modifier = 1
 
     if (this.cursors?.left.isDown) {
-      scrollSpeed = -speed * 10
+      scrollSpeed -= speed * modifier
     } else if (this.cursors?.right.isDown) {
-      scrollSpeed = speed * 10
-    } else {
-      scrollSpeed += speed
+      scrollSpeed += speed * modifier
     }
 
     this.bgDust.tilePositionX += scrollSpeed * 0.25
