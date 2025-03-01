@@ -7,8 +7,8 @@ import { useTeleportPosition } from 'nyx-kit/compositions'
 import { ref, useTemplateRef, type DefineComponent } from 'vue'
 
 const gameStore = useGameStore()
-const { changeScene, idlePlayer, addSprite } = gameStore
-const { canIdlePlayer, spritePosition } = storeToRefs(gameStore)
+const { addSprite } = gameStore
+const { spritePosition } = storeToRefs(gameStore)
 
 const nyxButton = useTemplateRef<DefineComponent>('nyxButton')
 const nyxCard = useTemplateRef<DefineComponent>('nyxCard')
@@ -45,8 +45,6 @@ const toggleDebug = (value?: boolean) => {
         ref="nyxCard"
       >
         <div class="debug__card-content">
-          <NyxButton :size="NyxSize.Small" @click="changeScene">Change Scene</NyxButton>
-          <NyxButton :size="NyxSize.Small" :disabled="!canIdlePlayer" @click="idlePlayer">Toggle Movement</NyxButton>
           <NyxButton :size="NyxSize.Small" @click="addSprite">Add New Sprite</NyxButton>
           <pre>{{ spritePosition }}</pre>
         </div>

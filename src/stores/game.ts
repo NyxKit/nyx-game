@@ -13,23 +13,6 @@ const useGameStore = defineStore('game', () => {
   const setPreloadComplete = (val: boolean) => isPreloadComplete.value = val
   const setPreloadProgress = (progress: number) => preloadProgress.value = progress
   const setCurrentScene = (scene: Phaser.Scene) => currentScene.value = scene
-
-  const changeScene = () => {
-    const scene = toRaw(currentScene.value) as GameScene
-    scene?.changeScene()
-  }
-  
-  const idlePlayer = () => {
-    if (!currentScene.value) return
-  
-    const scene = toRaw(currentScene.value) as GameScene
-    if (!scene) return
-  
-    // Get the update logo position
-    scene.idlePlayer(({ x, y }: { x: number, y: number }) => {
-      spritePosition.value = { x, y }
-    })
-  }
   
   const addSprite = () => {
   
@@ -54,22 +37,12 @@ const useGameStore = defineStore('game', () => {
       repeat: -1
     })
   }
-  
-  const canIdlePlayer = computed(() => currentScene.value?.scene.key === 'Game')
-
-  watch(currentScene, (newScene) => {
-    if (newScene?.scene.key !== 'Game') return
-    idlePlayer()
-  })
 
   return {
     addSprite,
-    canIdlePlayer,
-    changeScene,
     currentScene,
     isPlaying,
     isPreloadComplete,
-    idlePlayer,
     preloadProgress,
     setCurrentScene,
     setPreloadComplete,
