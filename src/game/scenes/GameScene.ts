@@ -11,8 +11,12 @@ export class GameScene extends Scene {
   title: GameObjects.Text | null = null
   playerTween: Phaser.Tweens.Tween | null = null
   cursors: Phaser.Types.Input.Keyboard.CursorKeys | null = null
-  w: number = 0
-  h: number = 0
+  private w: number = 0
+  private h: number = 0
+  private velocity: number = 0
+  private maxVelocity: number = 2
+  private acceleration: number = 0.1
+  private deceleration: number = 0.025
 
   constructor () {
     super('Game')
@@ -80,15 +84,21 @@ export class GameScene extends Scene {
   updateBackground () {
     if (!this.bgDust || !this.bgNebulae || !this.bgStars || !this.bgPlanets) return
 
-    const speed = 2
-    let scrollSpeed = 0.2
-    const modifier = 1
+    const baseSpeed = 0.5
 
     if (this.cursors?.left.isDown) {
-      scrollSpeed -= speed * modifier
+      this.velocity = Math.max(this.velocity - this.acceleration, -this.maxVelocity)
     } else if (this.cursors?.right.isDown) {
-      scrollSpeed += speed * modifier
+      this.velocity = Math.min(this.velocity + this.acceleration, this.maxVelocity)
+    } else {
+      if (this.velocity > 0) {
+        this.velocity = Math.max(0, this.velocity - this.deceleration)
+      } else if (this.velocity < 0) {
+        this.velocity = Math.min(0, this.velocity + this.deceleration)
+      }
     }
+
+    const scrollSpeed = baseSpeed + this.velocity
 
     this.bgDust.tilePositionX += scrollSpeed * 0.25
     this.bgNebulae.tilePositionX += scrollSpeed * 0.25
