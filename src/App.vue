@@ -2,13 +2,15 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Game, MainMenu, Hiscores, Settings, GameMenu, Debug } from '@/components'
-import { NyxProgress } from 'nyx-kit/components'
+import { NyxProgress, NyxModal } from 'nyx-kit/components'
 import useGameStore from './stores/game'
 import useClientStore from './stores/client'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
+import useInterfaceStore from './stores/interface'
 
 const { isPlaying, isPreloadComplete, preloadProgress } = storeToRefs(useGameStore())
 const { setScreenSize } = useClientStore()
+const { isSettingsVisible } = storeToRefs(useInterfaceStore())
 
 const isDebug = computed(() => {
   const hash = window.location.hash.substring(1)
@@ -39,13 +41,16 @@ onBeforeUnmount(() => {
   <transition name="fade">
     <div class="interface" v-if="isPreloadComplete && !isPlaying && !isDebug">
       <MainMenu class="view" />
-      <Settings />
+      <NyxModal v-model="isSettingsVisible">
+        <Settings />
+      </NyxModal>
       <Hiscores />
       <GameMenu />
     </div>
   </transition>
   
   <Debug />
+  <GameMenu />
   <Game />
 </template>
 

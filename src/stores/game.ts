@@ -4,16 +4,22 @@ import { computed, ref, toRaw, watch } from 'vue'
 
 const useGameStore = defineStore('game', () => {
   const isPlaying = ref(false)
+  const isPaused = ref(false)
   const isPreloadComplete = ref(false)
   const preloadProgress = ref(0)
   const currentScene = ref<Phaser.Scene>()
   const spritePosition = ref({ x: 0, y: 0 })
 
-  const togglePlaying = () => isPlaying.value = !isPlaying.value
+  const togglePlaying = (newVal?: boolean) => {
+    isPlaying.value = (newVal === undefined) ? !isPlaying.value : newVal
+    isPaused.value = !isPlaying.value
+  }
+
   const setPreloadComplete = (val: boolean) => isPreloadComplete.value = val
   const setPreloadProgress = (progress: number) => preloadProgress.value = progress
   const setCurrentScene = (scene: Phaser.Scene) => currentScene.value = scene
-  
+  const togglePaused = (newVal?: boolean) => isPaused.value = (newVal === undefined) ? !isPaused.value : newVal
+
   const addSprite = () => {
   
     const scene = toRaw(currentScene.value) as Phaser.Scene
@@ -42,6 +48,7 @@ const useGameStore = defineStore('game', () => {
     addSprite,
     currentScene,
     isPlaying,
+    isPaused,
     isPreloadComplete,
     preloadProgress,
     setCurrentScene,
@@ -49,6 +56,7 @@ const useGameStore = defineStore('game', () => {
     setPreloadProgress,
     spritePosition, 
     togglePlaying,
+    togglePaused,
   }
 })
 

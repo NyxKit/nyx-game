@@ -10,7 +10,6 @@ export default class GameControls {
 
   constructor (keyboard: Phaser.Input.Keyboard.KeyboardPlugin) {
     keyboard.on('keydown', (event: KeyboardEvent) => {
-      console.log('event down', event.code)
       switch (event.code) {
         case 'ArrowLeft':
         case 'KeyA':

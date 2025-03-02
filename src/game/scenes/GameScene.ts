@@ -1,13 +1,15 @@
-import { Scene, Tweens } from 'phaser'
+import { Scene } from 'phaser'
 import { EventBus } from '@/classes/EventBus'
 import GameControls from '@/classes/GameControls'
 import Player from '@/classes/Player'
 import Background from '@/classes/Background'
+import useGameStore from '@/stores/game'
 
 export class GameScene extends Scene {
-  private player: Player | null = null
-  private background: Background | null = null
   private controls: GameControls | null = null
+  private background: Background | null = null
+  private player: Player | null = null
+  private store = useGameStore()
 
   constructor () {
     super('Game')
@@ -26,6 +28,8 @@ export class GameScene extends Scene {
   }
 
   update () {
+    if (this.store.isPaused) return
+
     this.background?.update()
     this.player?.update()
   }
