@@ -8,8 +8,7 @@ import { computed, ref, useTemplateRef, type DefineComponent } from 'vue'
 import { GameState } from '@/types'
 
 const gameStore = useGameStore()
-const { addSprite } = gameStore
-const { spritePosition, hp, score, state, energy } = storeToRefs(gameStore)
+const { playerPosition, hp, score, state, energy } = storeToRefs(gameStore)
 
 const nyxButton = useTemplateRef<DefineComponent>('nyxButton')
 const nyxCard = useTemplateRef<DefineComponent>('nyxCard')
@@ -41,6 +40,11 @@ const computedEnergy = computed({
   get: () => energy.value.toString(),
   set: (value: string) => energy.value = parseInt(value)
 })
+
+const pos = computed(() => ({
+  x: parseFloat(playerPosition.value.x.toFixed(2)),
+  y: parseFloat(playerPosition.value.y.toFixed(2))
+}))
 
 const gameStateOptions = computed(() => Object.values(GameState).map((state) => ({ label: state, value: state })))
 
@@ -75,8 +79,7 @@ const gameStateOptions = computed(() => Object.values(GameState).map((state) => 
           <NyxFormField label="State" #default="{ id }" v-if="false">
             <NyxSelect :id="id" v-model="state" :options="gameStateOptions" />
           </NyxFormField>
-          <NyxButton class="debug__card-button" :size="NyxSize.Small" @click="addSprite">Add New Sprite</NyxButton>
-          <pre>{{ spritePosition }}</pre>
+          <pre>{{ pos }}</pre>
         </NyxForm>
       </NyxCard>
     </Teleport>

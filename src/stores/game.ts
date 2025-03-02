@@ -8,7 +8,7 @@ const useGameStore = defineStore('game', () => {
   const isDebug = ref(true)
   const preloadProgress = ref(0)
   const currentScene = ref<Phaser.Scene>()
-  const spritePosition = ref({ x: 0, y: 0 })
+  const playerPosition = ref({ x: 0, y: 0 })
   const score = ref(0)
   const hp = ref(0)
   const energy = ref(0)
@@ -29,29 +29,7 @@ const useGameStore = defineStore('game', () => {
     }
   }
 
-  const addSprite = () => {
-  
-    const scene = toRaw(currentScene.value) as Phaser.Scene
-    if (!scene) return
-  
-    // Add a new sprite to the current scene at a random position
-    const x = Phaser.Math.Between(64, scene.scale.width - 64)
-    const y = Phaser.Math.Between(64, scene.scale.height - 64)
-  
-    // `add.sprite` is a Phaser GameObjectFactory method and it returns a Sprite Game Object instance
-    const star = scene.add.sprite(x, y, 'blackhole')
-  
-    //  ... which you can then act upon. Here we create a Phaser Tween to fade the star sprite in and out.
-    //  You could, of course, do this from within the Phaser Scene code, but this is just an example
-    //  showing that Phaser objects and systems can be acted upon from outside of Phaser itself.
-    scene.add.tween({
-      targets: star,
-      duration: 500 + Math.random() * 1000,
-      alpha: 0,
-      yoyo: true,
-      repeat: -1
-    })
-  }
+  const setPlayerPosition = (x: number, y: number) => playerPosition.value = { x, y }
 
   const isPaused = computed(() => state.value === GameState.Paused)
   const isPlaying = computed(() => state.value === GameState.Playing)
@@ -74,7 +52,6 @@ const useGameStore = defineStore('game', () => {
   })
 
   return {
-    addSprite,
     currentScene,
     decrementEnergy,
     decrementHp,
@@ -87,12 +64,13 @@ const useGameStore = defineStore('game', () => {
     isPaused,
     isPlaying,
     isPreloading,
+    playerPosition,
     preloadProgress,
     score,
     setCurrentScene,
     setGameState,
     setPreloadProgress,
-    spritePosition, 
+    setPlayerPosition,
     state,
     togglePaused,
   }

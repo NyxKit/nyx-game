@@ -1,11 +1,13 @@
 import { Scene, GameObjects, Tweens } from 'phaser'
 import type GameControls from './GameControls'
 import { clamp } from 'nyx-kit/utils'
+import useGameStore from '@/stores/game'
 
 export default class Player {
   public sprite: GameObjects.Image
   private scene: Scene
   private controls: GameControls
+  private store = useGameStore()
   private speed: number = 2
   private bounds: {
     x: { min: number; max: number }
@@ -93,28 +95,12 @@ export default class Player {
   update (_velocity: number) {
     this.updateVelocity()
     this.updatePosition()
+    this.store.setPlayerPosition(this.sprite.x, this.sprite.y)
   }
 
   move (x: number, y: number) {
     this.sprite.setPosition(x, y)
     this.velocity.x = 0
     this.velocity.y = 0
-  }
-
-  idle (vueCallback: ({ x, y }: { x: number, y: number }) => void): Tweens.Tween | null {
-    return this.scene.tweens.add({
-      targets: this.sprite,
-      x: { value: 60, duration: 3000, ease: 'Back.easeInOut' },
-      y: { value: this.scene.scale.height * 0.5 - 80, duration: 1500, ease: 'Sine.easeInOut' },
-      yoyo: true,
-      repeat: -1,
-      onUpdate: () => {
-        if (!vueCallback) return
-        vueCallback({
-          x: Math.floor(this.sprite.x),
-          y: Math.floor(this.sprite.y)
-        })
-      }
-    })
   }
 }
