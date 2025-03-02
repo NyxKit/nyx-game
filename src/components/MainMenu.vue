@@ -12,7 +12,7 @@ const { togglePlaying } = useGameStore()
 <template>
   <div class="main-menu">
     <section>
-      <img src="@/assets/logo.svg" />
+      <img src="@/assets/logo.png" />
       <nav>
         <NyxButton
           class="button-play"
@@ -47,10 +47,9 @@ footer {
 
 section {
   width: 100%;
-  top: 50%;
+  top: 1rem;
   flex-direction: column;
-  gap: 5rem;
-  transform: translateY(-50%);
+  // transform: translateY(-50%);
 }
 
 nav {
@@ -71,7 +70,7 @@ h1 {
 }
 
 img {
-  max-height: 10rem;
+  max-width: 30rem;
 }
 
 .icon-gear {
