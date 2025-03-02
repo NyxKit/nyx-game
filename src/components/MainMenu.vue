@@ -3,9 +3,10 @@ import { NyxButton } from 'nyx-kit/components'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useInterfaceStore from '@/stores/interface'
 import useGameStore from '@/stores/game'
+import { GameState } from '@/types'
 
 const { toggleHiscores, toggleSettings } = useInterfaceStore()
-const { togglePlaying } = useGameStore()
+const { setGameState } = useGameStore()
 
 </script>
 
@@ -18,7 +19,7 @@ const { togglePlaying } = useGameStore()
           class="button-play"
           :theme="NyxTheme.Primary"
           :size="NyxSize.XLarge"
-          @click="togglePlaying"
+          @click="setGameState(GameState.Playing)"
         >Play</NyxButton>
         <NyxButton :size="NyxSize.Small" @click="toggleHiscores">Hiscores</NyxButton>
         <NyxButton :size="NyxSize.Small" @click="toggleSettings">Settings</NyxButton>

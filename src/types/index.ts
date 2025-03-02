@@ -1,5 +1,6 @@
 export enum GameState {
-  Init = 'init',
+  Preload = 'preload',
+  Menu = 'menu',
   Playing = 'playing',
   Paused = 'paused',
   GameOver = 'gameover',

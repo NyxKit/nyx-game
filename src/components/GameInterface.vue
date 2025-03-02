@@ -5,9 +5,10 @@ import { NyxProgress } from 'nyx-kit/components'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import { storeToRefs } from 'pinia'
 
-const { hp, score, isPlaying, isPaused } = storeToRefs(useGameStore())
+const { hp, energy, score, isPlaying, isPaused, isDebug } = storeToRefs(useGameStore())
 
 const interval = ref<number | null>(null)
+const numClicksDebug = ref(0)
 
 onMounted(() => {
   interval.value = window.setInterval(() => {
@@ -21,6 +22,13 @@ onBeforeUnmount(() => {
   window.clearInterval(interval.value)
 })
 
+const onClickHp = () => {
+  if (isDebug.value) return
+  numClicksDebug.value += 1
+  if (numClicksDebug.value < 10) return
+  isDebug.value = true
+}
+
 </script>
 
 <template>
@@ -32,7 +40,14 @@ onBeforeUnmount(() => {
       :size="NyxSize.XLarge"
       :theme="NyxTheme.Danger"
     />
-    <span class="game-interface__score">{{ score }}</span>
+    <span class="game-interface__score" @click="onClickHp">{{ score }}</span>
+    <NyxProgress
+      class="game-interface__progress"
+      :modelValue="energy"
+      :max="100"
+      :size="NyxSize.XLarge"
+      :theme="NyxTheme.Secondary"
+    />
   </header>
 </template>
 
@@ -47,7 +62,8 @@ onBeforeUnmount(() => {
   justify-content: center;
   align-items: center;
   padding: 1rem;
-  background-color: var(--nyx-c-bg);
+  // background-color: var(--nyx-c-bg);
+  gap: 1rem;
 
   &__progress {
     height: 2rem;
@@ -56,10 +72,11 @@ onBeforeUnmount(() => {
 
   &__score {
     flex: 1;
-    text-align: right;
+    text-align: center;
     font-size: 2rem;
     font-weight: bold;
     color: var(--nyx-c-text);
+    user-select: none;
   }
 }
 </style>

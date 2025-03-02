@@ -4,15 +4,16 @@ import { EventBus } from '@/classes/EventBus'
 import StartGame from '../game'
 import Phaser from 'phaser'
 import useGameStore from '@/stores/game'
+import { GameState } from '@/types'
 
-const { setCurrentScene, setPreloadComplete } = useGameStore()
+const { setCurrentScene, setGameState } = useGameStore()
 
 const game = ref()
 
 const init = () => {
   game.value = StartGame('game')
   EventBus.on('current-scene-ready', (scene: Phaser.Scene) => setCurrentScene(scene))
-  EventBus.on('preload-complete', () => setPreloadComplete(true))
+  EventBus.on('preload-complete', () => setGameState(GameState.Menu))
 }
 
 onMounted(init)

@@ -4,30 +4,30 @@ import { defineStore } from 'pinia'
 import { computed, ref, toRaw, watch } from 'vue'
 
 const useGameStore = defineStore('game', () => {
-  const state = ref(GameState.Init)
-  const isPlaying = ref(false)
-  const isPaused = ref(false)
-  const isPreloadComplete = ref(false)
+  const state = ref(GameState.Preload)
+  const isDebug = ref(true)
   const preloadProgress = ref(0)
   const currentScene = ref<Phaser.Scene>()
   const spritePosition = ref({ x: 0, y: 0 })
   const score = ref(0)
-  const hp = ref(50)
+  const hp = ref(0)
+  const energy = ref(0)
 
   const setGameState = (newState: GameState) => state.value = newState
-
-  const togglePlaying = (newVal?: boolean) => {
-    isPlaying.value = (newVal === undefined) ? !isPlaying.value : newVal
-    isPaused.value = !isPlaying.value
-  }
-
   const incrementScore = (amount?: number) => score.value += amount ?? 1
   const decrementHp = (amount?: number) => hp.value -= amount ?? 1
+  const decrementEnergy = (amount?: number) => energy.value -= amount ?? 1
 
-  const setPreloadComplete = (val: boolean) => isPreloadComplete.value = val
   const setPreloadProgress = (progress: number) => preloadProgress.value = progress
   const setCurrentScene = (scene: Phaser.Scene) => currentScene.value = scene
-  const togglePaused = (newVal?: boolean) => isPaused.value = (newVal === undefined) ? !isPaused.value : newVal
+  const togglePaused = (newVal?: boolean) => {
+    if (![GameState.Playing, GameState.Paused].includes(state.value)) return
+    if (newVal === undefined) {
+      state.value = state.value === GameState.Playing ? GameState.Paused : GameState.Playing
+    } else {
+      state.value = newVal ? GameState.Paused : GameState.Playing
+    }
+  }
 
   const addSprite = () => {
   
@@ -39,7 +39,7 @@ const useGameStore = defineStore('game', () => {
     const y = Phaser.Math.Between(64, scene.scale.height - 64)
   
     // `add.sprite` is a Phaser GameObjectFactory method and it returns a Sprite Game Object instance
-    const star = scene.add.sprite(x, y, 'star')
+    const star = scene.add.sprite(x, y, 'blackhole')
   
     //  ... which you can then act upon. Here we create a Phaser Tween to fade the star sprite in and out.
     //  You could, of course, do this from within the Phaser Scene code, but this is just an example
@@ -53,25 +53,48 @@ const useGameStore = defineStore('game', () => {
     })
   }
 
+  const isPaused = computed(() => state.value === GameState.Paused)
+  const isPlaying = computed(() => state.value === GameState.Playing)
+  const isPreloading = computed(() => state.value === GameState.Preload)
+  const isInMenu = computed(() => state.value === GameState.Menu)
+  const isGameOver = computed(() => state.value === GameState.GameOver)
+
+  watch(hp, (newVal) => {
+    if (state.value !== GameState.Playing) return
+    if (newVal > 0) return
+    setGameState(GameState.GameOver)
+  })
+
+  watch(state, (newVal, oldVal) => {
+    if (oldVal === GameState.Paused) return
+    if (newVal !== GameState.Playing) return
+    hp.value = 100
+    energy.value = 20
+    score.value = 0
+  })
+
   return {
     addSprite,
     currentScene,
+    decrementEnergy,
     decrementHp,
+    energy,
     hp,
     incrementScore,
+    isDebug,
+    isGameOver,
+    isInMenu,
     isPaused,
     isPlaying,
-    isPreloadComplete,
+    isPreloading,
     preloadProgress,
     score,
     setCurrentScene,
     setGameState,
-    setPreloadComplete,
     setPreloadProgress,
     spritePosition, 
     state,
     togglePaused,
-    togglePlaying,
   }
 })
 

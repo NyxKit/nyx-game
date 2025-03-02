@@ -32,3 +32,4 @@
 ## Links and assets
 - https://deep-fold.itch.io/space-background-generator
 - https://screamingbrainstudios.com/downloads/
+- https://nikitakart.itch.io/celestial-objects

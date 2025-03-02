@@ -1,6 +1,6 @@
 import { Scene, GameObjects, Tweens } from 'phaser'
 import type GameControls from './GameControls'
-import { clamp } from 'nyx-kit/types'
+import { clamp } from 'nyx-kit/utils'
 
 export default class Player {
   public sprite: GameObjects.Image
@@ -16,8 +16,8 @@ export default class Player {
     y: 2
   }
   private maxVelocity = {
-    x: 2,
-    y: 2
+    x: 4,
+    y: 4
   }
   private acceleration = {
     x: 0.1,
@@ -28,7 +28,7 @@ export default class Player {
     y: 0.025
   }
 
-  constructor(scene: Scene, controls: GameControls) {
+  constructor (scene: Scene, controls: GameControls) {
     this.scene = scene
     this.controls = controls
 
@@ -47,7 +47,7 @@ export default class Player {
     this.bounds = {
       x: {
         min: padding.horizontal,
-        max: (scene.scale.width - this.sprite.width - padding.horizontal) * 0.5
+        max: (scene.scale.width - this.sprite.width - padding.horizontal) * 1
       },
       y: {
         min: padding.vertical,
@@ -56,7 +56,7 @@ export default class Player {
     }
   }
 
-  private updateVelocity() {
+  private updateVelocity () {
     if (this.controls.left) {
       this.velocity.x = Math.max(this.velocity.x - this.acceleration.x, -this.maxVelocity.x)
     } else if (this.controls.right) {
@@ -82,7 +82,7 @@ export default class Player {
     }
   }
 
-  private updatePosition() {
+  private updatePosition () {
     this.sprite.x += this.velocity.x
     this.sprite.y += this.velocity.y
 
@@ -90,12 +90,12 @@ export default class Player {
     this.sprite.y = clamp(this.sprite.y, this.bounds.y.min, this.bounds.y.max)
   }
 
-  update() {
+  update (_velocity: number) {
     this.updateVelocity()
     this.updatePosition()
   }
 
-  move(x: number, y: number) {
+  move (x: number, y: number) {
     this.sprite.setPosition(x, y)
     this.velocity.x = 0
     this.velocity.y = 0

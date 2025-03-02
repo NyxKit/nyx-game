@@ -17,11 +17,22 @@ export class PreloaderScene extends Scene {
   preload () {
     this.load.setPath('assets')
     this.load.image('player', 'whale.png')
-    this.load.image('star', 'star.png')
-    this.load.image('bg_stars', 'bg_stars.png')
-    this.load.image('bg_dust', 'bg_dust.png')
-    this.load.image('bg_nebulae', 'bg_nebulae.png')
-    this.load.image('bg_planets', 'bg_planets.png')
+    this.load.image('blackhole', 'blackhole.png')
+    this.load.image('background/stars', 'background/stars.png')
+    this.load.image('background/dust', 'background/dust.png')
+    this.load.image('background/nebulae', 'background/nebulae.png')
+    this.load.image('background/planets', 'background/planets.png')
+    this.load.image('asteroid/1', 'asteroid/1.png')
+    this.load.image('asteroid/2', 'asteroid/2.png')
+    this.load.image('asteroid/3', 'asteroid/3.png')
+    this.load.image('asteroid/4', 'asteroid/4.png')
+    this.load.image('asteroid/5', 'asteroid/5.png')
+    this.load.image('asteroid/6', 'asteroid/6.png')
+    this.load.image('powerup/pink0', 'powerup/pink0.png')
+    this.load.image('powerup/pink1', 'powerup/pink1.png')
+    this.load.image('powerup/pink2', 'powerup/pink2.png')
+    this.load.image('powerup/blue1', 'powerup/blue1.png')
+    this.load.image('powerup/blue2', 'powerup/blue2.png')
   }
 
   create () {

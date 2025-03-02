@@ -8,14 +8,9 @@ import useClientStore from './stores/client'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useInterfaceStore from './stores/interface'
 
-const { isPlaying, isPreloadComplete, preloadProgress } = storeToRefs(useGameStore())
+const { isDebug, isInMenu, isPreloading, preloadProgress } = storeToRefs(useGameStore())
 const { setScreenSize } = useClientStore()
 const { isSettingsVisible } = storeToRefs(useInterfaceStore())
-
-const isDebug = computed(() => {
-  const hash = window.location.hash.substring(1)
-  return hash === 'debug'
-})
 
 onMounted(() => {
   window.addEventListener('resize', setScreenSize)
@@ -28,7 +23,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="preloader" v-if="!isPreloadComplete">
+  <div class="preloader" v-if="isPreloading">
     <NyxProgress
       class="preloader__progress"
       v-model="preloadProgress"
@@ -39,7 +34,7 @@ onBeforeUnmount(() => {
     />
   </div>
   <transition name="fade">
-    <div class="interface" v-if="isPreloadComplete && !isPlaying && !isDebug">
+    <div class="interface" v-if="isInMenu">
       <MainMenu class="view" />
       <NyxModal v-model="isSettingsVisible">
         <Settings />
@@ -49,7 +44,7 @@ onBeforeUnmount(() => {
     </div>
   </transition>
   
-  <Debug />
+  <Debug v-if="isDebug" />
   <GameMenu />
   <Game />
   <GameInterface />

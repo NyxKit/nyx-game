@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import useGameStore from '@/stores/game'
 import { storeToRefs } from 'pinia'
-import { NyxButton, NyxCard, NyxForm, NyxFormField, NyxInput } from 'nyx-kit/components'
+import { NyxButton, NyxCard, NyxForm, NyxFormField, NyxInput, NyxSelect } from 'nyx-kit/components'
 import { NyxPosition, NyxSize, NyxTheme, NyxInputType } from 'nyx-kit/types'
 import { useTeleportPosition } from 'nyx-kit/compositions'
 import { computed, ref, useTemplateRef, type DefineComponent } from 'vue'
+import { GameState } from '@/types'
 
 const gameStore = useGameStore()
 const { addSprite } = gameStore
-const { spritePosition, hp, score } = storeToRefs(gameStore)
+const { spritePosition, hp, score, state, energy } = storeToRefs(gameStore)
 
 const nyxButton = useTemplateRef<DefineComponent>('nyxButton')
 const nyxCard = useTemplateRef<DefineComponent>('nyxCard')
 
-const isDebugVisible = ref(false)
+const isDebugPanelVisible = ref(false)
 
 const { cssVariables } = useTeleportPosition(nyxButton, nyxCard, {
   gap: ref(NyxSize.XLarge),
@@ -23,7 +24,7 @@ const { cssVariables } = useTeleportPosition(nyxButton, nyxCard, {
 })
 
 const toggleDebug = (value?: boolean) => {
-  isDebugVisible.value = value === undefined ? !isDebugVisible.value : value
+  isDebugPanelVisible.value = value === undefined ? !isDebugPanelVisible.value : value
 }
 
 const computedHp = computed({
@@ -35,6 +36,13 @@ const computedScore = computed({
   get: () => score.value.toString(),
   set: (value: string) => score.value = parseInt(value)
 })
+
+const computedEnergy = computed({
+  get: () => energy.value.toString(),
+  set: (value: string) => energy.value = parseInt(value)
+})
+
+const gameStateOptions = computed(() => Object.values(GameState).map((state) => ({ label: state, value: state })))
 
 </script>
 
@@ -50,16 +58,22 @@ const computedScore = computed({
     <Teleport to="body">
       <NyxCard
         class="debug__card"
-        :class="{ 'debug__card--visible': isDebugVisible }"
+        :class="{ 'debug__card--visible': isDebugPanelVisible }"
         :style="cssVariables"
         ref="nyxCard"
       >
         <NyxForm class="debug__card-content">
           <NyxFormField label="HP" #default="{ id }">
-            <NyxInput :id="id" v-model="computedHp" :type="NyxInputType.Number" :max="100" />
+            <NyxInput class="debug__card-input" :id="id" v-model="computedHp" :type="NyxInputType.Number" :max="100" />
+          </NyxFormField>
+          <NyxFormField label="Energy" #default="{ id }">
+            <NyxInput class="debug__card-input" :id="id" v-model="computedEnergy" :type="NyxInputType.Number" />
           </NyxFormField>
           <NyxFormField label="Score" #default="{ id }">
-            <NyxInput :id="id" v-model="computedScore" :type="NyxInputType.Number" />
+            <NyxInput class="debug__card-input" :id="id" v-model="computedScore" :type="NyxInputType.Number" />
+          </NyxFormField>
+          <NyxFormField label="State" #default="{ id }" v-if="false">
+            <NyxSelect :id="id" v-model="state" :options="gameStateOptions" />
           </NyxFormField>
           <NyxButton class="debug__card-button" :size="NyxSize.Small" @click="addSprite">Add New Sprite</NyxButton>
           <pre>{{ spritePosition }}</pre>
@@ -113,6 +127,10 @@ const computedScore = computed({
 
     &-button {
       margin: 0.5rem 0;
+    }
+
+    &-input {
+      text-align: right;
     }
   }
 </style>
