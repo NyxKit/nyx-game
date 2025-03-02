@@ -1,19 +1,28 @@
 import type { GameScene } from '@/scenes'
+import { GameState } from '@/types'
 import { defineStore } from 'pinia'
 import { computed, ref, toRaw, watch } from 'vue'
 
 const useGameStore = defineStore('game', () => {
+  const state = ref(GameState.Init)
   const isPlaying = ref(false)
   const isPaused = ref(false)
   const isPreloadComplete = ref(false)
   const preloadProgress = ref(0)
   const currentScene = ref<Phaser.Scene>()
   const spritePosition = ref({ x: 0, y: 0 })
+  const score = ref(0)
+  const hp = ref(50)
+
+  const setGameState = (newState: GameState) => state.value = newState
 
   const togglePlaying = (newVal?: boolean) => {
     isPlaying.value = (newVal === undefined) ? !isPlaying.value : newVal
     isPaused.value = !isPlaying.value
   }
+
+  const incrementScore = (amount?: number) => score.value += amount ?? 1
+  const decrementHp = (amount?: number) => hp.value -= amount ?? 1
 
   const setPreloadComplete = (val: boolean) => isPreloadComplete.value = val
   const setPreloadProgress = (progress: number) => preloadProgress.value = progress
@@ -47,16 +56,22 @@ const useGameStore = defineStore('game', () => {
   return {
     addSprite,
     currentScene,
-    isPlaying,
+    decrementHp,
+    hp,
+    incrementScore,
     isPaused,
+    isPlaying,
     isPreloadComplete,
     preloadProgress,
+    score,
     setCurrentScene,
+    setGameState,
     setPreloadComplete,
     setPreloadProgress,
     spritePosition, 
-    togglePlaying,
+    state,
     togglePaused,
+    togglePlaying,
   }
 })
 

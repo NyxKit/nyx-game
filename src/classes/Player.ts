@@ -12,8 +12,8 @@ export default class Player {
     y: { min: number; max: number }
   }
   private velocity = {
-    x: 0,
-    y: 0
+    x: 2,
+    y: 2
   }
   private maxVelocity = {
     x: 2,
@@ -47,7 +47,7 @@ export default class Player {
     this.bounds = {
       x: {
         min: padding.horizontal,
-        max: scene.scale.width - this.sprite.width - padding.horizontal
+        max: (scene.scale.width - this.sprite.width - padding.horizontal) * 0.5
       },
       y: {
         min: padding.vertical,

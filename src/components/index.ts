@@ -1,8 +1,17 @@
-import Game from './Game.vue'
-import MainMenu from './MainMenu.vue'
-import Hiscores from './Hiscores.vue'
-import Settings from './Settings.vue'
-import GameMenu from './GameMenu.vue' 
 import Debug from './Debug.vue'
+import Game from './Game.vue'
+import GameInterface from './GameInterface.vue'
+import GameMenu from './GameMenu.vue' 
+import Hiscores from './Hiscores.vue'
+import MainMenu from './MainMenu.vue'
+import Settings from './Settings.vue'
 
-export { Game, MainMenu, Hiscores, Settings, GameMenu, Debug }
+export {
+  Debug,
+  Game,
+  GameInterface,
+  GameMenu,
+  Hiscores,
+  MainMenu,
+  Settings,
+}

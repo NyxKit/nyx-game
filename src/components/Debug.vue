@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import useGameStore from '@/stores/game'
 import { storeToRefs } from 'pinia'
-import { NyxButton, NyxCard } from 'nyx-kit/components'
-import { NyxPosition, NyxSize, NyxTheme } from 'nyx-kit/types'
+import { NyxButton, NyxCard, NyxForm, NyxFormField, NyxInput } from 'nyx-kit/components'
+import { NyxPosition, NyxSize, NyxTheme, NyxInputType } from 'nyx-kit/types'
 import { useTeleportPosition } from 'nyx-kit/compositions'
-import { ref, useTemplateRef, type DefineComponent } from 'vue'
+import { computed, ref, useTemplateRef, type DefineComponent } from 'vue'
 
 const gameStore = useGameStore()
 const { addSprite } = gameStore
-const { spritePosition } = storeToRefs(gameStore)
+const { spritePosition, hp, score } = storeToRefs(gameStore)
 
 const nyxButton = useTemplateRef<DefineComponent>('nyxButton')
 const nyxCard = useTemplateRef<DefineComponent>('nyxCard')
@@ -25,6 +25,16 @@ const { cssVariables } = useTeleportPosition(nyxButton, nyxCard, {
 const toggleDebug = (value?: boolean) => {
   isDebugVisible.value = value === undefined ? !isDebugVisible.value : value
 }
+
+const computedHp = computed({
+  get: () => hp.value.toString(),
+  set: (value: string) => hp.value = parseInt(value)
+})
+
+const computedScore = computed({
+  get: () => score.value.toString(),
+  set: (value: string) => score.value = parseInt(value)
+})
 
 </script>
 
@@ -44,10 +54,16 @@ const toggleDebug = (value?: boolean) => {
         :style="cssVariables"
         ref="nyxCard"
       >
-        <div class="debug__card-content">
-          <NyxButton :size="NyxSize.Small" @click="addSprite">Add New Sprite</NyxButton>
+        <NyxForm class="debug__card-content">
+          <NyxFormField label="HP" #default="{ id }">
+            <NyxInput :id="id" v-model="computedHp" :type="NyxInputType.Number" :max="100" />
+          </NyxFormField>
+          <NyxFormField label="Score" #default="{ id }">
+            <NyxInput :id="id" v-model="computedScore" :type="NyxInputType.Number" />
+          </NyxFormField>
+          <NyxButton class="debug__card-button" :size="NyxSize.Small" @click="addSprite">Add New Sprite</NyxButton>
           <pre>{{ spritePosition }}</pre>
-        </div>
+        </NyxForm>
       </NyxCard>
     </Teleport>
   </div>
@@ -91,8 +107,12 @@ const toggleDebug = (value?: boolean) => {
     &-content {
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 0.5rem;
       padding: 0;
+    }
+
+    &-button {
+      margin: 0.5rem 0;
     }
   }
 </style>
