@@ -28,6 +28,11 @@ export class GameScene extends Scene {
   }
 
   update () {
+    if (!this.store.isPlaying) {
+      this.background?.update()
+      return
+    }
+
     if (this.store.isPaused) return
 
     this.background?.update()

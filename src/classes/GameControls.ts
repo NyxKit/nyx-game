@@ -1,4 +1,7 @@
+import useGameStore from '@/stores/game'
+
 export default class GameControls {
+  private store = useGameStore()
   left: boolean = false
   right: boolean = false
   up: boolean = false
@@ -10,6 +13,8 @@ export default class GameControls {
 
   constructor (keyboard: Phaser.Input.Keyboard.KeyboardPlugin) {
     keyboard.on('keydown', (event: KeyboardEvent) => {
+      if (!this.store.isPlaying) return
+
       switch (event.code) {
         case 'ArrowLeft':
         case 'KeyA':

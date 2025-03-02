@@ -1,4 +1,4 @@
-import type { GameScene } from '@/game/scenes'
+import type { GameScene } from '@/scenes'
 import { defineStore } from 'pinia'
 import { computed, ref, toRaw, watch } from 'vue'
 

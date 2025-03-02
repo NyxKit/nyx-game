@@ -58,15 +58,9 @@ export default class Player {
 
   private updateVelocity() {
     if (this.controls.left) {
-      this.velocity.x = Math.max(
-        this.velocity.x - this.acceleration.x,
-        -this.maxVelocity.x
-      )
+      this.velocity.x = Math.max(this.velocity.x - this.acceleration.x, -this.maxVelocity.x)
     } else if (this.controls.right) {
-      this.velocity.x = Math.min(
-        this.velocity.x + this.acceleration.x,
-        this.maxVelocity.x
-      )
+      this.velocity.x = Math.min(this.velocity.x + this.acceleration.x, this.maxVelocity.x)
     } else {
       if (this.velocity.x > 0) {
         this.velocity.x = Math.max(0, this.velocity.x - this.deceleration.x)
@@ -76,15 +70,9 @@ export default class Player {
     }
 
     if (this.controls.up) {
-      this.velocity.y = Math.max(
-        this.velocity.y - this.acceleration.y,
-        -this.maxVelocity.y
-      )
+      this.velocity.y = Math.max(this.velocity.y - this.acceleration.y, -this.maxVelocity.y)
     } else if (this.controls.down) {
-      this.velocity.y = Math.min(
-        this.velocity.y + this.acceleration.y,
-        this.maxVelocity.y
-      )
+      this.velocity.y = Math.min(this.velocity.y + this.acceleration.y, this.maxVelocity.y)
     } else {
       if (this.velocity.y > 0) {
         this.velocity.y = Math.max(0, this.velocity.y - this.deceleration.y)

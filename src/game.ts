@@ -1,5 +1,5 @@
 import { AUTO, Game } from 'phaser'
-import { BootScene, PreloaderScene, GameScene, GameOverScene } from '@/game/scenes'
+import { BootScene, PreloaderScene, GameScene, GameOverScene } from '@/scenes'
 import useClientStore from '@/stores/client'
 
 //  Find out more information about the Game Config at:

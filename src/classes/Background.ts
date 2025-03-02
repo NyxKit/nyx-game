@@ -1,14 +1,17 @@
 import { createTiledImage } from '@/utils'
 import type { GameObjects, Scene } from 'phaser'
 import type GameControls from './GameControls'
+import useGameStore from '@/stores/game'
 
 export default class Background {
   private scene: Scene
   private controls: GameControls
-  private bgDust: GameObjects.TileSprite | null = null
-  private bgStars: GameObjects.TileSprite | null = null
-  private bgNebulae: GameObjects.TileSprite | null = null
-  private bgPlanets: GameObjects.TileSprite | null = null
+  private store = useGameStore()
+
+  private bgDust: GameObjects.TileSprite
+  private bgStars: GameObjects.TileSprite
+  private bgNebulae: GameObjects.TileSprite
+  private bgPlanets: GameObjects.TileSprite
 
   private velocity: number = 0
   private maxVelocity: number = 2

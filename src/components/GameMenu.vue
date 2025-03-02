@@ -37,7 +37,7 @@ onUnmounted(() => {
 
 <template>
   <NyxModal
-    v-if="isPaused"
+    v-if="isPlaying && isPaused"
     :customClass="customClass"
     :size="NyxSize.Small"
     static

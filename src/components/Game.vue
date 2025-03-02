@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { EventBus } from '@/classes/EventBus'
-import StartGame from '../game/main'
+import StartGame from '../game'
 import Phaser from 'phaser'
 import useGameStore from '@/stores/game'
 
