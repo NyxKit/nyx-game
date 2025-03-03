@@ -71,17 +71,6 @@ export class GameScene extends Scene {
     }
 
     if (powerUp) {
-      switch (powerUp.type) {
-        case PowerUpType.Default:
-          this.store.increaseEnergy(1)
-          break
-        case PowerUpType.Energy:
-          this.store.increaseEnergy(100)
-          break
-        case PowerUpType.Shield:
-          // this.store.increaseShield(100)
-          break
-      }
       powerUp.destroy()
     }
 
@@ -98,7 +87,10 @@ export class GameScene extends Scene {
       this.asteroids.forEach((asteroid) => {
         const asteroidBounds = asteroid.sprite.getBounds()
         if (Phaser.Geom.Intersects.LineToRectangle(beamLine, asteroidBounds)) {
-          asteroid.destroy(true)
+          asteroid.hp -= 1
+          if (asteroid.hp <= 0) {
+            asteroid.destroy(true)
+          }
         }
       })
     }
@@ -114,7 +106,7 @@ export class GameScene extends Scene {
   }
 
   private trySpawnAsteroid () {
-    const spawnRate = this.store.debug.isImmortal ? 1000 : 5000 / this.velocity
+    const spawnRate = this.store.debug.isImmortal ? 1000 : 3000 / this.velocity
     const timeSinceLastSpawn = this.time.now - this.lastSpawnTime
 
     if (timeSinceLastSpawn >= spawnRate) {
@@ -157,35 +149,47 @@ export class GameScene extends Scene {
   spawnAsteroid () {
     const asteroid = new Asteroid(this, {
       speed: this.velocity,
-      onDestroy: this.onDestroyAsteroid.bind(this)
+      isLarge: Math.random() > 0.8,
+      onDestroy: this.onDestroyAsteroid.bind(this),
     })
 
     this.asteroids.push(asteroid)
   }
 
-  spawnPowerUp (position: { x: number; y: number }) {
-    const powerUp = new PowerUp(this, {
-      type: PowerUpType.Default,
-      position,
-      onDestroy: this.onDestroyPowerUp.bind(this)
-    })
+  spawnPowerUp (position: { x: number; y: number }, isLarge: boolean) {
+    let type = PowerUpType.Hp
+    if (isLarge) {
+      type = Math.random() > 0.5 ? PowerUpType.HpCrystal : PowerUpType.EnergyCrystal
+    } else {
+      type = Math.random() > 0.5 ? PowerUpType.Hp : PowerUpType.Energy
+    }
+    const powerUp = new PowerUp(this, { type, position, speed: this.velocity, onDestroy: this.onDestroyPowerUp.bind(this) })
     this.powerUps.push(powerUp)
   }
 
   private onDestroyAsteroid (id: string, options?: KeyDict<any>) {
     this.asteroids = this.asteroids.filter((asteroid) => asteroid.id !== id)
     if (!options?.isDestroyedByPlayer) return
-    this.store.increaseScore(50)
-    this.spawnPowerUp(options.position)
+    this.store.increaseScore(Math.round(options.size * 2))
+    this.spawnPowerUp(options.position, options.isLarge)
   }
 
   private onDestroyPowerUp (id: string, options?: KeyDict<any>) {
     this.powerUps = this.powerUps.filter((powerUp) => powerUp.id !== id)
     if (!options?.isDestroyedByPlayer) return
-    if (options.type === PowerUpType.Energy) {
-      this.store.increaseEnergy(100)
-    } else if (options.type === PowerUpType.Shield) {
-      // this.store.increaseShield(100)
+    switch (options.type) {
+      case PowerUpType.Hp:
+        this.store.increaseHp(1)
+        break
+      case PowerUpType.HpCrystal:
+        this.store.increaseHp(50)
+        break
+      case PowerUpType.Energy:
+        this.store.increaseEnergy(5)
+        break
+      case PowerUpType.EnergyCrystal:
+        this.store.increaseEnergy(100)
+        break
     }
   }
 }

@@ -1,5 +1,5 @@
 import type { GameScene } from '@/scenes'
-import { DefaultPowerUpKey, PowerUpType, PowerUpTypeMap, type OnDestroyEvent } from '@/types'
+import { PowerUpType, PowerUpTypeMap, type OnDestroyEvent } from '@/types'
 import { getRandomFromArray } from 'nyx-kit/utils'
 import type { GameObjects } from 'phaser'
 import { v4 as uuidv4 } from 'uuid'
@@ -7,27 +7,27 @@ import { v4 as uuidv4 } from 'uuid'
 interface PowerUpOptions {
   type: PowerUpType
   position: { x: number; y: number }
+  speed: number
   onDestroy: OnDestroyEvent
 }
 
-export default class PowerUp {
+export default class PowerUp implements PowerUpOptions {
   private scene: GameScene
   private key: string
-  private position: { x: number; y: number }
-  private onDestroy: OnDestroyEvent
+  public position: { x: number; y: number }
+  public onDestroy: OnDestroyEvent
   public id: string = uuidv4()
-  public type: PowerUpType = PowerUpType.Default
+  public type: PowerUpType = PowerUpType.Hp
   public sprite: GameObjects.Image
-
-  // If key is true, the random powerup will be selected
-  // If key is a string, the powerup will be the one specified
+  public speed: number
 
   constructor (scene: GameScene, options?: PowerUpOptions) {
     this.scene = scene
-    this.type = options?.type ?? PowerUpType.Default
+    this.type = options?.type ?? PowerUpType.Hp
     this.key = getRandomFromArray(PowerUpTypeMap[this.type])
     this.position = options?.position ?? { x: 0, y: 0 }
     this.sprite = this.create()
+    this.speed = options?.speed ?? 5
     this.onDestroy = options?.onDestroy ?? (() => {})
   }
 
@@ -43,16 +43,17 @@ export default class PowerUp {
     const dx = playerPosition.x - this.sprite.x
     const dy = playerPosition.y - this.sprite.y
     const distance = Math.sqrt(dx * dx + dy * dy)
-    const threshold = (this.key === DefaultPowerUpKey) ? 2000 : 300
+    const threshold = 300
 
     // Only move if within range
     if (distance < threshold) {
-      const speed = 5
-      const vx = (dx / distance) * speed
-      const vy = (dy / distance) * speed
+      const vx = (dx / distance) * this.speed * 3
+      const vy = (dy / distance) * this.speed * 3
       
       this.sprite.x += vx
       this.sprite.y += vy
+    } else {
+      this.sprite.x -= this.speed * 3
     }
   }
 

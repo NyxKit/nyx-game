@@ -5,25 +5,30 @@ import { v4 as uuidv4 } from 'uuid'
 
 interface AsteroidOptions {
   speed?: number
+  isLarge?: boolean
   onDestroy: OnDestroyEvent
 }
 
-export default class Asteroid {
+export default class Asteroid implements AsteroidOptions {
   public id: string
   public sprite: GameObjects.Image
+  public hp: number = 1
+  public speed = 3
+  public isLarge = false
+  public onDestroy: OnDestroyEvent
   private velocity: { x: number; y: number } = { x: 1, y: 1 }
   private scene: Phaser.Scene
   private key: string
-  private speed = 3
   private size = 1
-  private onDestroy: OnDestroyEvent
 
   constructor (scene: Phaser.Scene, options: AsteroidOptions) {
     this.id = uuidv4()
     this.key = `asteroid/${getRandomBetween(1, 6)}`
     this.scene = scene
     this.speed *= options.speed ?? 1
-    this.size = getRandomBetween(2, 4)
+    this.isLarge = options.isLarge ?? false
+    this.size = this.isLarge ? getRandomBetween(2, 4, 0.5) * 3 : getRandomBetween(2, 4, 0.5)
+    this.hp = this.isLarge ? 25 : 10
     this.sprite = this.create()
     this.onDestroy = options.onDestroy
   }
@@ -76,7 +81,7 @@ export default class Asteroid {
 
   destroy (isDestroyedByPlayer: boolean = false) {
     const position = { x: this.sprite.x, y: this.sprite.y }
-    this.onDestroy(this.id, { isDestroyedByPlayer, position })
+    this.onDestroy(this.id, { isDestroyedByPlayer, position, size: this.size, isLarge: this.isLarge })
     this.sprite.destroy()
   }
 }

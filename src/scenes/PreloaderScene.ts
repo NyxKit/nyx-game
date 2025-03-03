@@ -28,6 +28,7 @@ export class PreloaderScene extends Scene {
     this.load.image('asteroid/4', 'asteroid/4.png')
     this.load.image('asteroid/5', 'asteroid/5.png')
     this.load.image('asteroid/6', 'asteroid/6.png')
+    this.load.image('powerup/blue0', 'powerup/pink0.png')
     this.load.image('powerup/pink0', 'powerup/pink0.png')
     this.load.image('powerup/pink1', 'powerup/pink1.png')
     this.load.image('powerup/pink2', 'powerup/pink2.png')
