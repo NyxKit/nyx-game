@@ -25,6 +25,8 @@ export class GameScene extends Scene {
     this.controls = new GameControls(this.input.keyboard)
     this.background = new Background(this, this.controls)
     this.player = new Player(this, this.controls)
+    this.player.setDepth(1000)
+    this.player.setPosition(200, this.scale.height / 2)
 
     EventBus.emit('current-scene-ready', this)
   }
@@ -48,8 +50,27 @@ export class GameScene extends Scene {
     const asteroid = this.isCollisionDetected()
 
     if (asteroid) {
-      this.store.decreaseHp(10)
+      this.store.decreaseHp(this.store.debug.isImmortal ? 0 : 10)
       asteroid.destroy()
+    }
+
+    // Check beam collision with asteroids
+    if (this.player?.beam) {
+      const beam = this.player.beam
+      const beamLine = new Phaser.Geom.Line(
+        this.player.x,
+        this.player.y,
+        this.player.x + Math.cos(beam.rotation) * beam.width,
+        this.player.y + Math.sin(beam.rotation) * beam.width
+      )
+
+      this.asteroids.forEach((asteroid) => {
+        const asteroidBounds = asteroid.sprite.getBounds()
+        if (Phaser.Geom.Intersects.LineToRectangle(beamLine, asteroidBounds)) {
+          asteroid.destroy()
+          this.store.increaseScore(50)
+        }
+      });
     }
   }
 

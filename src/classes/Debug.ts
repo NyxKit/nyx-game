@@ -1,13 +1,15 @@
 export default class Debug {
   private _isEnabled = false
-  private _isCollisionDisabled = true
+  private _isCollisionDisabled = false
   private _hasInfiniteEnergy = true
+  private _isImmortal = true
 
   constructor () {
     const data = JSON.parse(localStorage.getItem('debug') ?? '{}')
     this.isEnabled = data.isEnabled ?? this.isEnabled
     this._isCollisionDisabled = data.isCollisionDisabled ?? this._isCollisionDisabled
     this._hasInfiniteEnergy = data.hasInfiniteEnergy ?? this._hasInfiniteEnergy
+    this._isImmortal = data.isImmortal ?? this._isImmortal
   }
 
   get isEnabled () {
@@ -33,6 +35,15 @@ export default class Debug {
 
   set hasInfiniteEnergy (value: boolean) {
     this._hasInfiniteEnergy = value
+    this.save()
+  }
+
+  get isImmortal () {
+    return this.isEnabled && this._isImmortal
+  }
+
+  set isImmortal (value: boolean) {
+    this._isImmortal = value
     this.save()
   }
 

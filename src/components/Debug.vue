@@ -93,10 +93,13 @@ const disableDebug = () => {
             <NyxSelect :id="id" v-model="state" :options="gameStateOptions" />
           </NyxFormField>
           <NyxFormField #default="{ id }">
-            <NyxCheckbox :id="id" v-model="debug.isCollisionDisabled" label="Disable Collision" />
+            <NyxCheckbox :id="id" v-model="debug.isImmortal" label="Immortality" />
           </NyxFormField>
           <NyxFormField #default="{ id }">
             <NyxCheckbox :id="id" v-model="debug.hasInfiniteEnergy" label="Infinite Energy" />
+          </NyxFormField>
+          <NyxFormField #default="{ id }">
+            <NyxCheckbox :id="id" v-model="debug.isCollisionDisabled" label="Disable Collision" />
           </NyxFormField>
           <NyxButton class="debug__card-button" @click="addAsteroid">Spawn Asteroid</NyxButton>
           <NyxButton class="debug__card-button" @click="disableDebug">Disable debug</NyxButton>

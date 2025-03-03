@@ -3,17 +3,13 @@ import type GameControls from './GameControls'
 import { clamp } from 'nyx-kit/utils'
 import useGameStore from '@/stores/game'
 
-export default class Player {
+export default class Player extends Phaser.GameObjects.Container {
   public sprite: GameObjects.Image
-  private scene: Scene
+  public scene: Scene
   private controls: GameControls
   private store = useGameStore()
   private speed: number = 2
   private teleportDistance: number = 150
-  private bounds: {
-    x: { min: number; max: number }
-    y: { min: number; max: number }
-  }
   private velocity = {
     x: 2,
     y: 2
@@ -30,33 +26,28 @@ export default class Player {
     x: 0.05,
     y: 0.05
   }
+  public beam: Phaser.GameObjects.Rectangle | null = null;
+  private beamWidth = 24
+  private beamColor = 0x9F50F0 // Purple color for the beam
+  private beamRange = 2000 // How far the beam extends
+  private energyDrainRate = 0.1 // Energy drain per frame while shooting
 
   constructor (scene: Scene, controls: GameControls) {
+    super(scene, 0, 0)
     this.scene = scene
     this.controls = controls
 
     // Create the player sprite
-    this.sprite = scene.add.image(50, scene.scale.height * 0.5 - 100, 'player')
-      .setOrigin(0, 0)
-      .setDepth(100)
-      .setScrollFactor(0)
+    this.sprite = scene.add.image(0, 0, 'player')
+    this.add(this.sprite)
 
-    // Calculate bounds with configurable padding
-    const padding = {
-      horizontal: 20,
-      vertical: 20
-    }
+    // Add container to scene
+    scene.add.existing(this)
 
-    this.bounds = {
-      x: {
-        min: padding.horizontal,
-        max: (scene.scale.width - this.sprite.width - padding.horizontal) * 1
-      },
-      y: {
-        min: padding.vertical,
-        max: scene.scale.height - this.sprite.height - padding.vertical
-      }
-    }
+    // Add mouse input handling
+    scene.input.on('pointerdown', this.startBeam, this)
+    scene.input.on('pointerup', this.stopBeam, this)
+    scene.input.on('pointermove', this.updateBeamAngle, this)
   }
 
   private updateVelocity () {
@@ -86,8 +77,8 @@ export default class Player {
   }
 
   private teleport () {
-    let newX = this.sprite.x
-    let newY = this.sprite.y
+    let newX = this.x
+    let newY = this.y
     
     // Set full momentum in teleport direction
     if (this.controls.left) {
@@ -107,18 +98,18 @@ export default class Player {
     }
     
     // Move to new position
-    this.sprite.setPosition(
-      clamp(newX, this.bounds.x.min, this.bounds.x.max),
-      clamp(newY, this.bounds.y.min, this.bounds.y.max)
+    this.setPosition(
+      clamp(newX, 0, this.scene.scale.width - this.sprite.width),
+      clamp(newY, 0, this.scene.scale.height - this.sprite.height)
     )
   }
 
   private updatePosition () {
-    this.sprite.x += this.velocity.x
-    this.sprite.y += this.velocity.y
+    this.x += this.velocity.x
+    this.y += this.velocity.y
 
-    this.sprite.x = clamp(this.sprite.x, this.bounds.x.min, this.bounds.x.max)
-    this.sprite.y = clamp(this.sprite.y, this.bounds.y.min, this.bounds.y.max)
+    this.x = clamp(this.x, 0, this.scene.scale.width - this.sprite.width)
+    this.y = clamp(this.y, 0, this.scene.scale.height - this.sprite.height)
   }
 
   update (_velocity: number) {
@@ -130,14 +121,58 @@ export default class Player {
 
     this.updateVelocity()
     this.updatePosition()
-    this.store.setPlayerPosition(this.sprite.x, this.sprite.y)
+    this.store.setPlayerPosition(this.x, this.y)
+
+    // Handle beam energy drain
+    if (!this.beam) return
+    if (this.store.energy > 0 && !this.store.debug.hasInfiniteEnergy) {
+      this.store.energy -= this.energyDrainRate
+      if (this.store.energy <= 0) {
+        this.stopBeam()
+      }
+    }
   }
 
   move (x: number, y: number) {
-    this.sprite.setPosition(x, y)
+    this.setPosition(x, y)
   }
 
   private hasEnergy () {
-    return this.store.energy > 0 || this.store.debug.hasInfiniteEnergy
+    return this.store.energy > this.energyDrainRate || this.store.debug.hasInfiniteEnergy
+  }
+
+  private startBeam(): void {
+    if (this.beam || !this.hasEnergy()) return
+    this.beam = this.scene.add.rectangle(this.sprite.width / 2, 0, this.beamRange, this.beamWidth, this.beamColor)
+    this.beam.setOrigin(0, 0.5)
+    this.add(this.beam)
+    this.updateBeamAngle()
+  }
+
+  private stopBeam(): void {
+    if (!this.beam) return
+    this.beam.destroy()
+    this.beam = null
+  }
+
+  private updateBeamAngle(): void {
+    if (!this.beam) return
+    const pointer = this.scene.input.activePointer
+    const angle = Phaser.Math.Angle.Between(
+      this.x,
+      this.y,
+      pointer.worldX,
+      pointer.worldY
+    )
+    this.beam.setRotation(angle)
+  }
+
+  destroy(): void {
+    // Clean up event listeners
+    this.scene.input.off('pointerdown', this.startBeam, this)
+    this.scene.input.off('pointerup', this.stopBeam, this)
+    this.scene.input.off('pointermove', this.updateBeamAngle, this)
+    
+    super.destroy()
   }
 }

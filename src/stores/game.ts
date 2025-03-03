@@ -14,7 +14,7 @@ const useGameStore = defineStore('game', () => {
   const energy = ref(0)
 
   const setGameState = (newState: GameState) => state.value = newState
-  const incrementScore = (amount?: number) => score.value += amount ?? 1
+  const increaseScore = (amount?: number) => score.value += amount ?? 1
   const decreaseHp = (amount?: number) => hp.value -= amount ?? 1
   const decreaseEnergy = (amount?: number) => energy.value -= amount ?? 1
 
@@ -58,7 +58,7 @@ const useGameStore = defineStore('game', () => {
     decreaseHp,
     energy,
     hp,
-    incrementScore,
+    increaseScore,
     isGameOver,
     isInMenu,
     isPaused,
