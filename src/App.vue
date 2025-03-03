@@ -12,6 +12,8 @@ const { debug, isInMenu, isPreloading, preloadProgress } = storeToRefs(useGameSt
 const { setScreenSize } = useClientStore()
 const { isSettingsVisible } = storeToRefs(useInterfaceStore())
 
+const version = import.meta.env.VITE_APP_VERSION
+
 onMounted(() => {
   window.addEventListener('resize', setScreenSize)
 })
@@ -49,6 +51,7 @@ onBeforeUnmount(() => {
   <Game />
   <GameInterface />
   <GameOver />
+  <span class="version">{{ version }}</span>
 </template>
 
 <style lang="scss">
@@ -103,4 +106,14 @@ main, .view, canvas {
 // .v-leave-to {
 //   opacity: 0;
 // }
+
+.version {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  font-size: 12px;
+  opacity: 0.7;
+  z-index: 1000;
+  padding: 1rem;
+}
 </style>
