@@ -55,6 +55,11 @@ export default class PowerUp implements PowerUpOptions {
     } else {
       this.sprite.x -= this.speed * 3
     }
+
+    const shouldDestroy = this.sprite.x < -this.sprite.width
+      || this.sprite.y > this.scene.scale.height + this.sprite.height
+
+    if (shouldDestroy) this.destroy()
   }
 
   destroy (isDestroyedByPlayer: boolean = false) {

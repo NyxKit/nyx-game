@@ -71,7 +71,7 @@ export class GameScene extends Scene {
     }
 
     if (powerUp) {
-      powerUp.destroy()
+      powerUp.destroy(true)
     }
 
     // Check beam collision with asteroids
@@ -94,15 +94,6 @@ export class GameScene extends Scene {
         }
       })
     }
-
-    const playerBounds = this.player!.sprite.getBounds()
-    // Check powerup collision with player
-    this.powerUps.forEach((powerUp) => {
-      const powerUpBounds = powerUp.sprite.getBounds()
-      if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, powerUpBounds)) {
-        powerUp.destroy()
-      }
-    })
   }
 
   private trySpawnAsteroid () {
@@ -157,11 +148,12 @@ export class GameScene extends Scene {
   }
 
   spawnPowerUp (position: { x: number; y: number }, isLarge: boolean) {
+    const ratio = this.store.energy / 100
     let type = PowerUpType.Hp
     if (isLarge) {
-      type = Math.random() > 0.5 ? PowerUpType.HpCrystal : PowerUpType.EnergyCrystal
+      type = Math.random() > ratio ? PowerUpType.EnergyCrystal : PowerUpType.HpCrystal
     } else {
-      type = Math.random() > 0.5 ? PowerUpType.Hp : PowerUpType.Energy
+      type = Math.random() > ratio ? PowerUpType.Energy : PowerUpType.Hp
     }
     const powerUp = new PowerUp(this, { type, position, speed: this.velocity, onDestroy: this.onDestroyPowerUp.bind(this) })
     this.powerUps.push(powerUp)
@@ -175,6 +167,7 @@ export class GameScene extends Scene {
   }
 
   private onDestroyPowerUp (id: string, options?: KeyDict<any>) {
+    console.log('onDestroyPowerUp', id, options)
     this.powerUps = this.powerUps.filter((powerUp) => powerUp.id !== id)
     if (!options?.isDestroyedByPlayer) return
     switch (options.type) {
@@ -182,13 +175,17 @@ export class GameScene extends Scene {
         this.store.increaseHp(1)
         break
       case PowerUpType.HpCrystal:
-        this.store.increaseHp(50)
+        this.store.increaseHp(20)
         break
       case PowerUpType.Energy:
         this.store.increaseEnergy(5)
         break
       case PowerUpType.EnergyCrystal:
-        this.store.increaseEnergy(100)
+        this.store.increaseEnergy(25)
+        break
+      default:
+        this.store.increaseHp(1)
+        this.store.increaseEnergy(5)
         break
     }
   }

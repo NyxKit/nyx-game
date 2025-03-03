@@ -19,12 +19,12 @@ export default class Player extends Phaser.GameObjects.Container {
     y: 4
   }
   private acceleration = {
-    x: 0.15,
-    y: 0.15
+    x: 0.2,
+    y: 0.2
   }
   private deceleration = {
-    x: 0.05,
-    y: 0.05
+    x: 0.1,
+    y: 0.1
   }
   public beam: Phaser.GameObjects.Rectangle | null = null;
   private beamSize = 24
