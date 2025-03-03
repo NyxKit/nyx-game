@@ -1,3 +1,5 @@
+import type { KeyDict } from 'nyx-kit/types'
+
 export default class Debug {
   private _isEnabled = false
   private _isCollisionDisabled = false
@@ -6,10 +8,15 @@ export default class Debug {
 
   constructor () {
     const data = JSON.parse(localStorage.getItem('debug') ?? '{}')
-    this.isEnabled = data.isEnabled ?? this.isEnabled
-    this._isCollisionDisabled = data.isCollisionDisabled ?? this._isCollisionDisabled
-    this._hasInfiniteEnergy = data.hasInfiniteEnergy ?? this._hasInfiniteEnergy
-    this._isImmortal = data.isImmortal ?? this._isImmortal
+    this._isEnabled = this.load(data, '_isEnabled')
+    this._isCollisionDisabled = this.load(data, '_isCollisionDisabled')
+    this._hasInfiniteEnergy = this.load(data, '_hasInfiniteEnergy')
+    this._isImmortal = this.load(data, '_isImmortal')
+  }
+
+  private load (data: KeyDict<boolean>, key: string): boolean {
+    if (data[key] === undefined) return !!this[key as keyof this]
+    else return data[key]
   }
 
   get isEnabled () {
@@ -20,6 +27,7 @@ export default class Debug {
     this._isEnabled = value
     this.save()
   }
+
   get isCollisionDisabled () {
     return this.isEnabled && this._isCollisionDisabled
   }
