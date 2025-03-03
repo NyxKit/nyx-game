@@ -68,6 +68,7 @@ const disableDebug = () => {
       class="debug__button"
       :theme="NyxTheme.Danger"
       :size="NyxSize.Small"
+      tabindex="-1"
       @click="toggleDebug"
     >Debug</NyxButton>
     <Teleport to="body">

@@ -14,6 +14,7 @@ export default class Asteroid {
   private scene: Phaser.Scene
   private key: string
   private speed = 3
+  private size = 1
   private onDestroy: (id: string) => void
 
   constructor (scene: Phaser.Scene, options: AsteroidOptions) {
@@ -21,6 +22,7 @@ export default class Asteroid {
     this.key = `asteroid/${getRandomBetween(1, 6)}`
     this.scene = scene
     this.speed *= options.speed ?? 1
+    this.size = getRandomBetween(2, 4)
     this.sprite = this.create()
     this.onDestroy = options.onDestroy ?? (() => {})
   }
@@ -56,7 +58,7 @@ export default class Asteroid {
 
     return this.scene.add
       .image(startX, startY, this.key)
-      .setScale(3)
+      .setScale(this.size)
       .setDepth(100)
   }
 
