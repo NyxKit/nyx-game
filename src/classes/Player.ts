@@ -26,7 +26,7 @@ export default class Player extends Phaser.GameObjects.Container {
     x: 0.1,
     y: 0.1
   }
-  public beam: Phaser.GameObjects.Rectangle | null = null;
+  public beam: Phaser.GameObjects.TileSprite | null = null
   private beamSize = 24
   private beamColor = 0x9F50F0 // Purple color for the beam
   private beamRange = 2000 // How far the beam extends
@@ -162,9 +162,17 @@ export default class Player extends Phaser.GameObjects.Container {
 
   private startBeam(): void {
     if (this.beam || !this.hasEnergy) return
-    this.beam = this.scene.add.rectangle(this.sprite.width / 2, 0, this.beamRange, this.beamSize, this.beamColor)
+    
+    // Get beam texture and scale it to match beam height
+    const beamTexture = this.scene.textures.get('beam')
+    const textureHeight = beamTexture.source[0].height
+    const scaleY = this.beamSize / textureHeight
+
+    this.beam = this.scene.add.tileSprite(this.sprite.width / 2, 0, this.beamRange, this.beamSize, 'beam')
       .setOrigin(0, 0.5)
       .setDepth(1000)
+      .setScale(1, scaleY)
+    
     this.add(this.beam)
     this.updateBeamAngle()
   }

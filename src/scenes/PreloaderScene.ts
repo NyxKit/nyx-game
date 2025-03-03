@@ -18,6 +18,7 @@ export class PreloaderScene extends Scene {
     this.load.setPath('assets')
     this.load.image('player', 'whale.png')
     this.load.image('blackhole', 'blackhole.png')
+    this.load.image('beam', 'beam.png')
     this.load.image('background/stars', 'background/stars.png')
     this.load.image('background/dust', 'background/dust.png')
     this.load.image('background/nebulae', 'background/nebulae.png')
