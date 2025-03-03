@@ -54,6 +54,13 @@ export default class Player extends Phaser.GameObjects.Container {
     return this.store.energy > this.energyDrainRate || this.store.debug.hasInfiniteEnergy
   }
 
+  public get currentPosition () {
+    return {
+      x: this.x,
+      y: this.y
+    }
+  }
+
   public get beamOrigin () {
     return {
       x: this.x + this.sprite.width / 2,

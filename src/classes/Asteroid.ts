@@ -1,10 +1,11 @@
+import type { OnDestroyEvent } from '@/types'
 import { getRandomBetween } from 'nyx-kit/utils'
 import type { GameObjects } from 'phaser'
 import { v4 as uuidv4 } from 'uuid'
 
 interface AsteroidOptions {
   speed?: number
-  onDestroy?: (id: string) => void
+  onDestroy: OnDestroyEvent
 }
 
 export default class Asteroid {
@@ -15,7 +16,7 @@ export default class Asteroid {
   private key: string
   private speed = 3
   private size = 1
-  private onDestroy: (id: string) => void
+  private onDestroy: OnDestroyEvent
 
   constructor (scene: Phaser.Scene, options: AsteroidOptions) {
     this.id = uuidv4()
@@ -24,7 +25,7 @@ export default class Asteroid {
     this.speed *= options.speed ?? 1
     this.size = getRandomBetween(2, 4)
     this.sprite = this.create()
-    this.onDestroy = options.onDestroy ?? (() => {})
+    this.onDestroy = options.onDestroy
   }
 
   create () {
@@ -73,9 +74,10 @@ export default class Asteroid {
     if (shouldDestroy) this.destroy()
   }
 
-  destroy () {
+  destroy (isDestroyedByPlayer: boolean = false) {
+    const position = { x: this.sprite.x, y: this.sprite.y }
+    this.onDestroy(this.id, { isDestroyedByPlayer, position })
     this.sprite.destroy()
-    this.onDestroy(this.id)
   }
 }
 

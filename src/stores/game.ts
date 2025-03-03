@@ -1,5 +1,6 @@
 import { Debug } from '@/classes'
 import { GameState } from '@/types'
+import { clampDecrease, clampIncrease } from '@/utils/number'
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 
@@ -14,9 +15,12 @@ const useGameStore = defineStore('game', () => {
   const energy = ref(0)
 
   const setGameState = (newState: GameState) => state.value = newState
-  const increaseScore = (amount?: number) => score.value += amount ?? 1
-  const decreaseHp = (amount?: number) => hp.value -= amount ?? 1
-  const decreaseEnergy = (amount?: number) => energy.value -= amount ?? 1
+  const increaseScore = (amount: number = 1) => score.value += amount
+
+  const increaseHp = (amount?: number) => hp.value = clampIncrease(hp.value, amount ?? 1, 100)
+  const decreaseHp = (amount?: number) => hp.value = clampDecrease(hp.value, amount ?? 1, 0)
+  const increaseEnergy = (amount?: number) => energy.value = clampIncrease(energy.value, amount ?? 1, 100)
+  const decreaseEnergy = (amount?: number) => energy.value = clampDecrease(energy.value, amount ?? 1, 0)
 
   const setPreloadProgress = (progress: number) => preloadProgress.value = progress
   const setCurrentScene = (scene: Phaser.Scene) => currentScene.value = scene
@@ -58,6 +62,8 @@ const useGameStore = defineStore('game', () => {
     decreaseHp,
     energy,
     hp,
+    increaseEnergy,
+    increaseHp,
     increaseScore,
     isGameOver,
     isInMenu,
