@@ -9,6 +9,7 @@ export default class Player {
   private controls: GameControls
   private store = useGameStore()
   private speed: number = 2
+  private teleportDistance: number = 150
   private bounds: {
     x: { min: number; max: number }
     y: { min: number; max: number }
@@ -22,12 +23,12 @@ export default class Player {
     y: 4
   }
   private acceleration = {
-    x: 0.1,
-    y: 0.1
+    x: 0.15,
+    y: 0.15
   }
   private deceleration = {
-    x: 0.025,
-    y: 0.025
+    x: 0.05,
+    y: 0.05
   }
 
   constructor (scene: Scene, controls: GameControls) {
@@ -84,6 +85,34 @@ export default class Player {
     }
   }
 
+  private teleport () {
+    let newX = this.sprite.x
+    let newY = this.sprite.y
+    
+    // Set full momentum in teleport direction
+    if (this.controls.left) {
+      newX -= this.teleportDistance
+      this.velocity.x = -this.maxVelocity.x
+    } else if (this.controls.right) {
+      newX += this.teleportDistance
+      this.velocity.x = this.maxVelocity.x
+    }
+
+    if (this.controls.up) {
+      newY -= this.teleportDistance
+      this.velocity.y = -this.maxVelocity.y
+    } else if (this.controls.down) {
+      newY += this.teleportDistance
+      this.velocity.y = this.maxVelocity.y
+    }
+    
+    // Move to new position
+    this.sprite.setPosition(
+      clamp(newX, this.bounds.x.min, this.bounds.x.max),
+      clamp(newY, this.bounds.y.min, this.bounds.y.max)
+    )
+  }
+
   private updatePosition () {
     this.sprite.x += this.velocity.x
     this.sprite.y += this.velocity.y
@@ -93,6 +122,12 @@ export default class Player {
   }
 
   update (_velocity: number) {
+    if (this.controls.space && this.hasEnergy()) {
+      this.teleport()
+      this.store.decreaseEnergy(this.store.debug.hasInfiniteEnergy ? 0 : 1)
+      this.controls.space = false
+    }
+
     this.updateVelocity()
     this.updatePosition()
     this.store.setPlayerPosition(this.sprite.x, this.sprite.y)
@@ -100,7 +135,9 @@ export default class Player {
 
   move (x: number, y: number) {
     this.sprite.setPosition(x, y)
-    this.velocity.x = 0
-    this.velocity.y = 0
+  }
+
+  private hasEnergy () {
+    return this.store.energy > 0 || this.store.debug.hasInfiniteEnergy
   }
 }

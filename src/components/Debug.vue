@@ -55,6 +55,10 @@ const addAsteroid = () => {
   scene.spawnAsteroid()
 }
 
+const disableDebug = () => {
+  debug.value.isEnabled = false
+}
+
 </script>
 
 <template>
@@ -75,6 +79,7 @@ const addAsteroid = () => {
         ref="nyxCard"
       >
         <NyxForm class="debug__card-content">
+          <span class="debug__card-position"><pre>x: {{ pos.x }}</pre><pre>y: {{ pos.y }}</pre></span>
           <NyxFormField label="HP" #default="{ id }">
             <NyxInput class="debug__card-input" :id="id" v-model="computedHp" :type="NyxInputType.Number" :max="100" />
           </NyxFormField>
@@ -90,8 +95,11 @@ const addAsteroid = () => {
           <NyxFormField #default="{ id }">
             <NyxCheckbox :id="id" v-model="debug.isCollisionDisabled" label="Disable Collision" />
           </NyxFormField>
-          <NyxButton class="debug__card-button" @click="addAsteroid">Add Asteroid</NyxButton>
-          <pre>{{ pos }}</pre>
+          <NyxFormField #default="{ id }">
+            <NyxCheckbox :id="id" v-model="debug.hasInfiniteEnergy" label="Infinite Energy" />
+          </NyxFormField>
+          <NyxButton class="debug__card-button" @click="addAsteroid">Spawn Asteroid</NyxButton>
+          <NyxButton class="debug__card-button" @click="disableDebug">Disable debug</NyxButton>
         </NyxForm>
       </NyxCard>
     </Teleport>
@@ -126,13 +134,6 @@ const addAsteroid = () => {
       pointer-events: auto;
     }
 
-    pre {
-      font-size: 12px;
-      background-color: var(--nyx-c-bg);
-      padding: 1rem;
-      border-radius: 0.5rem;
-    }
-
     &-content {
       display: flex;
       flex-direction: column;
@@ -146,6 +147,19 @@ const addAsteroid = () => {
 
     &-input {
       text-align: right;
+    }
+
+    &-position {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 12px;
+      background-color: var(--nyx-c-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+
+      pre {
+        flex: 1;
+      }
     }
   }
 </style>

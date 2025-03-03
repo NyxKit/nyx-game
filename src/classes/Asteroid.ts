@@ -74,7 +74,6 @@ export default class Asteroid {
   destroy () {
     this.sprite.destroy()
     this.onDestroy(this.id)
-    console.log('asteroid destroyed', this.id)
   }
 }
 

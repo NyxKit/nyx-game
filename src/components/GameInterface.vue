@@ -27,6 +27,7 @@ const onClickHp = () => {
   numClicksDebug.value += 1
   if (numClicksDebug.value < 10) return
   debug.value.isEnabled = true
+  numClicksDebug.value = 0
 }
 
 </script>

@@ -11,7 +11,8 @@ export class GameScene extends Scene {
   private store = useGameStore()
   private velocity = 1
   private asteroids: Asteroid[] = []
-
+  private lastSpawnTime = 0
+  
   constructor () {
     super('Game')
   }
@@ -43,20 +44,39 @@ export class GameScene extends Scene {
     this.background?.update(this.velocity)
     this.player?.update(this.velocity)
 
-    // Check for collisions between player and asteroids
+    this.trySpawnAsteroid()
+    const asteroid = this.isCollisionDetected()
+
+    if (asteroid) {
+      this.store.decreaseHp(10)
+      asteroid.destroy()
+    }
+  }
+
+  private trySpawnAsteroid () {
+    const spawnRate = 5000 / this.velocity
+    const timeSinceLastSpawn = this.time.now - this.lastSpawnTime
+
+    if (timeSinceLastSpawn >= spawnRate) {
+      this.lastSpawnTime = this.time.now
+      this.spawnAsteroid()
+    }
+  }
+
+  private isCollisionDetected (): Asteroid | false {
     if (this.player?.sprite && !this.store.debug.isCollisionDisabled) {
       const playerBounds = this.player.sprite.getBounds()
-      
+
       for (const asteroid of this.asteroids) {
         const asteroidBounds = asteroid.sprite.getBounds()
         
         if (Phaser.Geom.Rectangle.Overlaps(playerBounds, asteroidBounds)) {
-          // Player hit asteroid
-          this.store.setGameState(GameState.GameOver)
-          break
+          return asteroid
         }
       }
     }
+
+    return false
   }
 
   spawnAsteroid () {
