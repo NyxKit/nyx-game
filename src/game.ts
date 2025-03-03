@@ -1,5 +1,5 @@
 import { AUTO, Game } from 'phaser'
-import { BootScene, PreloaderScene, GameScene, GameOverScene } from '@/scenes'
+import { BootScene, PreloaderScene, GameScene } from '@/scenes'
 import useClientStore from '@/stores/client'
 
 //  Find out more information about the Game Config at:
@@ -14,8 +14,7 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [
     BootScene,
     PreloaderScene,
-    GameScene,
-    GameOverScene
+    GameScene
   ]
 }
 

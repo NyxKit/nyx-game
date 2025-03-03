@@ -2,7 +2,7 @@ import { Scene } from 'phaser'
 import { EventBus, GameControls, Player, Background, Asteroid } from '@/classes'
 import useGameStore from '@/stores/game'
 import { clamp } from 'nyx-kit/utils'
-import { DefaultPowerUpKey, GameState, PowerUpType } from '@/types'
+import { PowerUpType } from '@/types'
 import type { KeyDict } from 'nyx-kit/types'
 import PowerUp from '@/classes/PowerUp'
 
@@ -18,6 +18,13 @@ export class GameScene extends Scene {
   
   constructor () {
     super('Game')
+  }
+
+  reset () {
+    this.asteroids = []
+    this.powerUps = []
+    this.lastSpawnTime = 0
+    this.scene.restart()
   }
 
   create () {

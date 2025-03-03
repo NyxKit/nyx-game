@@ -9,7 +9,7 @@ export default class Player extends Phaser.GameObjects.Container {
   private controls: GameControls
   private store = useGameStore()
   private speed: number = 2
-  private teleportDistance: number = 150
+  private teleportDistance: number = 250
   private velocity = {
     x: 2,
     y: 2
@@ -31,6 +31,8 @@ export default class Player extends Phaser.GameObjects.Container {
   private beamColor = 0x9F50F0 // Purple color for the beam
   private beamRange = 2000 // How far the beam extends
   private energyDrainRate = 0.1 // Energy drain per frame while shooting
+  private lastTeleportTime = 0
+  private readonly teleportCooldown = 1000
 
   constructor (scene: Scene, controls: GameControls) {
     super(scene, 0, 0)
@@ -131,9 +133,12 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   update (_velocity: number) {
-    if (this.controls.space && this.hasEnergy) {
-      this.teleport()
-      this.store.decreaseEnergy(this.store.debug.hasInfiniteEnergy ? 0 : 1)
+    if (this.controls.space) {
+      const currentTime = this.scene.time.now
+      if (currentTime - this.lastTeleportTime >= this.teleportCooldown) {
+        this.teleport()
+        this.lastTeleportTime = currentTime
+      }
       this.controls.space = false
     }
 
@@ -174,8 +179,8 @@ export default class Player extends Phaser.GameObjects.Container {
     if (!this.beam) return
     const pointer = this.scene.input.activePointer
     const angle = Phaser.Math.Angle.Between(this.beamOrigin.x, this.beamOrigin.y, pointer.worldX, pointer.worldY)
-    const minAngle = -Math.PI / 4 // -45 degrees in radians
-    const maxAngle = Math.PI / 4  // 45 degrees in radians
+    const minAngle = -Math.PI / 3 // -60 degrees in radians
+    const maxAngle = Math.PI / 3  // 60 degrees in radians
     const clampedAngle = clamp(angle, minAngle, maxAngle)
     this.beam.setRotation(clampedAngle)
   }

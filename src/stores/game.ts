@@ -1,4 +1,5 @@
 import { Debug } from '@/classes'
+import type { GameScene } from '@/scenes'
 import { GameState } from '@/types'
 import { clampDecrease, clampIncrease } from '@/utils/number'
 import { defineStore } from 'pinia'
@@ -17,10 +18,10 @@ const useGameStore = defineStore('game', () => {
   const setGameState = (newState: GameState) => state.value = newState
   const increaseScore = (amount: number = 1) => score.value += amount
 
-  const increaseHp = (amount?: number) => hp.value = clampIncrease(hp.value, amount ?? 1, 100)
-  const decreaseHp = (amount?: number) => hp.value = clampDecrease(hp.value, amount ?? 1, 0)
-  const increaseEnergy = (amount?: number) => energy.value = clampIncrease(energy.value, amount ?? 1, 100)
-  const decreaseEnergy = (amount?: number) => energy.value = clampDecrease(energy.value, amount ?? 1, 0)
+  const increaseHp = (amount?: number) => hp.value = clampIncrease(hp.value, amount ?? 1, 0, 100)
+  const decreaseHp = (amount?: number) => hp.value = clampDecrease(hp.value, amount ?? 1, 0, 100)
+  const increaseEnergy = (amount?: number) => energy.value = clampIncrease(energy.value, amount ?? 1, 0, 100)
+  const decreaseEnergy = (amount?: number) => energy.value = clampDecrease(energy.value, amount ?? 1, 0, 100)
 
   const setPreloadProgress = (progress: number) => preloadProgress.value = progress
   const setCurrentScene = (scene: Phaser.Scene) => currentScene.value = scene
@@ -53,6 +54,8 @@ const useGameStore = defineStore('game', () => {
     hp.value = 100
     energy.value = 20
     score.value = 0
+    const scene = currentScene.value as GameScene
+    scene.reset()
   })
 
   return {

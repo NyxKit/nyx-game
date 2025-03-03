@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { Game, MainMenu, Hiscores, Settings, GameMenu, Debug, GameInterface } from '@/components'
+import { Game, MainMenu, Hiscores, Settings, GameMenu, Debug, GameInterface, GameOver } from '@/components'
 import { NyxProgress, NyxModal } from 'nyx-kit/components'
 import useGameStore from './stores/game'
 import useClientStore from './stores/client'
@@ -48,6 +48,7 @@ onBeforeUnmount(() => {
   <GameMenu />
   <Game />
   <GameInterface />
+  <GameOver />
 </template>
 
 <style lang="scss">
