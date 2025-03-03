@@ -58,10 +58,10 @@ export class GameScene extends Scene {
     if (this.player?.beam) {
       const beam = this.player.beam
       const beamLine = new Phaser.Geom.Line(
-        this.player.x,
-        this.player.y,
-        this.player.x + Math.cos(beam.rotation) * beam.width,
-        this.player.y + Math.sin(beam.rotation) * beam.width
+        this.player.beamOrigin.x,
+        this.player.beamOrigin.y,
+        this.player.beamOrigin.x + Math.cos(beam.rotation) * beam.width,
+        this.player.beamOrigin.y + Math.sin(beam.rotation) * beam.width
       )
 
       this.asteroids.forEach((asteroid) => {
@@ -70,7 +70,7 @@ export class GameScene extends Scene {
           asteroid.destroy()
           this.store.increaseScore(50)
         }
-      });
+      })
     }
   }
 

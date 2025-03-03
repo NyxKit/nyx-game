@@ -27,7 +27,7 @@ export default class Player extends Phaser.GameObjects.Container {
     y: 0.05
   }
   public beam: Phaser.GameObjects.Rectangle | null = null;
-  private beamWidth = 24
+  private beamSize = 24
   private beamColor = 0x9F50F0 // Purple color for the beam
   private beamRange = 2000 // How far the beam extends
   private energyDrainRate = 0.1 // Energy drain per frame while shooting
@@ -48,6 +48,17 @@ export default class Player extends Phaser.GameObjects.Container {
     scene.input.on('pointerdown', this.startBeam, this)
     scene.input.on('pointerup', this.stopBeam, this)
     scene.input.on('pointermove', this.updateBeamAngle, this)
+  }
+
+  private get hasEnergy () {
+    return this.store.energy > this.energyDrainRate || this.store.debug.hasInfiniteEnergy
+  }
+
+  public get beamOrigin () {
+    return {
+      x: this.x + this.sprite.width / 2,
+      y: this.y
+    }
   }
 
   private updateVelocity () {
@@ -113,7 +124,7 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   update (_velocity: number) {
-    if (this.controls.space && this.hasEnergy()) {
+    if (this.controls.space && this.hasEnergy) {
       this.teleport()
       this.store.decreaseEnergy(this.store.debug.hasInfiniteEnergy ? 0 : 1)
       this.controls.space = false
@@ -137,14 +148,11 @@ export default class Player extends Phaser.GameObjects.Container {
     this.setPosition(x, y)
   }
 
-  private hasEnergy () {
-    return this.store.energy > this.energyDrainRate || this.store.debug.hasInfiniteEnergy
-  }
-
   private startBeam(): void {
-    if (this.beam || !this.hasEnergy()) return
-    this.beam = this.scene.add.rectangle(this.sprite.width / 2, 0, this.beamRange, this.beamWidth, this.beamColor)
-    this.beam.setOrigin(0, 0.5)
+    if (this.beam || !this.hasEnergy) return
+    this.beam = this.scene.add.rectangle(this.sprite.width / 2, 0, this.beamRange, this.beamSize, this.beamColor)
+      .setOrigin(0, 0.5)
+      .setDepth(1000)
     this.add(this.beam)
     this.updateBeamAngle()
   }
@@ -158,21 +166,17 @@ export default class Player extends Phaser.GameObjects.Container {
   private updateBeamAngle(): void {
     if (!this.beam) return
     const pointer = this.scene.input.activePointer
-    const angle = Phaser.Math.Angle.Between(
-      this.x,
-      this.y,
-      pointer.worldX,
-      pointer.worldY
-    )
-    this.beam.setRotation(angle)
+    const angle = Phaser.Math.Angle.Between(this.beamOrigin.x, this.beamOrigin.y, pointer.worldX, pointer.worldY)
+    const minAngle = -Math.PI / 4 // -45 degrees in radians
+    const maxAngle = Math.PI / 4  // 45 degrees in radians
+    const clampedAngle = clamp(angle, minAngle, maxAngle)
+    this.beam.setRotation(clampedAngle)
   }
 
   destroy(): void {
-    // Clean up event listeners
     this.scene.input.off('pointerdown', this.startBeam, this)
     this.scene.input.off('pointerup', this.stopBeam, this)
     this.scene.input.off('pointermove', this.updateBeamAngle, this)
-    
     super.destroy()
   }
 }
