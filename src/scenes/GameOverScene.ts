@@ -1,4 +1,4 @@
-import { EventBus } from '@/classes/EventBus'
+import { EventBus } from '@/classes'
 import useClientStore from '@/stores/client'
 import { Scene } from 'phaser'
 import { storeToRefs } from 'pinia'

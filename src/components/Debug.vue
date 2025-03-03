@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import useGameStore from '@/stores/game'
 import { storeToRefs } from 'pinia'
-import { NyxButton, NyxCard, NyxForm, NyxFormField, NyxInput, NyxSelect } from 'nyx-kit/components'
+import { NyxButton, NyxCard, NyxForm, NyxFormField, NyxInput, NyxSelect, NyxCheckbox } from 'nyx-kit/components'
 import { NyxPosition, NyxSize, NyxTheme, NyxInputType } from 'nyx-kit/types'
 import { useTeleportPosition } from 'nyx-kit/compositions'
-import { computed, ref, useTemplateRef, type DefineComponent } from 'vue'
+import { computed, ref, toRaw, useTemplateRef, type DefineComponent } from 'vue'
 import { GameState } from '@/types'
+import type { GameScene } from '@/scenes'
 
 const gameStore = useGameStore()
-const { playerPosition, hp, score, state, energy } = storeToRefs(gameStore)
+const { debug, playerPosition, hp, score, state, energy, currentScene } = storeToRefs(gameStore)
 
 const nyxButton = useTemplateRef<DefineComponent>('nyxButton')
 const nyxCard = useTemplateRef<DefineComponent>('nyxCard')
@@ -48,6 +49,12 @@ const pos = computed(() => ({
 
 const gameStateOptions = computed(() => Object.values(GameState).map((state) => ({ label: state, value: state })))
 
+const addAsteroid = () => {
+  const scene = toRaw(currentScene.value) as GameScene
+  if (!scene) return
+  scene.spawnAsteroid()
+}
+
 </script>
 
 <template>
@@ -63,6 +70,7 @@ const gameStateOptions = computed(() => Object.values(GameState).map((state) => 
       <NyxCard
         class="debug__card"
         :class="{ 'debug__card--visible': isDebugPanelVisible }"
+        :size="NyxSize.Large"
         :style="cssVariables"
         ref="nyxCard"
       >
@@ -79,6 +87,10 @@ const gameStateOptions = computed(() => Object.values(GameState).map((state) => 
           <NyxFormField label="State" #default="{ id }" v-if="false">
             <NyxSelect :id="id" v-model="state" :options="gameStateOptions" />
           </NyxFormField>
+          <NyxFormField #default="{ id }">
+            <NyxCheckbox :id="id" v-model="debug.isCollisionDisabled" label="Disable Collision" />
+          </NyxFormField>
+          <NyxButton class="debug__card-button" @click="addAsteroid">Add Asteroid</NyxButton>
           <pre>{{ pos }}</pre>
         </NyxForm>
       </NyxCard>

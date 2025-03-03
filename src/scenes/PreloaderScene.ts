@@ -1,4 +1,4 @@
-import { EventBus } from '@/classes/EventBus'
+import { EventBus } from '@/classes'
 import useGameStore from '@/stores/game'
 import { Scene } from 'phaser'
 

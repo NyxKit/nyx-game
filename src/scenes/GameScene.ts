@@ -1,10 +1,8 @@
 import { Scene } from 'phaser'
-import { EventBus } from '@/classes/EventBus'
-import GameControls from '@/classes/GameControls'
-import Player from '@/classes/Player'
-import Background from '@/classes/Background'
+import { EventBus, GameControls, Player, Background, Asteroid } from '@/classes'
 import useGameStore from '@/stores/game'
 import { clamp } from 'nyx-kit/utils'
+import { GameState } from '@/types'
 
 export class GameScene extends Scene {
   private controls: GameControls | null = null
@@ -12,6 +10,7 @@ export class GameScene extends Scene {
   private player: Player | null = null
   private store = useGameStore()
   private velocity = 1
+  private asteroids: Asteroid[] = []
 
   constructor () {
     super('Game')
@@ -40,7 +39,29 @@ export class GameScene extends Scene {
 
     if (this.store.isPaused) return
 
+    this.asteroids.forEach((asteroid) => asteroid.update())
     this.background?.update(this.velocity)
     this.player?.update(this.velocity)
+
+    // Check for collisions between player and asteroids
+    if (this.player?.sprite && !this.store.debug.isCollisionDisabled) {
+      const playerBounds = this.player.sprite.getBounds()
+      
+      for (const asteroid of this.asteroids) {
+        const asteroidBounds = asteroid.sprite.getBounds()
+        
+        if (Phaser.Geom.Rectangle.Overlaps(playerBounds, asteroidBounds)) {
+          // Player hit asteroid
+          this.store.setGameState(GameState.GameOver)
+          break
+        }
+      }
+    }
+  }
+
+  spawnAsteroid () {
+    const onDestroy = (id: string) => this.asteroids = this.asteroids.filter((asteroid) => asteroid.id !== id)
+    const asteroid = new Asteroid(this, { speed: this.velocity, onDestroy })
+    this.asteroids.push(asteroid)
   }
 }

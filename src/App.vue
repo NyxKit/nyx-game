@@ -8,7 +8,7 @@ import useClientStore from './stores/client'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useInterfaceStore from './stores/interface'
 
-const { isDebug, isInMenu, isPreloading, preloadProgress } = storeToRefs(useGameStore())
+const { debug, isInMenu, isPreloading, preloadProgress } = storeToRefs(useGameStore())
 const { setScreenSize } = useClientStore()
 const { isSettingsVisible } = storeToRefs(useInterfaceStore())
 
@@ -44,7 +44,7 @@ onBeforeUnmount(() => {
     </div>
   </transition>
   
-  <Debug v-if="isDebug" />
+  <Debug v-if="debug.isEnabled" />
   <GameMenu />
   <Game />
   <GameInterface />

@@ -1,11 +1,11 @@
-import type { GameScene } from '@/scenes'
+import { Debug } from '@/classes'
 import { GameState } from '@/types'
 import { defineStore } from 'pinia'
-import { computed, ref, toRaw, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const useGameStore = defineStore('game', () => {
   const state = ref(GameState.Preload)
-  const isDebug = ref(true)
+  const debug = ref(new Debug())
   const preloadProgress = ref(0)
   const currentScene = ref<Phaser.Scene>()
   const playerPosition = ref({ x: 0, y: 0 })
@@ -53,12 +53,12 @@ const useGameStore = defineStore('game', () => {
 
   return {
     currentScene,
+    debug,
     decrementEnergy,
     decrementHp,
     energy,
     hp,
     incrementScore,
-    isDebug,
     isGameOver,
     isInMenu,
     isPaused,

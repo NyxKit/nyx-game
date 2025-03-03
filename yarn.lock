@@ -2688,9 +2688,9 @@ nwsapi@^2.2.16:
   integrity sha512-F1I/bimDpj3ncaNDhfyMWuFqmQDBwDB0Fogc2qpL3BWvkQteFD/8BzWuIRl83rq0DXfm8SGt/HFhLXZyljTXcQ==
 
 nyx-kit@^1.0.0:
-  version "1.1.11"
-  resolved "https://registry.yarnpkg.com/nyx-kit/-/nyx-kit-1.1.11.tgz#abc5ff8bde0356372540eab20d981f129af7e4e5"
-  integrity sha512-IHADpP4x2cR0hkiAAW1f7Y9xRAYCSBrC/CP14SmOnGWbTnidW9avFBLKQ6aoZMdVn07i0pAEKBzF5ckCqWQjUw==
+  version "1.1.12"
+  resolved "https://registry.yarnpkg.com/nyx-kit/-/nyx-kit-1.1.12.tgz#a791274dda353d95dc2be05e8ab07502010d6715"
+  integrity sha512-8OZVu94kqeK5cwHkj5x8MfL7NG9qWYmkJMlAgZhH+0h09vvqsKEsiFzQkHE+XKDnk4qLRU8Ac+CwLXR4ATKjxg==
   dependencies:
     vue "^3.5.13"
 
@@ -3325,6 +3325,11 @@ util-deprecate@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
+
+uuid@^11.1.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.0.tgz#9549028be1753bb934fc96e2bca09bb4105ae912"
+  integrity sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==
 
 vite-hot-client@^0.2.4:
   version "0.2.4"
