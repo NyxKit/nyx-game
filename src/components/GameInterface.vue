@@ -5,7 +5,7 @@ import { NyxProgress } from 'nyx-kit/components'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import { storeToRefs } from 'pinia'
 
-const { hp, energy, score, isPlaying, isPaused, isDebug } = storeToRefs(useGameStore())
+const { hp, energy, score, isPlaying, isPaused, debug } = storeToRefs(useGameStore())
 
 const interval = ref<number | null>(null)
 const numClicksDebug = ref(0)
@@ -23,10 +23,10 @@ onBeforeUnmount(() => {
 })
 
 const onClickHp = () => {
-  if (isDebug.value) return
+  if (debug.value.isEnabled) return
   numClicksDebug.value += 1
   if (numClicksDebug.value < 10) return
-  isDebug.value = true
+  debug.value.isEnabled = true
 }
 
 </script>
