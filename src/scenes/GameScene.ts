@@ -9,7 +9,7 @@ import PowerUp from '@/classes/PowerUp'
 export class GameScene extends Scene {
   private controls: GameControls | null = null
   private background: Background | null = null
-  private player: Player | null = null
+  public player: Player | null = null
   private store = useGameStore()
   private velocity = 1
   private asteroids: Asteroid[] = []
@@ -75,35 +75,27 @@ export class GameScene extends Scene {
     }
 
     // Check beam collision with asteroids
-    // if (this.player?.beam?.isActive) {
-    //   const beam = this.player.beam
-    //   const beamLine = new Phaser.Geom.Line(
-    //     this.player.beamOrigin.x,
-    //     this.player.beamOrigin.y,
-    //     this.player.beamOrigin.x + Math.cos(beam.sprite.rotation) * beam.sprite.displayHeight,
-    //     this.player.beamOrigin.y + Math.sin(beam.sprite.rotation) * beam.sprite.displayWidth
-    //   )
-    //   this.add.line(0, 0, 
-    //     this.player.beamOrigin.x,
-    //     this.player.beamOrigin.y,
-    //     this.player.beamOrigin.x + Math.cos(beam.sprite.rotation) * beam.sprite.displayHeight,
-    //     this.player.beamOrigin.y + Math.sin(beam.sprite.rotation) * beam.sprite.displayWidth,
-    //     0xff0000
-    //   ).setDepth(2000)
+    if (this.player?.beam?.isActive) {
+      const beamLine = this.player.beam.line
+      this.add.line(0, 0, 
+        beamLine.x1,
+        beamLine.y1,
+        beamLine.x2,
+        beamLine.y2,
+        0xff0000
+      ).setDepth(2000)
 
-    //   console.log(beamLine, this.player.beamOrigin, beam.sprite.rotation, beam.sprite.displayWidth, beam.sprite.displayHeight)
-
-    //   this.asteroids.forEach((asteroid) => {
-    //     const asteroidBounds = asteroid.sprite.getBounds()
-    //     if (Phaser.Geom.Intersects.LineToRectangle(beamLine, asteroidBounds)) {
-    //       console.log('>>>>>>>>>>> hit')
-    //       asteroid.hp -= 1
-    //       if (asteroid.hp <= 0) {
-    //         asteroid.destroy(true)
-    //       }
-    //     }
-    //   })
-    // }
+      this.asteroids.forEach((asteroid) => {
+        const asteroidBounds = asteroid.sprite.getBounds()
+        if (Phaser.Geom.Intersects.LineToRectangle(beamLine, asteroidBounds)) {
+          console.log('>>>>>>>>>>> hit')
+          asteroid.hp -= 1
+          if (asteroid.hp <= 0) {
+            asteroid.destroy(true)
+          }
+        }
+      })
+    }
   }
 
   private trySpawnAsteroid () {

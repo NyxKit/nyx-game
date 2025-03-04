@@ -3,10 +3,11 @@ import type GameControls from './GameControls'
 import { clamp } from 'nyx-kit/utils'
 import useGameStore from '@/stores/game'
 import Beam from './Beam'
+import type { GameScene } from '@/scenes'
 
 export default class Player extends Phaser.GameObjects.Container {
   public sprite: GameObjects.Image
-  public scene: Scene
+  public scene: GameScene
   private controls: GameControls
   private store = useGameStore()
   private speed: number = 2
@@ -32,7 +33,7 @@ export default class Player extends Phaser.GameObjects.Container {
   private lastTeleportTime = 0
   private readonly teleportCooldown = 1000
 
-  constructor (scene: Scene, controls: GameControls) {
+  constructor (scene: GameScene, controls: GameControls) {
     super(scene, 0, 0)
     this.scene = scene
     this.controls = controls
@@ -69,8 +70,8 @@ export default class Player extends Phaser.GameObjects.Container {
 
   public get beamOrigin () {
     return {
-      x: this.x + this.sprite.width / 2,
-      y: this.y
+      x: this.x,
+      y: this.y + this.sprite.height / 2
     }
   }
 
