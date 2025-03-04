@@ -2,6 +2,7 @@ import { Scene, GameObjects, Tweens } from 'phaser'
 import type GameControls from './GameControls'
 import { clamp } from 'nyx-kit/utils'
 import useGameStore from '@/stores/game'
+import Beam from './Beam'
 
 export default class Player extends Phaser.GameObjects.Container {
   public sprite: GameObjects.Image
@@ -26,10 +27,7 @@ export default class Player extends Phaser.GameObjects.Container {
     x: 0.1,
     y: 0.1
   }
-  public beam: Phaser.GameObjects.TileSprite | null = null
-  private beamSize = 24
-  private beamColor = 0x9F50F0 // Purple color for the beam
-  private beamRange = 2000 // How far the beam extends
+  public beam: Beam | null = null
   private energyDrainRate = 0.1 // Energy drain per frame while shooting
   private lastTeleportTime = 0
   private readonly teleportCooldown = 1000
@@ -39,7 +37,13 @@ export default class Player extends Phaser.GameObjects.Container {
     this.scene = scene
     this.controls = controls
 
-    // Create the player sprite
+    const playerSpriteSrc = this.scene.textures.get('player').getSourceImage()
+
+    // Create the beam first so it renders behind the player
+    this.beam = new Beam(this.scene, { x: playerSpriteSrc.width / 2, y: 0 })
+    this.add(this.beam.sprite)
+
+    // Create the player sprite after so it renders on top
     this.sprite = scene.add.image(0, 0, 'player')
     this.add(this.sprite)
 
@@ -47,9 +51,9 @@ export default class Player extends Phaser.GameObjects.Container {
     scene.add.existing(this)
 
     // Add mouse input handling
-    scene.input.on('pointerdown', this.startBeam, this)
-    scene.input.on('pointerup', this.stopBeam, this)
-    scene.input.on('pointermove', this.updateBeamAngle, this)
+    scene.input.on('pointerdown', this.createBeam, this)
+    scene.input.on('pointerup', this.destroyBeam, this)
+    scene.input.on('pointermove', this.updateBeam, this)
   }
 
   private get hasEnergy () {
@@ -151,7 +155,7 @@ export default class Player extends Phaser.GameObjects.Container {
     if (this.store.energy > 0 && !this.store.debug.hasInfiniteEnergy) {
       this.store.energy -= this.energyDrainRate
       if (this.store.energy <= 0) {
-        this.stopBeam()
+        this.beam.destroy()
       }
     }
   }
@@ -160,43 +164,30 @@ export default class Player extends Phaser.GameObjects.Container {
     this.setPosition(x, y)
   }
 
-  private startBeam(): void {
-    if (this.beam || !this.hasEnergy) return
-    
-    // Get beam texture and scale it to match beam height
-    const beamTexture = this.scene.textures.get('beam')
-    const textureHeight = beamTexture.source[0].height
-    const scaleY = this.beamSize / textureHeight
-
-    this.beam = this.scene.add.tileSprite(this.sprite.width / 2, 0, this.beamRange, this.beamSize, 'beam')
-      .setOrigin(0, 0.5)
-      .setDepth(1000)
-      .setScale(1, scaleY)
-    
-    this.add(this.beam)
-    this.updateBeamAngle()
-  }
-
-  private stopBeam(): void {
-    if (!this.beam) return
-    this.beam.destroy()
-    this.beam = null
-  }
-
-  private updateBeamAngle(): void {
-    if (!this.beam) return
-    const pointer = this.scene.input.activePointer
-    const angle = Phaser.Math.Angle.Between(this.beamOrigin.x, this.beamOrigin.y, pointer.worldX, pointer.worldY)
-    const minAngle = -Math.PI / 3 // -60 degrees in radians
-    const maxAngle = Math.PI / 3  // 60 degrees in radians
-    const clampedAngle = clamp(angle, minAngle, maxAngle)
-    this.beam.setRotation(clampedAngle)
-  }
-
   destroy(): void {
-    this.scene.input.off('pointerdown', this.startBeam, this)
-    this.scene.input.off('pointerup', this.stopBeam, this)
-    this.scene.input.off('pointermove', this.updateBeamAngle, this)
+    if (this.beam) {
+      this.scene.input.off('pointerdown', this.createBeam, this)
+      this.scene.input.off('pointerup', this.destroyBeam, this)
+      this.scene.input.off('pointermove', this.updateBeam, this)
+      this.beam.destroy()
+    }
+
     super.destroy()
+  }
+
+  private createBeam () {
+    console.log('createBeam', {
+      player: this.currentPosition,
+      beam: { x: this.beam?.sprite.x, y: this.beam?.sprite.y }
+    })
+    this.beam?.start(this.beamOrigin)
+  }
+
+  private destroyBeam () {
+    this.beam?.end()
+  }
+
+  private updateBeam () {
+    this.beam?.update(this.beamOrigin)
   }
 }

@@ -24,7 +24,7 @@ export class GameScene extends Scene {
     this.asteroids = []
     this.powerUps = []
     this.lastSpawnTime = 0
-    this.scene.restart()
+    // this.scene.restart()
   }
 
   create () {
@@ -37,32 +37,6 @@ export class GameScene extends Scene {
     this.player = new Player(this, this.controls)
     this.player.setDepth(1000)
     this.player.setPosition(200, this.scale.height / 2)
-
-    // this.anims.create({
-    //   key: 'beam',
-    //   frames: this.anims.generateFrameNames('beam', {
-    //     prefix: 'start',
-    //     start: 1,
-    //     end: 8,
-    //   }),
-    //   frameRate: 10,
-    // })
-
-    // const beam = this.add.sprite(100, 200, 'beam', 'start1').setScale(2)
-    // beam.setOrigin(0, 0.5)
-    // beam.setDepth(100000)
-
-    // beam.anims.create({
-    //   key: 'active',
-    //   frames: this.anims.generateFrameNames('beam', {
-    //     prefix: 'active',
-    //     start: 1,
-    //     end: 8,
-    //   }),
-    //   frameRate: 10,
-    // })
-    // console.log('beam', beam.anims.get('active'))
-    // beam.anims.play('active')
 
     EventBus.emit('current-scene-ready', this)
   }
@@ -101,25 +75,35 @@ export class GameScene extends Scene {
     }
 
     // Check beam collision with asteroids
-    if (this.player?.beam) {
-      const beam = this.player.beam
-      const beamLine = new Phaser.Geom.Line(
-        this.player.beamOrigin.x,
-        this.player.beamOrigin.y,
-        this.player.beamOrigin.x + Math.cos(beam.rotation) * beam.width,
-        this.player.beamOrigin.y + Math.sin(beam.rotation) * beam.width
-      )
+    // if (this.player?.beam?.isActive) {
+    //   const beam = this.player.beam
+    //   const beamLine = new Phaser.Geom.Line(
+    //     this.player.beamOrigin.x,
+    //     this.player.beamOrigin.y,
+    //     this.player.beamOrigin.x + Math.cos(beam.sprite.rotation) * beam.sprite.displayHeight,
+    //     this.player.beamOrigin.y + Math.sin(beam.sprite.rotation) * beam.sprite.displayWidth
+    //   )
+    //   this.add.line(0, 0, 
+    //     this.player.beamOrigin.x,
+    //     this.player.beamOrigin.y,
+    //     this.player.beamOrigin.x + Math.cos(beam.sprite.rotation) * beam.sprite.displayHeight,
+    //     this.player.beamOrigin.y + Math.sin(beam.sprite.rotation) * beam.sprite.displayWidth,
+    //     0xff0000
+    //   ).setDepth(2000)
 
-      this.asteroids.forEach((asteroid) => {
-        const asteroidBounds = asteroid.sprite.getBounds()
-        if (Phaser.Geom.Intersects.LineToRectangle(beamLine, asteroidBounds)) {
-          asteroid.hp -= 1
-          if (asteroid.hp <= 0) {
-            asteroid.destroy(true)
-          }
-        }
-      })
-    }
+    //   console.log(beamLine, this.player.beamOrigin, beam.sprite.rotation, beam.sprite.displayWidth, beam.sprite.displayHeight)
+
+    //   this.asteroids.forEach((asteroid) => {
+    //     const asteroidBounds = asteroid.sprite.getBounds()
+    //     if (Phaser.Geom.Intersects.LineToRectangle(beamLine, asteroidBounds)) {
+    //       console.log('>>>>>>>>>>> hit')
+    //       asteroid.hp -= 1
+    //       if (asteroid.hp <= 0) {
+    //         asteroid.destroy(true)
+    //       }
+    //     }
+    //   })
+    // }
   }
 
   private trySpawnAsteroid () {

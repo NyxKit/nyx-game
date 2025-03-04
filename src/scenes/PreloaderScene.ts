@@ -36,10 +36,9 @@ export class PreloaderScene extends Scene {
     this.load.image('powerup/blue1', 'powerup/blue1.png')
     this.load.image('powerup/blue2', 'powerup/blue2.png')
 
-    // this.load.json('beam-config', 'beam.json')
-    // this.load.spritesheet('beam', 'beam.png', { frameWidth: 64, frameHeight: 64 })
+    this.load.spritesheet('beam', 'beam.png', { frameWidth: 64, frameHeight: 64 })
 
-    this.load.atlas('beam', 'beam.png', 'beam.json')
+    // this.load.atlas('beam', 'beam.png', 'beam.json')
   }
 
   create () {

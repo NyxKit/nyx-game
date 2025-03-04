@@ -12,3 +12,17 @@ export const createTiledImage = (
     .setAlpha(options?.alpha ?? 1)
 }
 
+export const createSpriteAnimation = (
+  anims: Phaser.Animations.AnimationManager,
+  key: string,
+  src: string,
+  frames: number[],
+  repeat: number = -1,
+) => {
+  return anims.create({
+    key,
+    frames: anims.generateFrameNames(src, { frames }),
+    frameRate: 10,
+    repeat: repeat
+  })
+}

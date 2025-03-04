@@ -4,6 +4,7 @@ import Player from './Player'
 import Background from './Background'
 import GameControls from './GameControls'
 import EventBus from './EventBus'
+import Beam from './Beam'
 
 export {
   Debug,
@@ -11,5 +12,6 @@ export {
   Player,
   Background,
   GameControls,
-  EventBus
+  EventBus,
+  Beam
 }
