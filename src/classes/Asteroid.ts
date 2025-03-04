@@ -12,7 +12,8 @@ interface AsteroidOptions {
 export default class Asteroid implements AsteroidOptions {
   public id: string
   public sprite: GameObjects.Image
-  public hp: number = 1
+  private _hp: number = 1
+  private maxHp: number = 1
   public speed = 3
   public isLarge = false
   public onDestroy: OnDestroyEvent
@@ -29,8 +30,35 @@ export default class Asteroid implements AsteroidOptions {
     this.isLarge = options.isLarge ?? false
     this.size = this.isLarge ? getRandomBetween(2, 4, 0.5) * 3 : getRandomBetween(2, 4, 0.5)
     this.hp = this.isLarge ? 25 : 10
+    this.maxHp = this.hp
     this.sprite = this.create()
     this.onDestroy = options.onDestroy
+  }
+
+  public get hp () {
+    return this._hp
+  }
+
+  public set hp (value: number) {
+    this._hp = value
+    if (!this.sprite) return
+    // Calculate red tint based on remaining HP percentage
+    const hpPercentage = this._hp / this.maxHp
+    // const redTint = 0x7B3636 // Dark red blended with black
+    // const yellowTint = 0xFFFFC0 // Pale yellow blended with white
+    const orangeTint = 0xFFD580 // Soft orange-yellow blend
+    const whiteTint = 0xFFFFFF // Base white color
+    
+    // Blend between white and red based on HP
+    const tint = Phaser.Display.Color.Interpolate.ColorWithColor(
+      Phaser.Display.Color.ValueToColor(orangeTint),
+      Phaser.Display.Color.ValueToColor(whiteTint), 
+      100,
+      hpPercentage * 100
+    )
+
+    // Apply the tint to the sprite
+    this.sprite.setTint(Phaser.Display.Color.GetColor(tint.r, tint.g, tint.b))
   }
 
   create () {
@@ -82,7 +110,14 @@ export default class Asteroid implements AsteroidOptions {
   destroy (isDestroyedByPlayer: boolean = false) {
     const position = { x: this.sprite.x, y: this.sprite.y }
     this.onDestroy(this.id, { isDestroyedByPlayer, position, size: this.size, isLarge: this.isLarge })
+    const { x, y } = { x: this.sprite.x, y: this.sprite.y }
     this.sprite.destroy()
+
+    const explosion = this.scene.add.sprite(x, y, 'explosion/md')
+      .setScale(this.size * 0.5)
+      .setDepth(100)
+    explosion.anims.play('explosion/md')
+      .once('animationcomplete', () => explosion.destroy())
   }
 }
 

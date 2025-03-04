@@ -5,6 +5,7 @@ import { clamp } from 'nyx-kit/utils'
 import { PowerUpType } from '@/types'
 import type { KeyDict } from 'nyx-kit/types'
 import PowerUp from '@/classes/PowerUp'
+import { createSpriteAnimation } from '@/utils'
 
 export class GameScene extends Scene {
   private controls: GameControls | null = null
@@ -38,10 +39,14 @@ export class GameScene extends Scene {
     this.player.setDepth(1000)
     this.player.setPosition(200, this.scale.height / 2)
 
+    // createSpriteAnimation(this.anims, 'explosion-sm', 'explosion/sm', [0, 1, 2, 3], 0)
+    createSpriteAnimation(this.anims, 'explosion/md', 'explosion/md', [0, 1, 2, 3], 0) 
+    // createSpriteAnimation(this.anims, 'explosion-lg', 'explosion/lg', [0, 1, 2, 3], 0)
+
     EventBus.emit('current-scene-ready', this)
   }
 
-  update () {
+  update (time: number, delta: number) {
     if (!this.player || !this.background) return
 
     this.velocity = 1 + Math.log10(Math.max(1, this.store.score / 1000)) * 2 + Math.pow(this.store.score / 1000, 1.1)
@@ -59,7 +64,7 @@ export class GameScene extends Scene {
     this.asteroids.forEach((asteroid) => asteroid.update())
     this.powerUps.forEach((powerUp) => powerUp.update(playerPos))
     this.background.update(this.velocity)
-    this.player.update(this.velocity)
+    this.player.update(this.velocity, time, delta)
 
     this.trySpawnAsteroid()
     const asteroid = this.isCollisionAsteroidDetected()
@@ -76,19 +81,31 @@ export class GameScene extends Scene {
 
     // Check beam collision with asteroids
     if (this.player?.beam?.isActive) {
-      const beamLine = this.player.beam.line
-      this.add.line(0, 0, 
-        beamLine.x1,
-        beamLine.y1,
-        beamLine.x2,
-        beamLine.y2,
-        0xff0000
-      ).setDepth(2000)
+      const beam = this.player.beam.sprite
+      const beamBounds = this.player.beam.bounds
 
+      // Calculate beam line starting from player position
+      const beamLine = new Phaser.Geom.Line(
+        this.player.x + (this.player.sprite.width / 2) - 50,
+        this.player.y,
+        this.player.x + Math.cos(beam.rotation) * beam.displayWidth,
+        this.player.y + Math.sin(beam.rotation) * beam.displayWidth
+      )
+
+      // Draw debug line
+      // this.line = this.add.line(
+      //   0,
+      //   0,
+      //   beamLine.x1,
+      //   beamLine.y1,
+      //   beamLine.x2, 
+      //   beamLine.y2,
+      //   0xff0000
+      // ).setOrigin(0, 0).setDepth(2000)
+      
       this.asteroids.forEach((asteroid) => {
         const asteroidBounds = asteroid.sprite.getBounds()
         if (Phaser.Geom.Intersects.LineToRectangle(beamLine, asteroidBounds)) {
-          console.log('>>>>>>>>>>> hit')
           asteroid.hp -= 1
           if (asteroid.hp <= 0) {
             asteroid.destroy(true)

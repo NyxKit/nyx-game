@@ -18,17 +18,19 @@ export class PreloaderScene extends Scene {
     this.load.setPath('assets')
     this.load.image('player', 'whale.png')
     this.load.image('blackhole', 'blackhole.png')
-    // this.load.image('beam', 'beam.png')
+    
     this.load.image('background/stars', 'background/stars.png')
     this.load.image('background/dust', 'background/dust.png')
     this.load.image('background/nebulae', 'background/nebulae.png')
     this.load.image('background/planets', 'background/planets.png')
+
     this.load.image('asteroid/1', 'asteroid/1.png')
     this.load.image('asteroid/2', 'asteroid/2.png')
     this.load.image('asteroid/3', 'asteroid/3.png')
     this.load.image('asteroid/4', 'asteroid/4.png')
     this.load.image('asteroid/5', 'asteroid/5.png')
     this.load.image('asteroid/6', 'asteroid/6.png')
+
     this.load.image('powerup/blue0', 'powerup/pink0.png')
     this.load.image('powerup/pink0', 'powerup/pink0.png')
     this.load.image('powerup/pink1', 'powerup/pink1.png')
@@ -37,6 +39,10 @@ export class PreloaderScene extends Scene {
     this.load.image('powerup/blue2', 'powerup/blue2.png')
 
     this.load.spritesheet('beam', 'beam.png', { frameWidth: 64, frameHeight: 64 })
+
+    // this.load.spritesheet('explosion/sm', 'explosion/sm.png', { frameWidth: 16, frameHeight: 16 })
+    this.load.spritesheet('explosion/md', 'explosion/md.png', { frameWidth: 32, frameHeight: 32 })
+    // this.load.spritesheet('explosion/lg', 'explosion/lg.png', { frameWidth: 48, frameHeight: 48 })
 
     // this.load.atlas('beam', 'beam.png', 'beam.json')
   }

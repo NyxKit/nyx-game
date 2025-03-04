@@ -68,13 +68,6 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
-  public get beamOrigin () {
-    return {
-      x: this.x,
-      y: this.y + this.sprite.height / 2
-    }
-  }
-
   private updateVelocity () {
     if (this.controls.left) {
       this.velocity.x = Math.max(this.velocity.x - this.acceleration.x, -this.maxVelocity.x)
@@ -137,7 +130,7 @@ export default class Player extends Phaser.GameObjects.Container {
     this.y = clamp(this.y, 0, this.scene.scale.height - this.sprite.height)
   }
 
-  update (_velocity: number) {
+  update (_velocity: number, time: number, delta: number) {
     if (this.controls.space) {
       const currentTime = this.scene.time.now
       if (currentTime - this.lastTeleportTime >= this.teleportCooldown) {
@@ -152,7 +145,8 @@ export default class Player extends Phaser.GameObjects.Container {
     this.store.setPlayerPosition(this.x, this.y)
 
     // Handle beam energy drain
-    if (!this.beam) return
+    if (!this.beam || !this.beam.isActive) return
+    this.beam.handleScaling()
     if (this.store.energy > 0 && !this.store.debug.hasInfiniteEnergy) {
       this.store.energy -= this.energyDrainRate
       if (this.store.energy <= 0) {
@@ -177,11 +171,7 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   private createBeam () {
-    console.log('createBeam', {
-      player: this.currentPosition,
-      beam: { x: this.beam?.sprite.x, y: this.beam?.sprite.y }
-    })
-    this.beam?.start(this.beamOrigin)
+    this.beam?.start(this.currentPosition)
   }
 
   private destroyBeam () {
@@ -189,6 +179,6 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   private updateBeam () {
-    this.beam?.update(this.beamOrigin)
+    this.beam?.update(this.currentPosition)
   }
 }
