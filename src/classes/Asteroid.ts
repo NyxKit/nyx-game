@@ -41,6 +41,10 @@ export default class Asteroid implements AsteroidOptions {
 
   public set hp (value: number) {
     this._hp = value
+    if (value <= 0) {
+      this.destroy(true)
+      return
+    }
     if (!this.sprite) return
     // Calculate red tint based on remaining HP percentage
     const hpPercentage = this._hp / this.maxHp
@@ -101,8 +105,10 @@ export default class Asteroid implements AsteroidOptions {
     this.sprite.y += this.velocity.y
     this.sprite.rotation += 0.01
 
-    const shouldDestroy = this.sprite.x < -this.sprite.width
-      || this.sprite.y > this.scene.scale.height + this.sprite.height
+    const padding = 50
+
+    const shouldDestroy = this.sprite.x < -this.sprite.width - padding
+      || this.sprite.y > this.scene.scale.height + this.sprite.height + padding
 
     if (shouldDestroy) this.destroy()
   }
@@ -113,7 +119,6 @@ export default class Asteroid implements AsteroidOptions {
     const { x, y } = { x: this.sprite.x, y: this.sprite.y }
     this.sprite.destroy()
 
-    if (isDestroyedByPlayer) return
     const explosion = this.scene.add.sprite(x, y, 'explosion/md')
       .setScale(this.size * 0.5)
       .setDepth(100)

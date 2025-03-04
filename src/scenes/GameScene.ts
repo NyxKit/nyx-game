@@ -22,10 +22,12 @@ export class GameScene extends Scene {
   }
 
   reset () {
+    this.asteroids.forEach((asteroid) => asteroid.destroy())
     this.asteroids = []
+    this.powerUps.forEach((powerUp) => powerUp.destroy())
     this.powerUps = []
     this.lastSpawnTime = 0
-    // this.scene.restart()
+    this.scene.restart()
   }
 
   create () {
@@ -105,9 +107,6 @@ export class GameScene extends Scene {
         const asteroidBounds = asteroid.sprite.getBounds()
         if (Phaser.Geom.Intersects.LineToRectangle(beamLine, asteroidBounds)) {
           asteroid.hp -= this.player?.damage ?? 1
-          if (asteroid.hp <= 0) {
-            asteroid.destroy(true)
-          }
         }
       })
     }
