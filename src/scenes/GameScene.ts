@@ -186,7 +186,6 @@ export class GameScene extends Scene {
   }
 
   private onDestroyPowerUp (id: string, options?: KeyDict<any>) {
-    console.log('onDestroyPowerUp', id, options)
     this.powerUps = this.powerUps.filter((powerUp) => powerUp.id !== id)
     if (!options?.isDestroyedByPlayer) return
     switch (options.type) {

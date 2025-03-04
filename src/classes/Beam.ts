@@ -74,7 +74,6 @@ export default class Beam {
     const scaleDuration = 500
     const scaleProgress = Math.min(1, (this.scene.time.now - this.beamStartTime) / scaleDuration)
     const beamScale = this.scale + (maxScale - this.scale) * scaleProgress
-    console.log('beamScale', beamScale, this.beamStartTime, this.scene.time.now)
     this.sprite.setScale(beamScale, this.scale)
   }
 }
