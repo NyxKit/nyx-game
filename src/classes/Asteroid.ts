@@ -28,8 +28,8 @@ export default class Asteroid implements AsteroidOptions {
     this.scene = scene
     this.speed *= options.speed ?? 1
     this.isLarge = options.isLarge ?? false
-    this.size = this.isLarge ? getRandomBetween(2, 4, 0.5) * 3 : getRandomBetween(2, 4, 0.5)
-    this.hp = this.isLarge ? 25 : 10
+    this.size = this.isLarge ? getRandomBetween(2, 4, 0.5) * 2 : getRandomBetween(2, 4, 0.5)
+    this.hp = this.isLarge ? 50 : 25
     this.maxHp = this.hp
     this.sprite = this.create()
     this.onDestroy = options.onDestroy

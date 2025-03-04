@@ -144,14 +144,11 @@ export default class Player extends Phaser.GameObjects.Container {
     this.updatePosition()
     this.store.setPlayerPosition(this.x, this.y)
 
-    // Handle beam energy drain
-    if (!this.beam || !this.beam.isActive) return
-    this.beam.handleScaling()
-    if (this.store.energy > 0 && !this.store.debug.hasInfiniteEnergy) {
+    if (this.hasEnergy && this.beam?.isActive) {
+      this.beam.handleScaling()
       this.store.energy -= this.energyDrainRate
-      if (this.store.energy <= 0) {
-        this.beam.destroy()
-      }
+    } else if (this.beam?.isActive) {
+      this.beam.end()
     }
   }
 
@@ -171,14 +168,17 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   private createBeam () {
+    if (!this.hasEnergy) return
     this.beam?.start(this.currentPosition)
   }
 
   private destroyBeam () {
+    if (!this.hasEnergy) return
     this.beam?.end()
   }
 
   private updateBeam () {
+    if (!this.hasEnergy) return
     this.beam?.update(this.currentPosition)
   }
 }
