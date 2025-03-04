@@ -13,7 +13,7 @@ export default class Beam {
   public sprite: GameObjects.Sprite
   public isActive: boolean = false
   private beamStartTime: number = 0
-  private scale: number = 3
+  private scaleX: number = 3
 
   constructor (scene: GameScene, origin: { x: number, y: number }) {
     this.scene = scene
@@ -34,11 +34,15 @@ export default class Beam {
     return new Phaser.Geom.Rectangle(minX, minY, maxX - minX, maxY - minY)
   }
 
+  get scaleY () {
+    return clamp(this.scene.player?.damage ?? 1, 1, 4)
+  }
+
   start (pos: { x: number, y: number }) {
     this.isActive = true
     this.sprite
       .setAlpha(1)
-      .setScale(this.scale, this.scale)
+      .setScale(this.scaleX, this.scaleY)
     if (!this.sprite.anims) return
     this.sprite.anims.play('beam-start')
       .once('animationcomplete', () => this.isActive && this.sprite.anims.play('beam-active'))
@@ -60,7 +64,7 @@ export default class Beam {
     this.isActive = false
     this.sprite.anims.stop()
     this.sprite.anims.play('beam-end')
-      .once('animationcomplete', () => this.sprite.setScale(this.scale, this.scale))
+      .once('animationcomplete', () => this.sprite.setScale(this.scaleX, this.scaleY))
     this.beamStartTime = 0
   }
 
@@ -73,7 +77,7 @@ export default class Beam {
     const maxScale = 40
     const scaleDuration = 500
     const scaleProgress = Math.min(1, (this.scene.time.now - this.beamStartTime) / scaleDuration)
-    const beamScale = this.scale + (maxScale - this.scale) * scaleProgress
-    this.sprite.setScale(beamScale, this.scale)
+    const beamScale = this.scaleX + (maxScale - this.scaleX) * scaleProgress
+    this.sprite.setScale(beamScale, this.scaleY)
   }
 }

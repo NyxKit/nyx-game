@@ -11,8 +11,8 @@ export class GameScene extends Scene {
   private controls: GameControls | null = null
   private background: Background | null = null
   public player: Player | null = null
+  public velocity = 1
   private store = useGameStore()
-  private velocity = 1
   private asteroids: Asteroid[] = []
   private lastSpawnTime = 0
   private powerUps: PowerUp[] = []
@@ -82,8 +82,6 @@ export class GameScene extends Scene {
     // Check beam collision with asteroids
     if (this.player?.beam?.isActive) {
       const beam = this.player.beam.sprite
-      const beamBounds = this.player.beam.bounds
-
       // Calculate beam line starting from player position
       const beamLine = new Phaser.Geom.Line(
         this.player.x + (this.player.sprite.width / 2) - 50,
@@ -106,7 +104,7 @@ export class GameScene extends Scene {
       this.asteroids.forEach((asteroid) => {
         const asteroidBounds = asteroid.sprite.getBounds()
         if (Phaser.Geom.Intersects.LineToRectangle(beamLine, asteroidBounds)) {
-          asteroid.hp -= 1
+          asteroid.hp -= this.player?.damage ?? 1
           if (asteroid.hp <= 0) {
             asteroid.destroy(true)
           }

@@ -113,6 +113,7 @@ export default class Asteroid implements AsteroidOptions {
     const { x, y } = { x: this.sprite.x, y: this.sprite.y }
     this.sprite.destroy()
 
+    if (isDestroyedByPlayer) return
     const explosion = this.scene.add.sprite(x, y, 'explosion/md')
       .setScale(this.size * 0.5)
       .setDepth(100)

@@ -68,6 +68,12 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
+  public get damage () {
+    const score = this.store.score
+    if (score < 1000) return 1
+    return 1 + ((score - 1000) / 500)
+  }
+
   private updateVelocity () {
     if (this.controls.left) {
       this.velocity.x = Math.max(this.velocity.x - this.acceleration.x, -this.maxVelocity.x)
