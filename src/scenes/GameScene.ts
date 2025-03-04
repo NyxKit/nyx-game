@@ -38,6 +38,32 @@ export class GameScene extends Scene {
     this.player.setDepth(1000)
     this.player.setPosition(200, this.scale.height / 2)
 
+    // this.anims.create({
+    //   key: 'beam',
+    //   frames: this.anims.generateFrameNames('beam', {
+    //     prefix: 'start',
+    //     start: 1,
+    //     end: 8,
+    //   }),
+    //   frameRate: 10,
+    // })
+
+    // const beam = this.add.sprite(100, 200, 'beam', 'start1').setScale(2)
+    // beam.setOrigin(0, 0.5)
+    // beam.setDepth(100000)
+
+    // beam.anims.create({
+    //   key: 'active',
+    //   frames: this.anims.generateFrameNames('beam', {
+    //     prefix: 'active',
+    //     start: 1,
+    //     end: 8,
+    //   }),
+    //   frameRate: 10,
+    // })
+    // console.log('beam', beam.anims.get('active'))
+    // beam.anims.play('active')
+
     EventBus.emit('current-scene-ready', this)
   }
 

@@ -1,0 +1,177 @@
+{
+  "sprites": [
+    {
+      "fileName": "start1.png",
+      "width": 64,
+      "height": 64,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "fileName": "start2.png",
+      "width": 64,
+      "height": 64,
+      "x": 64,
+      "y": 0
+    },
+    {
+      "fileName": "start3.png",
+      "width": 64,
+      "height": 64,
+      "x": 128,
+      "y": 0
+    },
+    {
+      "fileName": "start4.png",
+      "width": 64,
+      "height": 64,
+      "x": 192,
+      "y": 0
+    },
+    {
+      "fileName": "start5.png",
+      "width": 64,
+      "height": 64,
+      "x": 256,
+      "y": 0
+    },
+    {
+      "fileName": "start6.png",
+      "width": 64,
+      "height": 64,
+      "x": 320,
+      "y": 0
+    },
+    {
+      "fileName": "start7.png",
+      "width": 64,
+      "height": 64,
+      "x": 384,
+      "y": 0
+    },
+    {
+      "fileName": "start8.png",
+      "width": 64,
+      "height": 64,
+      "x": 448,
+      "y": 0
+    },
+    {
+      "fileName": "active1.png",
+      "width": 64,
+      "height": 64,
+      "x": 0,
+      "y": 64
+    },
+    {
+      "fileName": "active2.png",
+      "width": 64,
+      "height": 64,
+      "x": 64,
+      "y": 64
+    },
+    {
+      "fileName": "active3.png",
+      "width": 64,
+      "height": 64,
+      "x": 128,
+      "y": 64
+    },
+    {
+      "fileName": "active4.png",
+      "width": 64,
+      "height": 64,
+      "x": 192,
+      "y": 64
+    },
+    {
+      "fileName": "active5.png",
+      "width": 64,
+      "height": 64,
+      "x": 256,
+      "y": 64
+    },
+    {
+      "fileName": "active6.png",
+      "width": 64,
+      "height": 64,
+      "x": 320,
+      "y": 64
+    },
+    {
+      "fileName": "active7.png",
+      "width": 64,
+      "height": 64,
+      "x": 384,
+      "y": 64
+    },
+    {
+      "fileName": "active8.png",
+      "width": 64,
+      "height": 64,
+      "x": 448,
+      "y": 64
+    },
+    {
+      "fileName": "end1.png",
+      "width": 64,
+      "height": 64,
+      "x": 0,
+      "y": 128
+    },
+    {
+      "fileName": "end2.png",
+      "width": 64,
+      "height": 64,
+      "x": 64,
+      "y": 128
+    },
+    {
+      "fileName": "end3.png",
+      "width": 64,
+      "height": 64,
+      "x": 128,
+      "y": 128
+    },
+    {
+      "fileName": "end4.png",
+      "width": 64,
+      "height": 64,
+      "x": 192,
+      "y": 128
+    },
+    {
+      "fileName": "end5.png",
+      "width": 64,
+      "height": 64,
+      "x": 256,
+      "y": 128
+    },
+    {
+      "fileName": "end6.png",
+      "width": 64,
+      "height": 64,
+      "x": 320,
+      "y": 128
+    },
+    {
+      "fileName": "end7.png",
+      "width": 64,
+      "height": 64,
+      "x": 384,
+      "y": 128
+    },
+    {
+      "fileName": "end8.png",
+      "width": 64,
+      "height": 64,
+      "x": 448,
+      "y": 128
+    }
+  ],
+  "packMode": "grid",
+  "padding": 0,
+  "backgroundColor": "rgba(0, 0, 0, 0)",
+  "spriteSheetWidth": 512,
+  "spriteSheetHeight": 192
+}
