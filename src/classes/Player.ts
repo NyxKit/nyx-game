@@ -142,6 +142,8 @@ export default class Player extends Phaser.GameObjects.Container {
       this.energy -= this.energyDrainRate
     } else if (this.beam?.isActive) {
       this.beam.end()
+    } else {
+      this.energy += config.player.energyRegen
     }
   }
 

@@ -1,43 +1,61 @@
 import config from '@/config'
 import type { GameScene } from '@/scenes'
-import { PowerUpType, PowerUpTypeMap, type OnDestroyEvent } from '@/types'
+import { useGameStore } from '@/stores'
+import { PowerUpType, type OnDestroyEvent } from '@/types'
 import { getRandomBetween, getRandomFromArray } from 'nyx-kit/utils'
 import type { GameObjects } from 'phaser'
 import { v4 as uuidv4 } from 'uuid'
 
 interface PowerUpOptions {
-  type: PowerUpType
+  type?: PowerUpType
   position: { x: number; y: number }
   speed: number
+  isLarge: boolean
   onDestroy: OnDestroyEvent
 }
 
 export default class PowerUp implements PowerUpOptions {
   private scene: GameScene
-  private key: string
+  private store = useGameStore()
   public position: { x: number; y: number }
   public onDestroy: OnDestroyEvent
   public id: string = uuidv4()
-  public type: PowerUpType = PowerUpType.Hp
+  public type: PowerUpType = PowerUpType.EnergySmall
   public sprite: GameObjects.Image
   public speed: number
+  public isLarge: boolean = false
 
   constructor (scene: GameScene, options?: PowerUpOptions) {
     this.scene = scene
-    this.type = options?.type ?? PowerUpType.Hp
-    this.key = getRandomFromArray(PowerUpTypeMap[this.type])
+    this.type = options?.type ?? this.getRandomType(options?.isLarge ?? false)
     this.position = options?.position ?? { x: 0, y: 0 }
     this.sprite = this.create()
     this.speed = options?.speed ?? 5
     this.onDestroy = options?.onDestroy ?? (() => {})
   }
 
+  get key () {
+    return this.type
+  }
+
+  private getRandomType (isLarge: boolean): PowerUpType {
+    if (!isLarge) return PowerUpType.EnergySmall
+    const energyTypes = [PowerUpType.EnergyMedium, PowerUpType.EnergyLarge]
+    const hpTypes = [PowerUpType.HpMedium, PowerUpType.HpLarge]
+    const ratio = this.store.energy / 100
+    return Math.random() > ratio ? getRandomFromArray(energyTypes) : getRandomFromArray(hpTypes)
+  }
+
   create () {
+    let scale = 2
+    if ([PowerUpType.EnergyMedium, PowerUpType.HpMedium].includes(this.type)) {
+      scale = 1.5
+    }
     return this.scene.add
       .image(this.position.x, this.position.y, this.key)
       .setOrigin(0.5, 0.5)
       .setRotation(getRandomBetween(0, Math.PI * 2))
-      .setScale(2)
+      .setScale(scale)
       .setDepth(100)
   }
 

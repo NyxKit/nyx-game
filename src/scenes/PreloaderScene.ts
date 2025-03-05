@@ -31,12 +31,12 @@ export class PreloaderScene extends Scene {
     this.load.image('asteroid/5', 'asteroid/5.png')
     this.load.image('asteroid/6', 'asteroid/6.png')
 
-    this.load.image('powerup/blue0', 'powerup/pink0.png')
-    this.load.image('powerup/pink0', 'powerup/pink0.png')
-    this.load.image('powerup/pink1', 'powerup/pink1.png')
-    this.load.image('powerup/pink2', 'powerup/pink2.png')
-    this.load.image('powerup/blue1', 'powerup/blue1.png')
-    this.load.image('powerup/blue2', 'powerup/blue2.png')
+    this.load.image('powerup/hp-small', 'powerup/pink0.png')
+    this.load.image('powerup/hp-medium', 'powerup/pink1.png')
+    this.load.image('powerup/hp-large', 'powerup/pink2.png')
+    this.load.image('powerup/energy-small', 'powerup/blue0.png')
+    this.load.image('powerup/energy-medium', 'powerup/blue1.png')
+    this.load.image('powerup/energy-large', 'powerup/blue2.png')
 
     this.load.spritesheet('beam', 'beam.png', { frameWidth: 64, frameHeight: 64 })
 

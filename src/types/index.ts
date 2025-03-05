@@ -11,16 +11,10 @@ export enum GameState {
 export type OnDestroyEvent = (id: string, options?: KeyDict<any>) => void
 
 export enum PowerUpType {
-  Hp = 'hp',
-  Energy = 'energy',
-  HpCrystal = 'hp-crystal',
-  EnergyCrystal = 'energy-crystal'
+  HpSmall = 'powerup/hp-small',
+  HpMedium = 'powerup/hp-medium',
+  HpLarge = 'powerup/hp-large',
+  EnergySmall = 'powerup/energy-small',
+  EnergyMedium = 'powerup/energy-medium',
+  EnergyLarge = 'powerup/energy-large'
 }
-
-export const PowerUpTypeMap = {
-  [PowerUpType.Energy]: ['powerup/pink0'],
-  [PowerUpType.Hp]: ['powerup/blue0'],
-  [PowerUpType.HpCrystal]: ['powerup/pink1', 'powerup/pink2'],
-  [PowerUpType.EnergyCrystal]: ['powerup/blue1', 'powerup/blue2']
-}
-

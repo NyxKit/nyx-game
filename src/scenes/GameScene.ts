@@ -175,14 +175,12 @@ export class GameScene extends Scene {
   }
 
   spawnPowerUp (position: { x: number; y: number }, isLarge: boolean) {
-    const ratio = this.store.energy / 100
-    let type = PowerUpType.Hp
-    if (isLarge) {
-      type = Math.random() > ratio ? PowerUpType.EnergyCrystal : PowerUpType.HpCrystal
-    } else {
-      type = Math.random() > ratio ? PowerUpType.Energy : PowerUpType.Hp
-    }
-    const powerUp = new PowerUp(this, { type, position, speed: this.velocity, onDestroy: this.onDestroyPowerUp.bind(this) })
+    const powerUp = new PowerUp(this, {
+      position,
+      isLarge,
+      speed:this.velocity,
+      onDestroy: this.onDestroyPowerUp.bind(this)
+    })
     this.powerUps.push(powerUp)
   }
 
@@ -197,20 +195,23 @@ export class GameScene extends Scene {
     this.powerUps = this.powerUps.filter((powerUp) => powerUp.id !== id)
     if (!options?.isDestroyedByPlayer || !this.player) return
     switch (options.type) {
-      case PowerUpType.Hp:
-        this.player.hp += config.powerUp.hpSmall
-        break
-      case PowerUpType.HpCrystal:
+      case PowerUpType.HpLarge:
         this.player.hp += config.powerUp.hpLarge
         break
-      case PowerUpType.Energy:
-        this.player.energy += config.powerUp.energySmall
+      case PowerUpType.HpMedium:
+        this.player.hp += config.powerUp.hpMedium
         break
-      case PowerUpType.EnergyCrystal:
+      case PowerUpType.HpSmall:
+        this.player.hp += config.powerUp.hpSmall
+        break
+      case PowerUpType.EnergyLarge:
         this.player.energy += config.powerUp.energyLarge
         break
+      case PowerUpType.EnergyMedium:
+        this.player.energy += config.powerUp.energyMedium
+        break
+      case PowerUpType.EnergySmall:
       default:
-        this.player.hp += config.powerUp.hpSmall
         this.player.energy += config.powerUp.energySmall
         break
     }
