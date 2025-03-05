@@ -1,3 +1,4 @@
+import config from '@/config'
 import type { OnDestroyEvent } from '@/types'
 import { clamp, getRandomBetween } from 'nyx-kit/utils'
 import type { GameObjects } from 'phaser'
@@ -15,7 +16,7 @@ export default class Asteroid implements AsteroidOptions {
   private _hp: number = 1
   private maxHp: number = 1
   public maxSpeed = 3
-  public minSpeed = 2
+  public minSpeed = config.asteroid.minSpeed
   public isLarge = false
   public onDestroy: OnDestroyEvent
   private scene: Phaser.Scene
@@ -27,10 +28,12 @@ export default class Asteroid implements AsteroidOptions {
     this.id = uuidv4()
     this.key = `asteroid/${getRandomBetween(1, 6)}`
     this.scene = scene
-    this.maxSpeed = (options.maxSpeed ?? 1) * 3
+    this.maxSpeed = (options.maxSpeed ?? 1) * config.asteroid.maxSpeedMultiplier
     this.isLarge = options.isLarge ?? false
-    this.size = this.isLarge ? getRandomBetween(2, 4, 0.5) * 2 : getRandomBetween(2, 4, 0.5)
-    this.hp = this.isLarge ? 50 : 25
+    this.size = this.isLarge
+      ? getRandomBetween(config.asteroid.large.size[0], config.asteroid.large.size[1], 0.5)
+      : getRandomBetween(config.asteroid.small.size[0], config.asteroid.small.size[1], 0.5)
+    this.hp = this.isLarge ? config.asteroid.large.hp : config.asteroid.small.hp
     this.maxHp = this.hp
     this.sprite = this.create()
     this.onDestroy = options.onDestroy

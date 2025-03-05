@@ -32,13 +32,13 @@ export default class Player extends Phaser.GameObjects.Container {
   private energyDrainRate = 0.1 // Energy drain per frame while shooting
 
   public isDashing: boolean = false
-  private dashDistance: number = 200
-  private dashCooldown: number = 1000
+  private dashDistance: number = config.player.dashDistance
+  private dashCooldown: number = config.player.dashCooldown
   private lastDashTime: number = 0
   private dashDestinationPos: { x: number, y: number } = { x: 0, y: 0 }
-  private teleportDistance: number = 250
+  private teleportDistance: number = config.player.teleportDistance
   private lastTeleportTime = 0
-  private readonly teleportCooldown = 1000
+  private readonly teleportCooldown = config.player.teleportCooldown
 
   private velocityBeforeDash: { x: number, y: number } = { x: 0, y: 0 }
   private dashStartTime: number = 0
@@ -76,7 +76,7 @@ export default class Player extends Phaser.GameObjects.Container {
     this._hp = value
     this.store.setPlayerHp(value)
     if (!isDamage) return
-    this.sprite.setTint(0xFFAAAA)
+    this.sprite.setTint(config.player.colorDamage)
     this.sprite.setPipeline('glow')
     window.setTimeout(() => {
       this.sprite.clearTint()
@@ -102,7 +102,7 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   public get bounds () {
-    const padding = 50
+    const padding = config.player.boundsPadding
     const playerBounds = this.sprite.getBounds()
     return new Phaser.Geom.Rectangle(
       playerBounds.x + padding,
@@ -241,7 +241,7 @@ export default class Player extends Phaser.GameObjects.Container {
       this.velocity.y = (dy / distance) * dashSpeed
 
       // Add blue/white shine effect while dashing
-      this.sprite.setTint(0x00aaff)
+      this.sprite.setTint(config.player.colorDash)
       this.sprite.setPipeline('glow')
     } else {
       // Reached destination, stop dashing

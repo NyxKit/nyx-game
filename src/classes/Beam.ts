@@ -4,6 +4,7 @@ import { createSpriteAnimation } from '@/utils'
 import type { GameObjects, Scene } from 'phaser'
 import { v4 as uuidv4 } from 'uuid'
 import { clamp } from 'nyx-kit/utils'
+import config from '@/config'
 
 export default class Beam {
   private scene: GameScene
@@ -13,7 +14,7 @@ export default class Beam {
   public sprite: GameObjects.Sprite
   public isActive: boolean = false
   private beamStartTime: number = 0
-  private scaleX: number = 3
+  private scaleX: number = config.beam.scaleX
 
   constructor (scene: GameScene, origin: { x: number, y: number }) {
     this.scene = scene
@@ -54,8 +55,8 @@ export default class Beam {
     if (!this.isActive) return
     const pointer = this.scene.input.activePointer
     const angle = Phaser.Math.Angle.Between(pos.x, pos.y, pointer.worldX, pointer.worldY)
-    const minAngle = -Math.PI / 3 // -60 degrees in radians
-    const maxAngle = Math.PI / 3  // 60 degrees in radians
+    const minAngle = config.beam.minAngle
+    const maxAngle = config.beam.maxAngle
     const clampedAngle = clamp(angle, minAngle, maxAngle)
     this.sprite.setRotation(clampedAngle)
   }
@@ -74,8 +75,8 @@ export default class Beam {
 
   public handleScaling () {
     if (!this.isActive) return
-    const maxScale = 40
-    const scaleDuration = 500
+    const maxScale = config.beam.maxScale
+    const scaleDuration = config.beam.scaleDuration
     const scaleProgress = Math.min(1, (this.scene.time.now - this.beamStartTime) / scaleDuration)
     const beamScale = this.scaleX + (maxScale - this.scaleX) * scaleProgress
     this.sprite.setScale(beamScale, this.scaleY)
