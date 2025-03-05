@@ -2,7 +2,7 @@
   "name": "nyx-game",
   "homepage": "http://nyxkit.github.io/nyx-game",
   "author": "Arne Decant <hello@arnedecant.be>",
-  "version": "0.0.13",
+  "version": "0.0.15",
   "private": false,
   "scripts": {
     "dev": "vite",

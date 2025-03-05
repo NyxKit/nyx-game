@@ -70,7 +70,7 @@ const disableDebug = () => {
       :size="NyxSize.Small"
       tabindex="-1"
       @click="toggleDebug"
-    >Debug</NyxButton>
+    >Debog</NyxButton>
     <Teleport to="body">
       <NyxCard
         class="debug__card"

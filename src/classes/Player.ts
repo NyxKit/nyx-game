@@ -67,8 +67,8 @@ export default class Player extends Phaser.GameObjects.Container {
 
   public set hp (value: number) {
     const isDamage = value < this._hp
-    this._hp = value
-    this.store.setPlayerHp(value)
+    this._hp = clamp(value, 0, config.player.hpMax)
+    this.store.setPlayerHp(this._hp)
     if (!isDamage) return
     this.sprite.setTint(config.player.colorDamage)
     this.sprite.setPipeline('glow')
@@ -83,8 +83,8 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   public set energy (value: number) {
-    this._energy = value
-    this.store.setPlayerEnergy(value)
+    this._energy = clamp(value, 0, config.player.energyMax)
+    this.store.setPlayerEnergy(this._energy)
   }
 
   private get hasEnergy () {

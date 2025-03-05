@@ -2,10 +2,11 @@ import { Scene } from 'phaser'
 import { EventBus, GameControls, Player, Background, Asteroid } from '@/classes'
 import useGameStore from '@/stores/game'
 import { clamp } from 'nyx-kit/utils'
-import { GameState, PowerUpType } from '@/types'
+import { PowerUpType } from '@/types'
 import type { KeyDict } from 'nyx-kit/types'
 import PowerUp from '@/classes/PowerUp'
 import { createSpriteAnimation } from '@/utils'
+import { Audio } from '@/classes/Audio'
 
 export class GameScene extends Scene {
   private controls: GameControls | null = null
@@ -16,9 +17,11 @@ export class GameScene extends Scene {
   private asteroids: Asteroid[] = []
   private lastSpawnTime = 0
   private powerUps: PowerUp[] = []
+  public audio: Audio | null = null
   
   constructor () {
     super('Game')
+    // this.audio = new Audio(this)
   }
 
   reset () {
