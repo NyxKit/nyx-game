@@ -112,7 +112,7 @@ export default class Asteroid implements AsteroidOptions {
   update () {
     this.sprite.x += this.velocity.x
     this.sprite.y += this.velocity.y
-    this.sprite.rotation += 0.01
+    this.sprite.rotation += config.asteroid.rotationSpeed
 
     const padding = 50
 

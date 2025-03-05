@@ -25,6 +25,7 @@ export default {
   asteroid: {
     minSpeed: 2,
     maxSpeedMultiplier: 3,
+    rotationSpeed: 0.01,
     small: {
       hp: 20,
       speed: 1,
@@ -35,6 +36,9 @@ export default {
       speed: 1,
       size: [4, 5],
     },
+  },
+  powerUp: {
+    rotationSpeed: 0.01,
   },
   beam: {
     damage: 1,

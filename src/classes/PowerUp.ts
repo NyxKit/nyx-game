@@ -1,6 +1,7 @@
+import config from '@/config'
 import type { GameScene } from '@/scenes'
 import { PowerUpType, PowerUpTypeMap, type OnDestroyEvent } from '@/types'
-import { getRandomFromArray } from 'nyx-kit/utils'
+import { getRandomBetween, getRandomFromArray } from 'nyx-kit/utils'
 import type { GameObjects } from 'phaser'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -35,6 +36,7 @@ export default class PowerUp implements PowerUpOptions {
     return this.scene.add
       .image(this.position.x, this.position.y, this.key)
       .setOrigin(0.5, 0.5)
+      .setRotation(getRandomBetween(0, Math.PI * 2))
       .setScale(2)
       .setDepth(100)
   }
@@ -55,6 +57,8 @@ export default class PowerUp implements PowerUpOptions {
     } else {
       this.sprite.x -= this.speed * 3
     }
+
+    this.sprite.rotation += config.powerUp.rotationSpeed
 
     const shouldDestroy = this.sprite.x < -this.sprite.width
       || this.sprite.y > this.scene.scale.height + this.sprite.height
