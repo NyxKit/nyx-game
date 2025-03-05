@@ -61,7 +61,7 @@ export class GameScene extends Scene {
 
     if (this.store.isPaused) return
 
-    const playerPos = this.player!.currentPosition
+    const playerPos = this.player.currentPosition
 
     this.asteroids.forEach((asteroid) => asteroid.update())
     this.powerUps.forEach((powerUp) => powerUp.update(playerPos))
@@ -69,12 +69,18 @@ export class GameScene extends Scene {
     this.player.update(this.velocity, time, delta)
 
     this.trySpawnAsteroid()
-    const asteroid = this.isCollisionAsteroidDetected()
-    const powerUp = this.isCollisionPowerUpDetected()
+
+    const playerBounds = this.player.bounds
+    const asteroid = this.isCollisionAsteroidDetected(playerBounds)
+    const powerUp = this.isCollisionPowerUpDetected(playerBounds)
 
     if (asteroid) {
-      if (!this.store.debug.isImmortal) this.store.decreaseHp(10)
-      asteroid.destroy()
+      if (this.player?.isDashing) {
+        asteroid.destroy(true)
+      } else {
+        this.player.hp -= 10
+        asteroid.destroy(false)
+      }
     }
 
     if (powerUp) {
@@ -122,40 +128,30 @@ export class GameScene extends Scene {
     }
   }
 
-  private isCollisionAsteroidDetected (): Asteroid | false {
-    if (this.player?.sprite && !this.store.debug.isCollisionDisabled) {
-      const playerBounds = this.player.sprite.getBounds()
-
-      for (const asteroid of this.asteroids) {
-        const asteroidBounds = asteroid.sprite.getBounds()
-        
-        if (Phaser.Geom.Rectangle.Overlaps(playerBounds, asteroidBounds)) {
-          return asteroid
-        }
+  private isCollisionAsteroidDetected (playerBounds: Phaser.Geom.Rectangle): Asteroid | false {
+    if (this.store.debug.isCollisionDisabled) return false
+    for (const asteroid of this.asteroids) {
+      const asteroidBounds = asteroid.sprite.getBounds()
+      if (Phaser.Geom.Rectangle.Overlaps(playerBounds, asteroidBounds)) {
+        return asteroid
       }
     }
-
     return false
   }
 
-  private isCollisionPowerUpDetected (): PowerUp | false {
-    if (this.player?.sprite && !this.store.debug.isCollisionDisabled) {
-      const playerBounds = this.player.sprite.getBounds()
-
-      for (const powerUp of this.powerUps) {
-        const powerUpBounds = powerUp.sprite.getBounds()
-        if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, powerUpBounds)) {
-          return powerUp
-        }
+  private isCollisionPowerUpDetected (playerBounds: Phaser.Geom.Rectangle): PowerUp | false {
+    for (const powerUp of this.powerUps) {
+      const powerUpBounds = powerUp.sprite.getBounds()
+      if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, powerUpBounds)) {
+        return powerUp
       }
     }
-
     return false
   }
 
   spawnAsteroid () {
     const asteroid = new Asteroid(this, {
-      speed: this.velocity,
+      maxSpeed: this.velocity,
       isLarge: Math.random() > 0.8,
       onDestroy: this.onDestroyAsteroid.bind(this),
     })

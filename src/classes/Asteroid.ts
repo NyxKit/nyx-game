@@ -1,10 +1,10 @@
 import type { OnDestroyEvent } from '@/types'
-import { getRandomBetween } from 'nyx-kit/utils'
+import { clamp, getRandomBetween } from 'nyx-kit/utils'
 import type { GameObjects } from 'phaser'
 import { v4 as uuidv4 } from 'uuid'
 
 interface AsteroidOptions {
-  speed?: number
+  maxSpeed?: number
   isLarge?: boolean
   onDestroy: OnDestroyEvent
 }
@@ -14,19 +14,20 @@ export default class Asteroid implements AsteroidOptions {
   public sprite: GameObjects.Image
   private _hp: number = 1
   private maxHp: number = 1
-  public speed = 3
+  public maxSpeed = 3
+  public minSpeed = 2
   public isLarge = false
   public onDestroy: OnDestroyEvent
-  private velocity: { x: number; y: number } = { x: 1, y: 1 }
   private scene: Phaser.Scene
   private key: string
   private size = 1
+  private angle: number = 0
 
   constructor (scene: Phaser.Scene, options: AsteroidOptions) {
     this.id = uuidv4()
     this.key = `asteroid/${getRandomBetween(1, 6)}`
     this.scene = scene
-    this.speed *= options.speed ?? 1
+    this.maxSpeed = (options.maxSpeed ?? 1) * 3
     this.isLarge = options.isLarge ?? false
     this.size = this.isLarge ? getRandomBetween(2, 4, 0.5) * 2 : getRandomBetween(2, 4, 0.5)
     this.hp = this.isLarge ? 50 : 25
@@ -65,6 +66,19 @@ export default class Asteroid implements AsteroidOptions {
     this.sprite.setTint(Phaser.Display.Color.GetColor(tint.r, tint.g, tint.b))
   }
 
+  private get speed () {
+    const healthRatio = this.hp / this.maxHp
+    const speed = this.minSpeed + ((this.maxSpeed - this.minSpeed) * healthRatio)
+    return clamp(speed, this.minSpeed, this.maxSpeed)
+  }
+
+  private get velocity () {
+    return {
+      x: -this.speed * Math.cos(this.angle),
+      y: this.speed * Math.sin(this.angle)
+    }
+  }
+
   create () {
     const src = this.scene.textures.get(this.key).getSourceImage()
 
@@ -78,20 +92,12 @@ export default class Asteroid implements AsteroidOptions {
       // Spawn on right side with random Y position and angle between -15 and 15 degrees
       startX = this.scene.scale.width + src.width
       startY = getRandomBetween(0, this.scene.scale.height - src.height)
-      const angle = getRandomBetween(-15, 15) * Math.PI / 180 // Convert to radians
-      this.velocity = {
-        x: -this.speed * Math.cos(angle),
-        y: this.speed * Math.sin(angle)
-      }
+      this.angle = getRandomBetween(-15, 15) * Math.PI / 180 // Convert to radians
     } else {
       // Spawn on top with random angle between 15-45 degrees
       startX = getRandomBetween(this.scene.scale.width / 2, this.scene.scale.width) + src.width
       startY = -src.height
-      const angle = getRandomBetween(15, 45) * Math.PI / 180 // Convert to radians
-      this.velocity = {
-        x: -this.speed * Math.cos(angle),
-        y: this.speed * Math.sin(angle)
-      }
+      this.angle = getRandomBetween(15, 45) * Math.PI / 180 // Convert to radians
     }
 
     return this.scene.add

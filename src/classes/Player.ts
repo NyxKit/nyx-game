@@ -4,34 +4,44 @@ import { clamp } from 'nyx-kit/utils'
 import useGameStore from '@/stores/game'
 import Beam from './Beam'
 import type { GameScene } from '@/scenes'
+import config from '@/config'
 
 export default class Player extends Phaser.GameObjects.Container {
   public sprite: GameObjects.Image
   public scene: GameScene
+  public _hp: number = config.player.hpStart
   private controls: GameControls
   private store = useGameStore()
-  private speed: number = 2
-  private teleportDistance: number = 250
   private velocity = {
-    x: 2,
-    y: 2
+    x: config.player.velocity,
+    y: config.player.velocity
   }
   private maxVelocity = {
-    x: 4,
-    y: 4
+    x: config.player.maxVelocity,
+    y: config.player.maxVelocity
   }
   private acceleration = {
-    x: 0.2,
-    y: 0.2
+    x: config.player.acceleration,
+    y: config.player.acceleration
   }
   private deceleration = {
-    x: 0.1,
-    y: 0.1
+    x: config.player.deceleration,
+    y: config.player.deceleration
   }
   public beam: Beam | null = null
   private energyDrainRate = 0.1 // Energy drain per frame while shooting
+
+  public isDashing: boolean = false
+  private dashDistance: number = 200
+  private dashCooldown: number = 1000
+  private lastDashTime: number = 0
+  private dashDestinationPos: { x: number, y: number } = { x: 0, y: 0 }
+  private teleportDistance: number = 250
   private lastTeleportTime = 0
   private readonly teleportCooldown = 1000
+
+  private velocityBeforeDash: { x: number, y: number } = { x: 0, y: 0 }
+  private dashStartTime: number = 0
 
   constructor (scene: GameScene, controls: GameControls) {
     super(scene, 0, 0)
@@ -57,6 +67,23 @@ export default class Player extends Phaser.GameObjects.Container {
     scene.input.on('pointermove', this.updateBeam, this)
   }
 
+  public get hp () {
+    return this._hp
+  }
+
+  public set hp (value: number) {
+    const isDamage = value < this._hp
+    this._hp = value
+    this.store.setPlayerHp(value)
+    if (!isDamage) return
+    this.sprite.setTint(0xFFAAAA)
+    this.sprite.setPipeline('glow')
+    window.setTimeout(() => {
+      this.sprite.clearTint()
+      this.sprite.resetPipeline()
+    }, 200)
+  }
+
   private get hasEnergy () {
     return this.store.energy > this.energyDrainRate || this.store.debug.hasInfiniteEnergy
   }
@@ -72,6 +99,77 @@ export default class Player extends Phaser.GameObjects.Container {
     const score = this.store.score
     if (score < 1000) return 1
     return 1 + ((score - 1000) / 500)
+  }
+
+  public get bounds () {
+    const padding = 50
+    const playerBounds = this.sprite.getBounds()
+    return new Phaser.Geom.Rectangle(
+      playerBounds.x + padding,
+      playerBounds.y + padding,
+      playerBounds.width - (padding * 2),
+      playerBounds.height - (padding * 2)
+    )
+  }
+
+  update (velocity: number, time: number, delta: number) {
+    const currentTime = this.scene.time.now
+    if (this.controls.space && currentTime - this.lastDashTime >= this.dashCooldown) {
+      this.isDashing = true
+      this.lastDashTime = currentTime
+      this.dashDestinationPos = {
+        x: this.x + (this.controls.left ? -this.dashDistance : this.controls.right ? this.dashDistance : 0),
+        y: this.y + (this.controls.up ? -this.dashDistance : this.controls.down ? this.dashDistance : 0)
+      }
+      this.dashDestinationPos = this.getClampedPosition(this.dashDestinationPos.x, this.dashDestinationPos.y)
+      this.controls.space = false
+    }
+
+    if (this.isDashing) {
+      this.handleDash()
+    } else {  
+      this.updateVelocity()
+      this.updatePosition()
+    }
+    
+    this.store.setPlayerPosition(this.x, this.y)
+
+    if (this.hasEnergy && this.beam?.isActive) {
+      this.beam.handleScaling()
+      this.store.energy -= this.energyDrainRate
+    } else if (this.beam?.isActive) {
+      this.beam.end()
+    }
+  }
+
+  move (x: number, y: number) {
+    this.setPosition(x, y)
+  }
+
+  destroy(): void {
+    if (this.beam) {
+      this.scene.input.off('pointerdown', this.createBeam, this)
+      this.scene.input.off('pointerup', this.destroyBeam, this)
+      this.scene.input.off('pointermove', this.updateBeam, this)
+      this.beam.destroy()
+    }
+
+    super.destroy()
+  }
+
+  private getClampedPosition (x: number, y: number) {
+    return {
+      x: clamp(x, 0, this.scene.scale.width - this.sprite.width),
+      y: clamp(y, 0, this.scene.scale.height - this.sprite.height)
+    }
+  }
+
+  private updatePosition () {
+    this.x += this.velocity.x
+    this.y += this.velocity.y
+    const clampedPosition = this.getClampedPosition(this.x, this.y)
+    this.x = clampedPosition.x
+    this.y = clampedPosition.y
   }
 
   private updateVelocity () {
@@ -128,49 +226,35 @@ export default class Player extends Phaser.GameObjects.Container {
     )
   }
 
-  private updatePosition () {
-    this.x += this.velocity.x
-    this.y += this.velocity.y
+  private handleDash () {
+    // Calculate direction to destination
+    const dx = this.dashDestinationPos.x - this.x
+    const dy = this.dashDestinationPos.y - this.y
+    
+    // Calculate distance to destination
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    
+    if (distance > 20) {
+      // Normalize direction and apply dash speed
+      const dashSpeed = config.player.dashSpeed // Using config value
+      this.velocity.x = (dx / distance) * dashSpeed
+      this.velocity.y = (dy / distance) * dashSpeed
 
-    this.x = clamp(this.x, 0, this.scene.scale.width - this.sprite.width)
-    this.y = clamp(this.y, 0, this.scene.scale.height - this.sprite.height)
-  }
+      // Add blue/white shine effect while dashing
+      this.sprite.setTint(0x00aaff)
+      this.sprite.setPipeline('glow')
+    } else {
+      // Reached destination, stop dashing
+      this.velocity.x = this.controls.right ? this.maxVelocity.x : this.controls.left ? -this.maxVelocity.x : 0
+      this.velocity.y = this.controls.down ? this.maxVelocity.y : this.controls.up ? -this.maxVelocity.y : 0
+      this.isDashing = false
 
-  update (_velocity: number, time: number, delta: number) {
-    if (this.controls.space) {
-      const currentTime = this.scene.time.now
-      if (currentTime - this.lastTeleportTime >= this.teleportCooldown) {
-        this.teleport()
-        this.lastTeleportTime = currentTime
-      }
-      this.controls.space = false
+      // Remove shine effect
+      this.sprite.clearTint()
+      this.sprite.resetPipeline()
     }
 
-    this.updateVelocity()
     this.updatePosition()
-    this.store.setPlayerPosition(this.x, this.y)
-
-    if (this.hasEnergy && this.beam?.isActive) {
-      this.beam.handleScaling()
-      this.store.energy -= this.energyDrainRate
-    } else if (this.beam?.isActive) {
-      this.beam.end()
-    }
-  }
-
-  move (x: number, y: number) {
-    this.setPosition(x, y)
-  }
-
-  destroy(): void {
-    if (this.beam) {
-      this.scene.input.off('pointerdown', this.createBeam, this)
-      this.scene.input.off('pointerup', this.destroyBeam, this)
-      this.scene.input.off('pointermove', this.updateBeam, this)
-      this.beam.destroy()
-    }
-
-    super.destroy()
   }
 
   private createBeam () {
