@@ -2,18 +2,17 @@
 import { onMounted, onUnmounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { NyxModal, NyxButton } from 'nyx-kit/components'
-import { NyxSize } from 'nyx-kit/types'
+import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useGameStore from '@/stores/game'
 import Settings from '@/components/Settings.vue'
+import { GameState } from '@/types'
 
 const gameStore = useGameStore()
 const { isPlaying, isPaused } = storeToRefs(gameStore)
-const { togglePaused } = gameStore
 
 const onKeyDown = (e: KeyboardEvent) => {
-  if (!isPlaying.value) return
   if (e.key === 'Escape') {
-    togglePaused()
+    gameStore.togglePaused()
   }
 }
 
@@ -24,6 +23,20 @@ const customClass = computed(() => {
   }
   return className
 })
+
+const onRestart = () => {
+  gameStore.reset()
+  gameStore.togglePaused()
+}
+
+const onQuit = () => {
+  gameStore.reset()
+  gameStore.setGameState(GameState.Menu)
+}
+
+const onResume = () => {
+  gameStore.togglePaused()
+}
 
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown)
@@ -37,14 +50,18 @@ onUnmounted(() => {
 
 <template>
   <NyxModal
-    v-if="isPlaying && isPaused"
+    v-if="isPaused"
     :customClass="customClass"
     :size="NyxSize.Small"
     static
   >
     <Settings />
     <template #footer>
-      <NyxButton @click="togglePaused">Resume</NyxButton>
+      <div class="game-menu__buttons">
+        <NyxButton @click="onRestart" :theme="NyxTheme.Warning">Restart</NyxButton>
+        <NyxButton @click="onQuit" :theme="NyxTheme.Danger">Quit</NyxButton>
+        <NyxButton @click="onResume" :theme="NyxTheme.Primary">Resume</NyxButton>
+      </div>
     </template>
   </NyxModal>
 </template>
@@ -60,6 +77,13 @@ onUnmounted(() => {
     opacity: 1;
     pointer-events: auto;
     transform: scale(1);
+  }
+
+  &__buttons {
+    width: 100%;
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
   }
 }
 </style>

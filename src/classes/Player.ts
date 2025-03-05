@@ -1,4 +1,4 @@
-import { Scene, GameObjects, Tweens } from 'phaser'
+import { GameObjects } from 'phaser'
 import type GameControls from './GameControls'
 import { clamp } from 'nyx-kit/utils'
 import useGameStore from '@/stores/game'
@@ -10,6 +10,7 @@ export default class Player extends Phaser.GameObjects.Container {
   public sprite: GameObjects.Image
   public scene: GameScene
   public _hp: number = config.player.hpStart
+  public _energy: number = config.player.energyStart
   private controls: GameControls
   private store = useGameStore()
   private velocity = {
@@ -36,21 +37,14 @@ export default class Player extends Phaser.GameObjects.Container {
   private dashCooldown: number = config.player.dashCooldown
   private lastDashTime: number = 0
   private dashDestinationPos: { x: number, y: number } = { x: 0, y: 0 }
-  private teleportDistance: number = config.player.teleportDistance
-  private lastTeleportTime = 0
-  private readonly teleportCooldown = config.player.teleportCooldown
-
-  private velocityBeforeDash: { x: number, y: number } = { x: 0, y: 0 }
-  private dashStartTime: number = 0
 
   constructor (scene: GameScene, controls: GameControls) {
     super(scene, 0, 0)
     this.scene = scene
     this.controls = controls
 
-    const playerSpriteSrc = this.scene.textures.get('player').getSourceImage()
-
     // Create the beam first so it renders behind the player
+    const playerSpriteSrc = this.scene.textures.get('player').getSourceImage()
     this.beam = new Beam(this.scene, { x: playerSpriteSrc.width / 2, y: 0 })
     this.add(this.beam.sprite)
 
@@ -84,8 +78,17 @@ export default class Player extends Phaser.GameObjects.Container {
     }, 200)
   }
 
+  public get energy () {
+    return this._energy
+  }
+
+  public set energy (value: number) {
+    this._energy = value
+    this.store.setPlayerEnergy(value)
+  }
+
   private get hasEnergy () {
-    return this.store.energy > this.energyDrainRate || this.store.debug.hasInfiniteEnergy
+    return this.energy >= this.energyDrainRate || this.store.debug.hasInfiniteEnergy
   }
 
   public get currentPosition () {
@@ -142,10 +145,6 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
-  move (x: number, y: number) {
-    this.setPosition(x, y)
-  }
-
   destroy(): void {
     if (this.beam) {
       this.scene.input.off('pointerdown', this.createBeam, this)
@@ -196,34 +195,6 @@ export default class Player extends Phaser.GameObjects.Container {
         this.velocity.y = Math.min(0, this.velocity.y + this.deceleration.y)
       }
     }
-  }
-
-  private teleport () {
-    let newX = this.x
-    let newY = this.y
-    
-    // Set full momentum in teleport direction
-    if (this.controls.left) {
-      newX -= this.teleportDistance
-      this.velocity.x = -this.maxVelocity.x
-    } else if (this.controls.right) {
-      newX += this.teleportDistance
-      this.velocity.x = this.maxVelocity.x
-    }
-
-    if (this.controls.up) {
-      newY -= this.teleportDistance
-      this.velocity.y = -this.maxVelocity.y
-    } else if (this.controls.down) {
-      newY += this.teleportDistance
-      this.velocity.y = this.maxVelocity.y
-    }
-    
-    // Move to new position
-    this.setPosition(
-      clamp(newX, 0, this.scene.scale.width - this.sprite.width),
-      clamp(newY, 0, this.scene.scale.height - this.sprite.height)
-    )
   }
 
   private handleDash () {

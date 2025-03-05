@@ -1,3 +1,5 @@
+import { GameScene } from '@/scenes'
+
 export const createTiledImage = (
   scene: Phaser.Scene,
   key: string,
@@ -26,3 +28,5 @@ export const createSpriteAnimation = (
     repeat: repeat
   })
 }
+
+export const isGameScene = (scene: Phaser.Scene): scene is GameScene => scene instanceof GameScene

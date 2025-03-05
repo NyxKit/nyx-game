@@ -9,10 +9,12 @@ const store = useGameStore()
 const { isGameOver, score } = storeToRefs(store)
 
 const onRestart = () => {
+  store.reset()
   store.setGameState(GameState.Playing)
 }
 
 const onMainMenu = () => {
+  store.reset()
   store.setGameState(GameState.Menu)
 }
 </script>

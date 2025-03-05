@@ -2,7 +2,7 @@ import { Scene } from 'phaser'
 import { EventBus, GameControls, Player, Background, Asteroid } from '@/classes'
 import useGameStore from '@/stores/game'
 import { clamp } from 'nyx-kit/utils'
-import { PowerUpType } from '@/types'
+import { GameState, PowerUpType } from '@/types'
 import type { KeyDict } from 'nyx-kit/types'
 import PowerUp from '@/classes/PowerUp'
 import { createSpriteAnimation } from '@/utils'
@@ -30,6 +30,15 @@ export class GameScene extends Scene {
     this.scene.restart()
   }
 
+  public togglePaused () {
+    this.store.togglePaused()
+    if (this.store.isPaused) {
+      this.scene.pause()
+    } else {
+      this.scene.resume()
+    }
+  }
+
   create () {
     if (!this.input.keyboard) {
       throw new Error('No keyboard input found')
@@ -50,16 +59,17 @@ export class GameScene extends Scene {
 
   update (time: number, delta: number) {
     if (!this.player || !this.background) return
+    if (this.store.isPaused) return
 
     this.velocity = 1 + Math.log10(Math.max(1, this.store.score / 1000)) * 2 + Math.pow(this.store.score / 1000, 1.1)
     this.velocity = clamp(this.velocity, 1, 15)
 
-    if (!this.store.isPlaying) {
+    if (!this.store.isInGame) {
       this.background.update(this.velocity)
       return
     }
 
-    if (this.store.isPaused) return
+    if (!this.store.isPlaying) return
 
     const playerPos = this.player.currentPosition
 
@@ -76,6 +86,7 @@ export class GameScene extends Scene {
 
     if (asteroid) {
       if (this.player?.isDashing) {
+        this.player.hp -= asteroid.hp * 0.1
         asteroid.destroy(true)
       } else {
         this.player.hp -= 10
@@ -180,23 +191,23 @@ export class GameScene extends Scene {
 
   private onDestroyPowerUp (id: string, options?: KeyDict<any>) {
     this.powerUps = this.powerUps.filter((powerUp) => powerUp.id !== id)
-    if (!options?.isDestroyedByPlayer) return
+    if (!options?.isDestroyedByPlayer || !this.player) return
     switch (options.type) {
       case PowerUpType.Hp:
-        this.store.increaseHp(1)
+        this.player.hp += 1
         break
       case PowerUpType.HpCrystal:
-        this.store.increaseHp(20)
+        this.player.hp += 20
         break
       case PowerUpType.Energy:
-        this.store.increaseEnergy(5)
+        this.player.energy += 5
         break
       case PowerUpType.EnergyCrystal:
-        this.store.increaseEnergy(25)
+        this.player.energy += 25
         break
       default:
-        this.store.increaseHp(1)
-        this.store.increaseEnergy(5)
+        this.player.hp += 1
+        this.player.energy += 5
         break
     }
   }

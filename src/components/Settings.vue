@@ -4,8 +4,17 @@ import { NyxCheckbox, NyxForm, NyxFormField, NyxModal, NyxSlider } from 'nyx-kit
 import useInterfaceStore from '@/stores/interface'
 import useSettingsStore from '@/stores/settings'
 import { NyxShape } from 'nyx-kit/types'
+import { watch } from 'vue'
 
 const { isFullscreen, musicVolume, sfxVolume } = storeToRefs(useSettingsStore())
+
+watch(isFullscreen, (newVal) => {
+  if (newVal) {
+    document.documentElement.requestFullscreen()
+  } else {
+    document.exitFullscreen()
+  }
+})
 
 </script>
 

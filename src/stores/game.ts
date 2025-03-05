@@ -1,7 +1,8 @@
 import { Debug } from '@/classes'
 import type { GameScene } from '@/scenes'
 import { GameState } from '@/types'
-import { clampDecrease, clampIncrease } from '@/utils/number'
+import { isGameScene } from '@/utils'
+import { clamp } from 'nyx-kit/utils'
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 
@@ -18,11 +19,8 @@ const useGameStore = defineStore('game', () => {
   const setGameState = (newState: GameState) => state.value = newState
   const increaseScore = (amount: number = 1) => score.value += amount
 
-  const setPlayerHp = (value: number) => hp.value = value
-  const increaseHp = (amount?: number) => hp.value = clampIncrease(hp.value, amount ?? 1, 0, 100)
-  const decreaseHp = (amount?: number) => hp.value = clampDecrease(hp.value, amount ?? 1, 0, 100)
-  const increaseEnergy = (amount?: number) => energy.value = clampIncrease(energy.value, amount ?? 1, 0, 100)
-  const decreaseEnergy = (amount?: number) => energy.value = clampDecrease(energy.value, amount ?? 1, 0, 100)
+  const setPlayerHp = (value: number) => hp.value = clamp(value, 0, 100)
+  const setPlayerEnergy = (value: number) => energy.value = clamp(value, 0, 100)
 
   const setPreloadProgress = (progress: number) => preloadProgress.value = progress
   const setCurrentScene = (scene: Phaser.Scene) => currentScene.value = scene
@@ -42,6 +40,16 @@ const useGameStore = defineStore('game', () => {
   const isPreloading = computed(() => state.value === GameState.Preload)
   const isInMenu = computed(() => state.value === GameState.Menu)
   const isGameOver = computed(() => state.value === GameState.GameOver)
+  const isInGame = computed(() => isPlaying.value || isPaused.value)
+
+  const reset = () => {
+    hp.value = 100
+    energy.value = 20
+    score.value = 0
+    if (currentScene.value && isGameScene(currentScene.value)) {
+      currentScene.value.reset()
+    }
+  }
 
   watch(hp, (newVal) => {
     if (state.value !== GameState.Playing) return
@@ -52,33 +60,28 @@ const useGameStore = defineStore('game', () => {
   watch(state, (newVal, oldVal) => {
     if (oldVal === GameState.Paused) return
     if (newVal !== GameState.Playing) return
-    hp.value = 100
-    energy.value = 20
-    score.value = 0
-    const scene = currentScene.value as GameScene
-    scene.reset()
+    reset()
   })
 
   return {
     currentScene,
     debug,
-    decreaseEnergy,
-    decreaseHp,
     energy,
     hp,
-    increaseEnergy,
-    increaseHp,
     increaseScore,
     isGameOver,
+    isInGame,
     isInMenu,
     isPaused,
     isPlaying,
     isPreloading,
     playerPosition,
     preloadProgress,
+    reset,
     score,
     setCurrentScene,
     setGameState,
+    setPlayerEnergy,
     setPlayerHp,
     setPreloadProgress,
     setPlayerPosition,
