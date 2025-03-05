@@ -10,6 +10,7 @@ import type { GameScene } from '@/scenes'
 
 const gameStore = useGameStore()
 const { debug, playerPosition, hp, score, state, energy, currentScene } = storeToRefs(gameStore)
+const { setPlayerHp, setPlayerEnergy } = gameStore
 
 const nyxButton = useTemplateRef<DefineComponent>('nyxButton')
 const nyxCard = useTemplateRef<DefineComponent>('nyxCard')
@@ -25,21 +26,22 @@ const { cssVariables } = useTeleportPosition(nyxButton, nyxCard, {
 
 const toggleDebug = (value?: boolean) => {
   isDebugPanelVisible.value = value === undefined ? !isDebugPanelVisible.value : value
+  nyxButton.value?.$el?.blur()
 }
-
-const computedHp = computed({
-  get: () => hp.value.toString(),
-  set: (value: string) => hp.value = parseInt(value)
-})
 
 const computedScore = computed({
   get: () => score.value.toString(),
   set: (value: string) => score.value = parseInt(value)
 })
 
+const computedHp = computed({
+  get: () => hp.value.toString(),
+  set: (value: string) => setPlayerHp(parseInt(value))
+})
+
 const computedEnergy = computed({
   get: () => energy.value.toString(),
-  set: (value: string) => energy.value = parseInt(value)
+  set: (value: string) => setPlayerEnergy(parseInt(value))
 })
 
 const pos = computed(() => ({

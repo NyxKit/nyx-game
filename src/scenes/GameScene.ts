@@ -7,6 +7,7 @@ import type { KeyDict } from 'nyx-kit/types'
 import PowerUp from '@/classes/PowerUp'
 import { createSpriteAnimation } from '@/utils'
 import { Audio } from '@/classes/Audio'
+import config from '@/config'
 
 export class GameScene extends Scene {
   private controls: GameControls | null = null
@@ -133,7 +134,7 @@ export class GameScene extends Scene {
   }
 
   private trySpawnAsteroid () {
-    const spawnRate = this.store.debug.isImmortal ? 1000 : 3000 / this.velocity
+    const spawnRate = config.asteroid.baseSpawnRate / this.velocity
     const timeSinceLastSpawn = this.time.now - this.lastSpawnTime
 
     if (timeSinceLastSpawn >= spawnRate) {
@@ -197,20 +198,20 @@ export class GameScene extends Scene {
     if (!options?.isDestroyedByPlayer || !this.player) return
     switch (options.type) {
       case PowerUpType.Hp:
-        this.player.hp += 1
+        this.player.hp += config.powerUp.hpSmall
         break
       case PowerUpType.HpCrystal:
-        this.player.hp += 20
+        this.player.hp += config.powerUp.hpLarge
         break
       case PowerUpType.Energy:
-        this.player.energy += 5
+        this.player.energy += config.powerUp.energySmall
         break
       case PowerUpType.EnergyCrystal:
-        this.player.energy += 25
+        this.player.energy += config.powerUp.energyLarge
         break
       default:
-        this.player.hp += 1
-        this.player.energy += 5
+        this.player.hp += config.powerUp.hpSmall
+        this.player.energy += config.powerUp.energySmall
         break
     }
   }

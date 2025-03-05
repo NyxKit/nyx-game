@@ -40,6 +40,7 @@ const onClickHp = () => {
       :max="100"
       :size="NyxSize.XLarge"
       :theme="NyxTheme.Danger"
+      showValue="start"
     />
     <span class="game-interface__score" @click="onClickHp">{{ score }}</span>
     <NyxProgress
@@ -48,6 +49,7 @@ const onClickHp = () => {
       :max="100"
       :size="NyxSize.XLarge"
       :theme="NyxTheme.Secondary"
+      showValue="start"
     />
   </header>
 </template>

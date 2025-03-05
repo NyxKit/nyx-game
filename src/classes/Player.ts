@@ -9,8 +9,6 @@ import config from '@/config'
 export default class Player extends Phaser.GameObjects.Container {
   public sprite: GameObjects.Image
   public scene: GameScene
-  public _hp: number = config.player.hpStart
-  public _energy: number = config.player.energyStart
   private controls: GameControls
   private store = useGameStore()
   private velocity = {
@@ -30,7 +28,7 @@ export default class Player extends Phaser.GameObjects.Container {
     y: config.player.deceleration
   }
   public beam: Beam | null = null
-  private energyDrainRate = 0.1 // Energy drain per frame while shooting
+  private energyDrainRate = config.player.energyDrainRate // Energy drain per frame while shooting
 
   public isDashing: boolean = false
   private dashDistance: number = config.player.dashDistance
@@ -62,13 +60,14 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   public get hp () {
-    return this._hp
+    return this.store.hp
   }
 
   public set hp (value: number) {
-    const isDamage = value < this._hp
-    this._hp = clamp(value, 0, config.player.hpMax)
-    this.store.setPlayerHp(this._hp)
+    if (this.store.debug.isImmortal) return
+    const isDamage = value < this.hp
+    const hp = clamp(value, 0, config.player.hpMax)
+    this.store.setPlayerHp(hp)
     if (!isDamage) return
     this.sprite.setTint(config.player.colorDamage)
     this.sprite.setPipeline('glow')
@@ -79,12 +78,13 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   public get energy () {
-    return this._energy
+    return this.store.energy
   }
 
   public set energy (value: number) {
-    this._energy = clamp(value, 0, config.player.energyMax)
-    this.store.setPlayerEnergy(this._energy)
+    if (this.store.debug.hasInfiniteEnergy) return
+    const energy = clamp(value, 0, config.player.energyMax)
+    this.store.setPlayerEnergy(energy)
   }
 
   private get hasEnergy () {
@@ -139,7 +139,7 @@ export default class Player extends Phaser.GameObjects.Container {
 
     if (this.hasEnergy && this.beam?.isActive) {
       this.beam.handleScaling()
-      this.store.energy -= this.energyDrainRate
+      this.energy -= this.energyDrainRate
     } else if (this.beam?.isActive) {
       this.beam.end()
     }

@@ -1,4 +1,5 @@
 import { Debug } from '@/classes'
+import config from '@/config'
 import type { GameScene } from '@/scenes'
 import { GameState } from '@/types'
 import { isGameScene } from '@/utils'
@@ -13,14 +14,14 @@ const useGameStore = defineStore('game', () => {
   const currentScene = ref<Phaser.Scene>()
   const playerPosition = ref({ x: 0, y: 0 })
   const score = ref(0)
-  const hp = ref(0)
-  const energy = ref(0)
+  const hp = ref(config.player.hpStart)
+  const energy = ref(config.player.energyStart)
 
   const setGameState = (newState: GameState) => state.value = newState
   const increaseScore = (amount: number = 1) => score.value += amount
 
-  const setPlayerHp = (value: number) => hp.value = clamp(value, 0, 100)
-  const setPlayerEnergy = (value: number) => energy.value = clamp(value, 0, 100)
+  const setPlayerHp = (value: number) => hp.value = clamp(value, 0, config.player.hpMax)
+  const setPlayerEnergy = (value: number) => energy.value = clamp(value, 0, config.player.energyMax)
 
   const setPreloadProgress = (progress: number) => preloadProgress.value = progress
   const setCurrentScene = (scene: Phaser.Scene) => currentScene.value = scene
@@ -43,8 +44,8 @@ const useGameStore = defineStore('game', () => {
   const isInGame = computed(() => isPlaying.value || isPaused.value)
 
   const reset = () => {
-    hp.value = 100
-    energy.value = 20
+    hp.value = config.player.hpStart
+    energy.value = config.player.energyStart
     score.value = 0
     if (currentScene.value && isGameScene(currentScene.value)) {
       currentScene.value.reset()
