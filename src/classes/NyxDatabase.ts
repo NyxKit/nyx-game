@@ -38,13 +38,13 @@ export default class NyxDatabase {
         this.subscriptions[key].destroy = destroyFn
       }
     } catch (error) {
-      console.error('Error subscribing to feature flags:', error)
+      console.error(`Error subscribing to key "${key}":`, error)
     }
   }
 
   unsubscribe = (key: string, cleanup?: () => void) => {
     if (!this.subscriptions[key]) {
-      console.warn(`You should not unsubscribe if you have not yet subscribed to ${key}`)
+      console.warn(`You should not unsubscribe if you have not yet subscribed to key "${key}".`)
       return
     }
 
@@ -56,7 +56,7 @@ export default class NyxDatabase {
       destroyFn()
       cleanup?.()
     } else {
-      console.warn('Unsubscribe called while subscribe is waiting to complete. Key:', key)
+      console.warn(`Unsubscribe called with key "${key}" while subscribe is waiting to complete.`)
     }
   }
 
@@ -72,7 +72,9 @@ export default class NyxDatabase {
     collectionName: NyxCollection,
     converter?: FirestoreDataConverter<T>
     ) => {
-    return converter ? collection(this.db, collectionName).withConverter(converter) : (collection(this.db, collectionName) as CollectionReference<T>)
+    return !!converter
+      ? collection(this.db, collectionName).withConverter(converter)
+      : collection(this.db, collectionName) as CollectionReference<T>
   }
 
   public getDocRef = <T = DocumentData>(
@@ -81,8 +83,12 @@ export default class NyxDatabase {
     converter?: FirestoreDataConverter<T>
   ) => {
     const colRef = this.getCollectionRef<T>(collectionName)
-    if (docId !== null) return converter ? doc(colRef, docId).withConverter(converter) : (doc(colRef, docId) as DocumentReference<T>)
-    else return converter ? doc(colRef).withConverter(converter) : (doc(colRef) as DocumentReference<T>)
+    if (docId !== null) return !!converter
+      ? doc(colRef, docId).withConverter(converter)
+      : doc(colRef, docId) as DocumentReference<T>
+    else return !!converter
+      ? doc(colRef).withConverter(converter)
+      : doc(colRef) as DocumentReference<T>
   }
 
   public getSnapshot = async <T = DocumentData>(
@@ -100,30 +106,23 @@ export default class NyxDatabase {
     converter?: FirestoreDataConverter<T>
   ) => {
     const docSnap = await this.getSnapshot<T>(collectionName, docId, converter)
-    if (!docSnap.exists()) {
-      console.error(`There is no document with collection: ${collectionName}, id: ${docId}`)
-      return null
-    }
-    return docSnap.data()
+    if (docSnap.exists()) return docSnap.data()
+    console.error(`There is no document with id "${docId}" in collection "${collectionName}".`)
+    return null
   }
 
   public getDocDataByRef = async <T = DocumentData>(ref: DocumentReference<T>) => {
     const docSnap = await getDoc<T, DocumentData>(ref)
-    if (!docSnap.exists()) {
-      console.error(`There is no document with reference: ${ref.id}`)
-      return undefined
-    }
-    return docSnap.data()
+    if (docSnap.exists()) return docSnap.data()
+    console.error(`No document found with reference id "${ref.id}".`)
+    return undefined
   }
 
   public getDocDataByQuery = async <T = DocumentData>(query: Query<T>) => {
     const querySnap = await getDocs(query)
-    if (querySnap.empty) {
-      console.error(`There is no document with query: ${query}`)
-      return []
-    } else {
-      return querySnap.docs.map(doc => doc.data())
-    }
+    if (!querySnap.empty) return querySnap.docs.map((doc) => doc.data())
+    console.error(`No document(s) found using query "${query}".`)
+    return []
   }
 
   public getCollectionData = async <T = DocumentData>(
@@ -132,12 +131,9 @@ export default class NyxDatabase {
   ) => {
     const colRef = this.getCollectionRef<T>(collectionName, converter)
     const querySnap = await getDocs<T, DocumentData>(colRef as Query<T>)
-    if (querySnap.empty) {
-      console.error(`There is no document with collectionName: ${collectionName}`)
-      return []
-    } else {
-      return querySnap.docs.map(doc => doc.data())
-    }
+    if (!querySnap.empty) return querySnap.docs.map((doc) => doc.data())
+    console.error(`Collection "${collectionName}" is empty.`)
+    return []
   }
 
   private getData<T>(snapshot: QueryDocumentSnapshot<DocumentData>, converter?: FirestoreDataConverter<T>) {
@@ -159,7 +155,7 @@ export default class NyxDatabase {
     callback: (data: T[]) => void,
     converter?: FirestoreDataConverter<T>
   ) {
-    const queryData = snapshot.docs.map(doc => this.getData(doc, converter))
+    const queryData = snapshot.docs.map((doc) => this.getData(doc, converter))
     callback(queryData)
   }
 }
