@@ -19,6 +19,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "firebase": "^11.4.0",
     "nyx-kit": "^1.0.0",
     "phaser": "^3.88.2",
     "pinia": "^3.0.1",
