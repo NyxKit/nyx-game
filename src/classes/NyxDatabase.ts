@@ -28,18 +28,17 @@ export default class NyxDatabase {
     }
 
     this.subscriptions[key].count += 1
-    if (this.subscriptions[key].count === 1) {
-      try {
-        if (docRef) {
-          const destroyFn = onSnapshot(docRef, (doc) => this.handleDocSnapshot(doc, callback, converter), error)
-          this.subscriptions[key].destroy = destroyFn
-        } else if (queryRef) {
-          const destroyFn = onSnapshot(queryRef, (snapshot) => this.handleQuerySnapshot(snapshot, callback, converter), error)
-          this.subscriptions[key].destroy = destroyFn
-        }
-      } catch (error) {
-        console.error('Error subscribing to feature flags:', error)
+    if (this.subscriptions[key].count !== 1) return
+    try {
+      if (docRef) {
+        const destroyFn = onSnapshot(docRef, (doc) => this.handleDocSnapshot(doc, callback, converter), error)
+        this.subscriptions[key].destroy = destroyFn
+      } else if (queryRef) {
+        const destroyFn = onSnapshot(queryRef, (snapshot) => this.handleQuerySnapshot(snapshot, callback, converter), error)
+        this.subscriptions[key].destroy = destroyFn
       }
+    } catch (error) {
+      console.error('Error subscribing to feature flags:', error)
     }
   }
 
@@ -50,15 +49,14 @@ export default class NyxDatabase {
     }
 
     this.subscriptions[key].count -= 1
-    if (this.subscriptions[key].count === 0) {
-      const destroyFn = this.subscriptions[key].destroy
-      if (destroyFn) {
-        delete this.subscriptions[key]
-        destroyFn()
-        if (cleanup) cleanup()
-      } else {
-        console.warn('Unsubscribe called while subscribe is waiting to complete. Key:', key)
-      }
+    if (this.subscriptions[key].count !== 0) return
+    const destroyFn = this.subscriptions[key].destroy
+    if (destroyFn) {
+      delete this.subscriptions[key]
+      destroyFn()
+      cleanup?.()
+    } else {
+      console.warn('Unsubscribe called while subscribe is waiting to complete. Key:', key)
     }
   }
 
@@ -68,29 +66,6 @@ export default class NyxDatabase {
 
   public getRunningKeys (prefix: string = '') {
     return this.runningKeys.filter((key) => key.startsWith(prefix))
-  }
-
-  private getData<T>(snapshot: QueryDocumentSnapshot<DocumentData>, converter?: FirestoreDataConverter<T>) {
-    return converter ? converter.fromFirestore(snapshot) : (snapshot.data() as T)
-  }
-
-  private handleDocSnapshot<T>(
-    doc: DocumentSnapshot<DocumentData>,
-    callback: (data: T) => void,
-    converter?: FirestoreDataConverter<T>
-  ) {
-    if (!doc.exists()) return
-    const docData = this.getData(doc, converter)
-    if (docData) callback(docData)
-  }
-
-  private handleQuerySnapshot<T>(
-    snapshot: { docs: QueryDocumentSnapshot<DocumentData>[] },
-    callback: (data: T[]) => void,
-    converter?: FirestoreDataConverter<T>
-  ) {
-    const queryData = snapshot.docs.map(doc => this.getData(doc, converter))
-    callback(queryData)
   }
   
   public getCollectionRef = <T = DocumentData>(
@@ -163,5 +138,28 @@ export default class NyxDatabase {
     } else {
       return querySnap.docs.map(doc => doc.data())
     }
+  }
+
+  private getData<T>(snapshot: QueryDocumentSnapshot<DocumentData>, converter?: FirestoreDataConverter<T>) {
+    return converter ? converter.fromFirestore(snapshot) : (snapshot.data() as T)
+  }
+
+  private handleDocSnapshot<T>(
+    doc: DocumentSnapshot<DocumentData>,
+    callback: (data: T) => void,
+    converter?: FirestoreDataConverter<T>
+  ) {
+    if (!doc.exists()) return
+    const docData = this.getData(doc, converter)
+    if (docData) callback(docData)
+  }
+
+  private handleQuerySnapshot<T>(
+    snapshot: { docs: QueryDocumentSnapshot<DocumentData>[] },
+    callback: (data: T[]) => void,
+    converter?: FirestoreDataConverter<T>
+  ) {
+    const queryData = snapshot.docs.map(doc => this.getData(doc, converter))
+    callback(queryData)
   }
 }
