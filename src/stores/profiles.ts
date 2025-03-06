@@ -19,7 +19,7 @@ const useProfilesStore = defineStore('profiles', () => {
       queryRef: query(collection).withConverter(Profile.Converter),
       callback: updateProfiles,
       error: (error) => {
-        console.error('Error in subscription to profiles', error)
+        console.error('Error in subscription to profiles.', error)
       }
     })
   }
@@ -28,7 +28,15 @@ const useProfilesStore = defineStore('profiles', () => {
     nyxDatabase.unsubscribe('profiles')
   }
 
-  return { profiles, subscribeProfiles, unsubscribeProfiles }
+  const addNewProfile = async (profile: Profile) => {
+    await nyxDatabase.addDocument(NyxCollection.Profiles, profile, Profile.Converter)
+  }
+
+  const updateProfile = async (profile: Profile) => {
+    await nyxDatabase.setDocument(NyxCollection.Profiles, profile.id, profile, Profile.Converter)
+  }
+
+  return { profiles, addNewProfile, updateProfile, subscribeProfiles, unsubscribeProfiles }
 })
 
 export default useProfilesStore

@@ -1,3 +1,4 @@
+import { GameMode } from '@/types'
 import type { QueryDocumentSnapshot } from 'firebase/firestore'
 import { NyxLoader } from 'nyx-kit/classes'
 
@@ -6,13 +7,17 @@ export default class Hiscore {
   public score: number = 0
   public timestamp: Date = new Date()
   public userId: string = ''
+  public version: string = '0.0.0'
+  public gameMode: GameMode = GameMode.Normal
 
   constructor (data?: unknown) {
     if (!data) return
-    this.id = NyxLoader.loadString(data, 'id')
-    this.score = NyxLoader.loadNumber(data, 'score')
-    // this.timestamp = NyxLoader.loadDate(data, 'timestamp')
-    this.userId = NyxLoader.loadString(data, 'userId')
+    this.id = NyxLoader.loadString(data, 'id', this.id)
+    this.score = NyxLoader.loadNumber(data, 'score', this.score)
+    // this.timestamp = NyxLoader.loadDate(data, 'timestamp', this.timestamp)
+    this.userId = NyxLoader.loadString(data, 'userId', this.userId)
+    this.version = NyxLoader.loadString(data, 'version', this.version)
+    this.gameMode = NyxLoader.loadEnum(data, 'gameMode', this.gameMode, Object.values(GameMode))
   }
 
   public getRawData() {
@@ -20,6 +25,8 @@ export default class Hiscore {
       score: this.score,
       timestamp: this.timestamp,
       userId: this.userId,
+      version: this.version,
+      gameMode: this.gameMode
     }
   }
 

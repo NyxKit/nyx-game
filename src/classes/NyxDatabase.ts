@@ -1,7 +1,12 @@
 
 import { NyxCollection } from '@/types'
-import { getFirestore, doc, getDoc, getDocs, collection, onSnapshot } from 'firebase/firestore'
-import type { Query, DocumentData, CollectionReference, FirestoreDataConverter, DocumentReference, FirestoreError, QueryDocumentSnapshot, DocumentSnapshot, QuerySnapshot } from 'firebase/firestore'
+import type { KeyDict } from 'nyx-kit/types'
+import { getFirestore, doc, getDoc, getDocs, collection, onSnapshot, addDoc, setDoc, updateDoc } from 'firebase/firestore'
+import type {
+  Query, DocumentData, CollectionReference, FirestoreDataConverter, DocumentReference, FirestoreError,
+  QueryDocumentSnapshot, DocumentSnapshot,
+  WithFieldValue
+} from 'firebase/firestore'
 
 interface NyxSubscription {
   key: string
@@ -20,7 +25,27 @@ interface NyxSubscriptionParams<T> {
 
 export default class NyxDatabase {
   private db = getFirestore()
-  private subscriptions: { [key: string]: NyxSubscription } = {}
+  private subscriptions: KeyDict<NyxSubscription> = {}
+
+  public getRunningKeys (prefix: string = '') {
+    return Object.keys(this.subscriptions).filter((key) => key.startsWith(prefix))
+  }
+
+  async addDocument<T>(collectionName: NyxCollection, data: T, converter?: FirestoreDataConverter<T>) {
+    const colRef = this.getCollectionRef(collectionName)
+    const docData = converter ? converter.toFirestore(data) : data as WithFieldValue<DocumentData>
+    await addDoc(colRef, docData)
+  }
+
+  async setDocument<T>(collectionName: NyxCollection, docId: string, data: T, converter?: FirestoreDataConverter<T>) {
+    const docRef = this.getDocRef(collectionName, docId, converter)
+    await setDoc(docRef, data)
+  }
+
+  async updateDocument<T>(collectionName: NyxCollection, docId: string, data: Partial<T>, converter?: FirestoreDataConverter<T>) {
+    const docRef = this.getDocRef(collectionName, docId, converter)
+    await updateDoc(docRef, data)
+  }
 
   async subscribe<T>({ key, docRef, queryRef, callback, error, converter }: NyxSubscriptionParams<T>) {
     if (this.subscriptions[key] === undefined) {
@@ -58,14 +83,6 @@ export default class NyxDatabase {
     } else {
       console.warn(`Unsubscribe called with key "${key}" while subscribe is waiting to complete.`)
     }
-  }
-
-  public get runningKeys() {
-    return Object.keys(this.subscriptions)
-  }
-
-  public getRunningKeys (prefix: string = '') {
-    return this.runningKeys.filter((key) => key.startsWith(prefix))
   }
   
   public getCollectionRef = <T = DocumentData>(

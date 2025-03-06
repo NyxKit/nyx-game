@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { query, where } from 'firebase/firestore'
+import { addDoc, query, where } from 'firebase/firestore'
 import { NyxCollection } from '@/types'
 import Hiscore from '@/classes/Hiscore'
 import { nyxDatabase } from '@/main'
@@ -19,7 +19,7 @@ const useHiscoresStore = defineStore('hiscores', () => {
       queryRef: query(collection).withConverter(Hiscore.Converter),
       callback: updateHiscores,
       error: (error) => {
-        console.error('Error in subscription to hiscores', error)
+        console.error('Error in subscription to hiscores.', error)
       }
     })
   }
@@ -28,7 +28,11 @@ const useHiscoresStore = defineStore('hiscores', () => {
     nyxDatabase.unsubscribe('hiscores')
   }
 
-  return { hiscores, subscribeHiscores, unsubscribeHiscores }
+  const addNewHiscore = async (hiscore: Hiscore) => {
+    await nyxDatabase.addDocument(NyxCollection.Hiscores, hiscore, Hiscore.Converter)
+  }
+
+  return { hiscores, addNewHiscore, subscribeHiscores, unsubscribeHiscores }
 })
 
 export default useHiscoresStore

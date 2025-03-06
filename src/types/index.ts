@@ -10,6 +10,13 @@ export enum GameState {
   GameOver = 'gameover',
 }
 
+export enum GameMode {
+  Normal = 'normal',
+  Story = 'story',
+  TimeTrial = 'time-trial',
+  Battle = 'battle',
+}
+
 export type OnDestroyEvent = (id: string, options?: KeyDict<any>) => void
 
 export enum PowerUpType {
