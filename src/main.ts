@@ -6,6 +6,7 @@ import App from './App.vue'
 import { initializeApp } from 'firebase/app'
 import { initializeFirestore } from 'firebase/firestore'
 import { getAnalytics } from 'firebase/analytics'
+import NyxDatabase from './classes/NyxDatabase'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -20,11 +21,11 @@ const firebaseApp = initializeApp(firebaseConfig)
 const firestore = initializeFirestore(firebaseApp, { ignoreUndefinedProperties: true })
 const analytics = getAnalytics(firebaseApp)
 
+const nyxDatabase = new NyxDatabase()
+
 const app = createApp(App)
+  .use(createPinia())
+  .use(NyxKit, { pixel: true })
+  .mount('#app')
 
-app.use(createPinia())
-app.use(NyxKit, { pixel: true })
-
-app.mount('#app')
-
-export { firestore, analytics }
+export { app, firestore, analytics, nyxDatabase }

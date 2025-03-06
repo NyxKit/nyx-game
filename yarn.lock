@@ -3232,9 +3232,9 @@ nwsapi@^2.2.16:
   integrity sha512-F1I/bimDpj3ncaNDhfyMWuFqmQDBwDB0Fogc2qpL3BWvkQteFD/8BzWuIRl83rq0DXfm8SGt/HFhLXZyljTXcQ==
 
 nyx-kit@^1.0.0:
-  version "1.1.16"
-  resolved "https://registry.yarnpkg.com/nyx-kit/-/nyx-kit-1.1.16.tgz#ec63888f3dc85a63e357cac428d4a4a12173d277"
-  integrity sha512-SHE377t4+sd/AyxwDz1aKLnbwWQf45214XMGBkVmwZN3GX/LXr96Zw6Le9b9DZ+7adNCgfaJQ4gcT3YlFp5IgA==
+  version "1.1.17"
+  resolved "https://registry.yarnpkg.com/nyx-kit/-/nyx-kit-1.1.17.tgz#accdb3029d8d59e2e8ce5e1f97e2c80ca2008b0e"
+  integrity sha512-iFF0rO9ihwXlAPfOHtEn1lmBHs1pQvV3blpCUbR/1l3M1EX8ABMXU7sEJUTenNgFIszpU9LvQcH6qrj1QGcJ/w==
   dependencies:
     vue "^3.5.13"
 
