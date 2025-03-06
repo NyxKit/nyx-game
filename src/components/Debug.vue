@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import useGameStore from '@/stores/game'
 import { storeToRefs } from 'pinia'
-import { NyxButton, NyxCard, NyxForm, NyxFormField, NyxInput, NyxSelect, NyxCheckbox } from 'nyx-kit/components'
+import { NyxButton, NyxCard, NyxForm, NyxFormField, NyxInput, NyxSelect, NyxCheckbox, NyxModal } from 'nyx-kit/components'
 import { NyxPosition, NyxSize, NyxTheme, NyxInputType } from 'nyx-kit/types'
 import { useTeleportPosition } from 'nyx-kit/compositions'
-import { computed, ref, toRaw, useTemplateRef, type DefineComponent } from 'vue'
+import { computed, ref, toRaw, useTemplateRef, type DefineComponent, onMounted, onUnmounted, watch } from 'vue'
 import { GameState } from '@/types'
 import type { GameScene } from '@/scenes'
+import { firestore } from '@/main'
+import { enableNetwork, disableNetwork } from 'firebase/firestore'
+import config from '@/config'
 
 const gameStore = useGameStore()
 const { debug, playerPosition, hp, score, state, energy, currentScene } = storeToRefs(gameStore)
@@ -15,7 +18,22 @@ const { setPlayerHp, setPlayerEnergy } = gameStore
 const nyxButton = useTemplateRef<DefineComponent>('nyxButton')
 const nyxCard = useTemplateRef<DefineComponent>('nyxCard')
 
+const isConfigModalVisible = ref(false)
 const isDebugPanelVisible = ref(false)
+const _isOnline = ref(true)
+const isOnline = computed({
+  get () {
+    return _isOnline.value
+  },
+  async set (value: boolean) {
+    if (value) {
+      await enableNetwork(firestore)
+    } else {
+      await disableNetwork(firestore)
+    }
+    _isOnline.value = value
+  }
+})
 
 const { cssVariables } = useTeleportPosition(nyxButton, nyxCard, {
   gap: ref(NyxSize.XLarge),
@@ -25,6 +43,7 @@ const { cssVariables } = useTeleportPosition(nyxButton, nyxCard, {
 })
 
 const toggleDebug = (value?: boolean) => {
+  isConfigModalVisible.value = false
   isDebugPanelVisible.value = value === undefined ? !isDebugPanelVisible.value : value
   nyxButton.value?.$el?.blur()
 }
@@ -61,6 +80,8 @@ const disableDebug = () => {
   debug.value.isEnabled = false
 }
 
+watch(state, () => isConfigModalVisible.value = false)
+
 </script>
 
 <template>
@@ -73,6 +94,9 @@ const disableDebug = () => {
       tabindex="-1"
       @click="toggleDebug"
     >Debog</NyxButton>
+    <NyxModal v-model="isConfigModalVisible" title="Config">
+      <pre>{{ config }}</pre>
+    </NyxModal>
     <Teleport to="body">
       <NyxCard
         class="debug__card"
@@ -104,7 +128,11 @@ const disableDebug = () => {
           <NyxFormField #default="{ id }">
             <NyxCheckbox :id="id" v-model="debug.isCollisionDisabled" label="Disable Collision" />
           </NyxFormField>
+          <NyxFormField #default="{ id }">
+            <NyxCheckbox :id="id" v-model="isOnline" label="Firestore Online" />
+          </NyxFormField>
           <NyxButton class="debug__card-button" @click="addAsteroid">Spawn Asteroid</NyxButton>
+          <NyxButton class="debug__card-button" @click="isConfigModalVisible = true">View config</NyxButton>
           <NyxButton class="debug__card-button" @click="disableDebug">Disable debug</NyxButton>
         </NyxForm>
       </NyxCard>
@@ -166,6 +194,16 @@ const disableDebug = () => {
       pre {
         flex: 1;
       }
+    }
+
+    &-connection {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--nyx-c-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-size: 12px;
     }
   }
 </style>

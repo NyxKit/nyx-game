@@ -5,7 +5,7 @@ import { NyxProgress } from 'nyx-kit/components'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import { storeToRefs } from 'pinia'
 
-const { hp, energy, score, isPlaying, isPaused, debug } = storeToRefs(useGameStore())
+const { hp, energy, score, isPlaying, isPaused, debug, isInGame } = storeToRefs(useGameStore())
 
 const interval = ref<number | null>(null)
 const numClicksDebug = ref(0)
@@ -33,7 +33,7 @@ const onClickHp = () => {
 </script>
 
 <template>
-  <header class="game-interface">
+  <header class="game-interface" v-if="isInGame">
     <NyxProgress
       class="game-interface__progress"
       :modelValue="hp"

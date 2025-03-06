@@ -69,6 +69,10 @@ export default class Asteroid implements AsteroidOptions {
     this.sprite.setTint(Phaser.Display.Color.GetColor(tint.r, tint.g, tint.b))
   }
 
+  public get damage () {
+    return this.hp * config.asteroid.damageMultiplier
+  }
+
   private get speed () {
     const healthRatio = this.hp / this.maxHp
     const speed = this.minSpeed + ((this.maxSpeed - this.minSpeed) * healthRatio)

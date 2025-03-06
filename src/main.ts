@@ -26,3 +26,5 @@ app.use(createPinia())
 app.use(NyxKit, { pixel: true })
 
 app.mount('#app')
+
+export { firestore, analytics }

@@ -66,7 +66,7 @@ export class GameScene extends Scene {
     if (this.store.isPaused) return
 
     this.velocity = 1 + Math.log10(Math.max(1, this.store.score / 1000)) * 2 + Math.pow(this.store.score / 1000, 1.1)
-    this.velocity = clamp(this.velocity, 1, 15)
+    this.velocity = clamp(this.velocity, 1, 20)
 
     if (!this.store.isInGame) {
       this.background.update(this.velocity)
@@ -90,10 +90,10 @@ export class GameScene extends Scene {
 
     if (asteroid) {
       if (this.player?.isDashing) {
-        this.player.hp -= asteroid.hp * 0.1
+        this.player.hp -= asteroid.damage * config.player.dashDamageReduction
         asteroid.destroy(true)
       } else {
-        this.player.hp -= 10
+        this.player.hp -= asteroid.damage
         asteroid.destroy(false)
       }
     }
