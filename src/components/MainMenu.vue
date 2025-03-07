@@ -3,11 +3,13 @@ import { NyxButton } from 'nyx-kit/components'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useInterfaceStore from '@/stores/interface'
 import useGameStore from '@/stores/game'
+import useProfilesStore from '@/stores/profiles'
 import { GameState } from '@/types'
 import useAuthStore from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 
 const authStore = useAuthStore()
+const { profile } = storeToRefs(useProfilesStore())
 const { toggleHiscores, toggleSettings } = useInterfaceStore()
 const { setGameState } = useGameStore() 
 const { loginWithGoogle, logout } = authStore
@@ -17,6 +19,7 @@ const { isLoggedIn } = storeToRefs(authStore)
 
 <template>
   <div class="main-menu">
+    <header>{{ profile?.fullName }}</header>
     <section>
       <img src="@/assets/logo.png" />
       <nav v-if="isLoggedIn">
@@ -44,6 +47,13 @@ const { isLoggedIn } = storeToRefs(authStore)
 .main-menu {
   display: flex;
   flex-direction: column;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  padding: 2rem;
 }
 
 section,

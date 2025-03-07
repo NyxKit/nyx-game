@@ -47,7 +47,8 @@ export default class NyxDatabase {
   async addDocument<T>(collectionName: NyxCollection, data: T, converter?: FirestoreDataConverter<T>) {
     const colRef = this.getCollectionRef(collectionName)
     const docData = converter ? converter.toFirestore(data) : data as WithFieldValue<DocumentData>
-    await addDoc(colRef, docData)
+    const docRef = await addDoc(colRef, docData)
+    return this.getDocument(collectionName, docRef.id, converter)
   }
 
   async setDocument<T>(collectionName: NyxCollection, docId: string, data: T, converter?: FirestoreDataConverter<T>) {

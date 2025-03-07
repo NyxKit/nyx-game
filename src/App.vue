@@ -21,9 +21,10 @@ const version = import.meta.env.VITE_APP_VERSION
 watch(debug, (newVal) => {
   if (!newVal.isEnabled) return
   hasDebugged.value = true
-})
+}, { immediate: true, deep: 1 })
 
 onMounted(async () => {
+  console.log('import.meta.env.DEV', import.meta.env.DEV)
   watchAuthState()
   window.addEventListener('resize', setScreenSize)
 })

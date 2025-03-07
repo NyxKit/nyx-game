@@ -5,13 +5,15 @@ import useGameStore from '@/stores/game'
 import { GameState } from '@/types'
 import { storeToRefs } from 'pinia'
 import { useHiscoresStore } from '@/stores'
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import useProfilesStore from '@/stores/profiles'
+import type Hiscore from '@/classes/Hiscore'
 
 const store = useGameStore()
 const { isGameOver, score, debug } = storeToRefs(store)
 const { addNewHiscore } = useHiscoresStore()
 const { profile } = storeToRefs(useProfilesStore())
+const hiscore = ref<Hiscore|null>(null)
 
 const onRestart = () => {
   store.reset()
@@ -23,10 +25,12 @@ const onMainMenu = () => {
   store.setGameState(GameState.Menu)
 }
 
-watch(isGameOver, (newVal) => {
+watch(isGameOver, async (newVal) => {
+  hiscore.value = null
   if (!newVal || !profile.value?.id) return
   debug.value.isEnabled = false
-  addNewHiscore(profile.value.id, score.value)
+  // debug.value.isEnabled = import.meta.env.DEV ? debug.value.isEnabled : false
+  hiscore.value = await addNewHiscore(profile.value.id, score.value)
 })
 </script>
 
@@ -38,6 +42,9 @@ watch(isGameOver, (newVal) => {
   >
     <h1>Game Over</h1>
     <p>Score: {{ score }}</p>
+    <p v-if="hiscore?.hasDebugged">
+      You played with debug mode enabled. Hiscore will not be visible in the leaderboard.
+    </p>
     <template #footer>
       <NyxButton @click="onRestart">Restart</NyxButton>
       <NyxButton @click="onMainMenu">Main Menu</NyxButton>
