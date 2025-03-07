@@ -5,6 +5,7 @@ import useGameStore from '@/stores/game'
 import Beam from './Beam'
 import type { GameScene } from '@/scenes'
 import config from '@/config'
+import type { Audio } from './Audio'
 
 export default class Player extends Phaser.GameObjects.Container {
   public sprite: GameObjects.Image
@@ -35,13 +36,13 @@ export default class Player extends Phaser.GameObjects.Container {
   private dashCooldown: number = config.player.dashCooldown
   private lastDashTime: number = 0
   private dashDestinationPos: { x: number, y: number } = { x: 0, y: 0 }
-  private beamSound: Phaser.Sound.BaseSound | null = null
-  private damageSound: Phaser.Sound.BaseSound | null = null
+  private audio: Audio|null = null
 
   constructor (scene: GameScene, controls: GameControls) {
     super(scene, 0, 0)
     this.scene = scene
     this.controls = controls
+    this.audio = scene.audio
 
     // Create the beam first so it renders behind the player
     const playerSpriteSrc = this.scene.textures.get('player').getSourceImage()
@@ -54,9 +55,6 @@ export default class Player extends Phaser.GameObjects.Container {
 
     // Add container to scene
     scene.add.existing(this)
-
-    this.beamSound = scene.sound.add('beam', { volume: 0.5, loop: true })
-    this.damageSound = scene.sound.add('damage', { volume: 0.5 })
 
     // Add mouse input handling
     scene.input.on('pointerdown', this.createBeam, this)
@@ -74,7 +72,11 @@ export default class Player extends Phaser.GameObjects.Container {
     const hp = clamp(value, 0, config.player.hpMax)
     this.store.setPlayerHp(hp)
     if (!isDamage) return
-    this.damageSound?.play()
+    if (hp <= 0) {
+      this.audio?.sfx.playerDeath?.play()
+    } else {
+      this.audio?.sfx.playerDamage?.play()
+    }
     this.sprite.setTint(config.player.colorDamage)
     this.sprite.setPipeline('glow')
     window.setTimeout(() => {
@@ -146,13 +148,14 @@ export default class Player extends Phaser.GameObjects.Container {
     if (this.hasEnergy && this.beam?.isActive) {
       this.beam.handleScaling()
       this.energy -= this.energyDrainRate
-      if (!this.beamSound?.isPlaying) this.beamSound?.play()
+      if (this.audio?.sfx.playerBeam?.isPlaying) return
+      this.audio?.sfx.playerBeam?.play()
     } else if (this.beam?.isActive) {
       this.beam.end()
-      this.beamSound?.stop()
+      this.audio?.sfx.playerBeam?.stop()
     } else {
       this.energy += config.player.energyRegen
-      this.beamSound?.stop()
+      this.audio?.sfx.playerBeam?.stop()
     }
   }
 
@@ -236,6 +239,7 @@ export default class Player extends Phaser.GameObjects.Container {
       this.sprite.resetPipeline()
     }
 
+    this.audio?.sfx.playerDash?.play()
     this.updatePosition()
   }
 

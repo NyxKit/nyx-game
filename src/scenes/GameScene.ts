@@ -22,7 +22,6 @@ export class GameScene extends Scene {
   
   constructor () {
     super('Game')
-    // this.audio = new Audio(this)
   }
 
   reset () {
@@ -48,7 +47,8 @@ export class GameScene extends Scene {
       throw new Error('No keyboard input found')
     }
 
-    this.sound.add('soundtrack', { loop: true, volume: 0.5 }).play()
+    this.audio = new Audio(this)
+    this.audio.soundtrack?.play()
 
     this.controls = new GameControls(this.input.keyboard)
     this.background = new Background(this, this.controls)
@@ -68,6 +68,7 @@ export class GameScene extends Scene {
     if (this.store.isPaused) return
 
     this.velocity = 1 + Math.log10(Math.max(1, this.store.score / 1000)) * 2 + Math.pow(this.store.score / 1000, 1.1)
+    // this.velocity = 1 + Math.log1p(Math.max(1, this.store.score / 1000)) * 3 + Math.pow(this.store.score / 1000, 1.05)
     this.velocity = clamp(this.velocity, 1, 20)
 
     if (!this.store.isInGame) {

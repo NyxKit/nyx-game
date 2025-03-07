@@ -6,7 +6,7 @@ import useSettingsStore from '@/stores/settings'
 import { NyxShape } from 'nyx-kit/types'
 import { watch } from 'vue'
 
-const { isFullscreen, musicVolume, sfxVolume } = storeToRefs(useSettingsStore())
+const { isFullscreen, currentVolume } = storeToRefs(useSettingsStore())
 
 watch(isFullscreen, (newVal) => {
   if (newVal) {
@@ -20,11 +20,8 @@ watch(isFullscreen, (newVal) => {
 
 <template>
   <NyxForm>
-    <NyxFormField label="Music" #default="{ id }">
-      <NyxSlider :for="id" v-model="musicVolume" :max="1" :min="0" :step="0.05" :shape="NyxShape.Rectangle" />
-    </NyxFormField>
-    <NyxFormField label="SFX" #default="{ id }">
-      <NyxSlider :for="id" v-model="sfxVolume" :max="1" :min="0" :step="0.05" :shape="NyxShape.Rectangle" />
+    <NyxFormField label="Volume" #default="{ id }">
+      <NyxSlider :for="id" v-model="currentVolume" :max="1" :min="0" :step="0.05" :shape="NyxShape.Rectangle" />
     </NyxFormField>
     <NyxFormField label="Fullscreen" #default="{ id }">
       <NyxCheckbox :for="id" v-model="isFullscreen" />
