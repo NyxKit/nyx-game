@@ -4,9 +4,14 @@ import { NyxSize } from 'nyx-kit/types'
 import useGameStore from '@/stores/game'
 import { GameState } from '@/types'
 import { storeToRefs } from 'pinia'
+import { useHiscoresStore } from '@/stores'
+import { watch } from 'vue'
+import useProfilesStore from '@/stores/profiles'
 
 const store = useGameStore()
 const { isGameOver, score } = storeToRefs(store)
+const { addNewHiscore } = useHiscoresStore()
+const { profile } = storeToRefs(useProfilesStore())
 
 const onRestart = () => {
   store.reset()
@@ -17,6 +22,11 @@ const onMainMenu = () => {
   store.reset()
   store.setGameState(GameState.Menu)
 }
+
+watch(isGameOver, (newVal) => {
+  if (!newVal || !profile.value?.id) return
+  addNewHiscore(profile.value.id, score.value)
+})
 </script>
 
 <template>

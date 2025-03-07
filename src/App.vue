@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Game, MainMenu, Hiscores, Settings, GameMenu, Debug, GameInterface, GameOver } from '@/components'
 import { NyxProgress, NyxModal } from 'nyx-kit/components'
@@ -7,18 +7,20 @@ import useGameStore from './stores/game'
 import useClientStore from './stores/client'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useInterfaceStore from './stores/interface'
+import useProfilesStore from './stores/profiles'
 
 const { debug, isInMenu, isPreloading, preloadProgress } = storeToRefs(useGameStore())
 const { setScreenSize } = useClientStore()
 const { isSettingsVisible } = storeToRefs(useInterfaceStore())
+const { profile } = storeToRefs(useProfilesStore())
 
 const version = import.meta.env.VITE_APP_VERSION
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('resize', setScreenSize)
 })
 
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
   window.removeEventListener('resize', setScreenSize)
 })
 

@@ -7,7 +7,7 @@ export default class Hiscore {
   public score: number = 0
   public timestamp: Date = new Date()
   public userId: string = ''
-  public version: string = '0.0.0'
+  public version: string = import.meta.env.VITE_APP_VERSION
   public gameMode: GameMode = GameMode.Normal
 
   constructor (data?: unknown) {

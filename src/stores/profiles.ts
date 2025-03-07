@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { defineStore, storeToRefs } from 'pinia'
 import { query, where } from 'firebase/firestore'
 import { NyxCollection } from '@/types'
@@ -9,14 +9,34 @@ import useAuthStore from '@/stores/auth'
 const useProfilesStore = defineStore('profiles', () => {
   const { user } = storeToRefs(useAuthStore())
   const profiles = ref<Profile[]>([])
+  const profile = ref<Profile|null>(null)
 
   const updateProfiles = (newVal: Profile|Profile[]) => {
     profiles.value = Array.isArray(newVal) ? newVal : [newVal]
   }
 
+  const setProfile = (newVal: Profile|Profile[]) => {
+    profile.value = Array.isArray(newVal) ? newVal[0] : newVal
+  }
+
+  const subscribeProfile = async (userId: string) => {
+    await nyxDatabase.subscribe<Profile>({
+      key: 'profile',
+      docRef: nyxDatabase.getDocRef(NyxCollection.Profiles, userId, Profile.Converter),
+      callback: setProfile,
+      error: (error) => {
+        console.error('Error in subscription to profile.', error)
+      }
+    })
+  }
+
+  const unsubscribeProfile = async () => {
+    nyxDatabase.unsubscribe('profile')
+  }
+
   const subscribeProfiles = async () => {
     const collection = nyxDatabase.getCollectionRef(NyxCollection.Profiles)
-    nyxDatabase.subscribe<Profile>({
+    await nyxDatabase.subscribe<Profile>({
       key: 'profiles',
       queryRef: query(collection).withConverter(Profile.Converter),
       callback: updateProfiles,
@@ -38,7 +58,21 @@ const useProfilesStore = defineStore('profiles', () => {
     await nyxDatabase.setDocument(NyxCollection.Profiles, profile.id, profile, Profile.Converter)
   }
 
-  return { profiles, addNewProfile, updateProfile, subscribeProfiles, unsubscribeProfiles }
+  watch(user, async (newVal) => {
+    if (!newVal) return
+    await subscribeProfile(newVal.uid)
+  }, { immediate: true })
+
+  return {
+    profile,
+    profiles,
+    addNewProfile,
+    updateProfile,
+    subscribeProfile,
+    unsubscribeProfile,
+    subscribeProfiles,
+    unsubscribeProfiles
+  }
 })
 
 export default useProfilesStore

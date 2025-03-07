@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { addDoc, query, where } from 'firebase/firestore'
-import { NyxCollection } from '@/types'
+import { GameMode, NyxCollection } from '@/types'
 import Hiscore from '@/classes/Hiscore'
 import { nyxDatabase } from '@/main'
 
@@ -28,7 +28,8 @@ const useHiscoresStore = defineStore('hiscores', () => {
     nyxDatabase.unsubscribe('hiscores')
   }
 
-  const addNewHiscore = async (hiscore: Hiscore) => {
+  const addNewHiscore = async (userId: string, score: number) => {
+    const hiscore = new Hiscore({ score, userId })
     await nyxDatabase.addDocument(NyxCollection.Hiscores, hiscore, Hiscore.Converter)
   }
 

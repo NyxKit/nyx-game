@@ -1,6 +1,5 @@
 import { Debug } from '@/classes'
 import config from '@/config'
-import type { GameScene } from '@/scenes'
 import { GameState } from '@/types'
 import { isGameScene } from '@/utils'
 import { clamp } from 'nyx-kit/utils'
