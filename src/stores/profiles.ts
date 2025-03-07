@@ -1,11 +1,13 @@
 import { ref, computed } from 'vue'
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { query, where } from 'firebase/firestore'
 import { NyxCollection } from '@/types'
 import { nyxDatabase } from '@/main'
 import Profile from '@/classes/Profile'
+import useAuthStore from '@/stores/auth'
 
 const useProfilesStore = defineStore('profiles', () => {
+  const { user } = storeToRefs(useAuthStore())
   const profiles = ref<Profile[]>([])
 
   const updateProfiles = (newVal: Profile|Profile[]) => {

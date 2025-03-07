@@ -31,6 +31,19 @@ export default class NyxDatabase {
     return Object.keys(this.subscriptions).filter((key) => key.startsWith(prefix))
   }
 
+  async getDocument<T>(
+    collectionName: NyxCollection,
+    docId: string,
+    converter?: FirestoreDataConverter<T>,
+    suppressError: boolean = false
+  ) {
+    const docRef = this.getDocRef(collectionName, docId, converter)
+    const doc = await getDoc<T, DocumentData>(docRef)
+    if (doc.exists()) return doc.data()
+    if (!suppressError) console.error(`No document found with id "${docId}" in collection "${collectionName}".`)
+    return null
+  }
+
   async addDocument<T>(collectionName: NyxCollection, data: T, converter?: FirestoreDataConverter<T>) {
     const colRef = this.getCollectionRef(collectionName)
     const docData = converter ? converter.toFirestore(data) : data as WithFieldValue<DocumentData>

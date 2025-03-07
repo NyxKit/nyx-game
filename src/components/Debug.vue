@@ -7,7 +7,7 @@ import { useTeleportPosition } from 'nyx-kit/compositions'
 import { computed, ref, toRaw, useTemplateRef, type DefineComponent, onMounted, onUnmounted, watch } from 'vue'
 import { GameState } from '@/types'
 import type { GameScene } from '@/scenes'
-import { firestore } from '@/main'
+import { firestore } from '@/firebase'
 import { enableNetwork, disableNetwork } from 'firebase/firestore'
 import config from '@/config'
 

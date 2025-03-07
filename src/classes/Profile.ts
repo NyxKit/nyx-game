@@ -3,34 +3,39 @@ import { NyxLoader } from 'nyx-kit/classes'
 
 export default class Profile {
   public id: string = ''
-  public firstName: string = ''
-  public lastName: string = ''
-  public email: string = ''
-  public country: string = ''
+  public displayName: string|null = null
+  public firstName: string|null = null
+  public lastName: string|null = null
+  public email: string|null = null
+  public country: string|null = null
   public createdAt: Date = new Date()
   public updatedAt: Date = new Date()
   
   constructor(data?: unknown) {
     if (!data) return
     this.id = NyxLoader.loadString(data, 'id')
-    this.firstName = NyxLoader.loadString(data, 'firstName')
-    this.lastName = NyxLoader.loadString(data, 'lastName')
-    this.email = NyxLoader.loadString(data, 'email')
-    this.country = NyxLoader.loadString(data, 'country')
+    this.displayName = NyxLoader.loadStringOrNull(data, 'displayName', null)
+    this.firstName = NyxLoader.loadStringOrNull(data, 'firstName', null)
+    this.lastName = NyxLoader.loadStringOrNull(data, 'lastName', null)
+    this.email = NyxLoader.loadStringOrNull(data, 'email', null)
+    this.country = NyxLoader.loadStringOrNull(data, 'country', null)
     // this.createdAt = NyxLoader.loadDate(data, 'createdAt')
     // this.updatedAt = NyxLoader.loadDate(data, 'updatedAt')
   }
 
   public get fullName () {
+    if (this.displayName) return this.displayName
     return `${this.firstName} ${this.lastName}`
   }
 
   public get initials () {
-    return `${this.firstName.charAt(0)}${this.lastName.charAt(0)}`
+    if (this.displayName) return this.displayName.split(' ').map((name) => name[0]).join('')
+    return `${this.firstName?.charAt(0)}${this.lastName?.charAt(0)}`
   }
 
   public getRawData() {
     return {
+      displayName: this.displayName,
       firstName: this.firstName,
       lastName: this.lastName,
       email: this.email,

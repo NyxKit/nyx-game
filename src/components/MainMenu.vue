@@ -4,9 +4,14 @@ import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useInterfaceStore from '@/stores/interface'
 import useGameStore from '@/stores/game'
 import { GameState } from '@/types'
+import useAuthStore from '@/stores/auth'
+import { storeToRefs } from 'pinia'
 
+const authStore = useAuthStore()
 const { toggleHiscores, toggleSettings } = useInterfaceStore()
-const { setGameState } = useGameStore()
+const { setGameState } = useGameStore() 
+const { loginWithGoogle, logout } = authStore
+const { isLoggedIn } = storeToRefs(authStore)
 
 </script>
 
@@ -14,7 +19,7 @@ const { setGameState } = useGameStore()
   <div class="main-menu">
     <section>
       <img src="@/assets/logo.png" />
-      <nav>
+      <nav v-if="isLoggedIn">
         <NyxButton
           class="button-play"
           :theme="NyxTheme.Primary"
@@ -23,6 +28,10 @@ const { setGameState } = useGameStore()
         >Play</NyxButton>
         <NyxButton :size="NyxSize.Small" @click="toggleHiscores">Hiscores</NyxButton>
         <NyxButton :size="NyxSize.Small" @click="toggleSettings">Settings</NyxButton>
+        <NyxButton :size="NyxSize.Small" @click="logout">Logout</NyxButton>
+      </nav>
+      <nav v-else>
+        <NyxButton :size="NyxSize.XLarge" @click="loginWithGoogle">Login</NyxButton>
       </nav>
     </section>
     <footer>
