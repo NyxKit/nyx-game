@@ -7,6 +7,7 @@ import { nyxDatabase } from '@/main'
 
 const useHiscoresStore = defineStore('hiscores', () => {
   const hiscores = ref<Hiscore[]>([])
+  const hasDebugged = ref(false)
 
   const updateHiscores = (newVal: Hiscore|Hiscore[]) => {
     hiscores.value = Array.isArray(newVal) ? newVal : [newVal]
@@ -14,9 +15,10 @@ const useHiscoresStore = defineStore('hiscores', () => {
 
   const subscribeHiscores = async () => {
     const collection = nyxDatabase.getCollectionRef(NyxCollection.Hiscores)
+    const queryWhere = where('hasDebugged', '==', false)
     nyxDatabase.subscribe<Hiscore>({
       key: 'hiscores',
-      queryRef: query(collection).withConverter(Hiscore.Converter),
+      queryRef: query(collection, queryWhere).withConverter(Hiscore.Converter),
       callback: updateHiscores,
       error: (error) => {
         console.error('Error in subscription to hiscores.', error)
@@ -29,11 +31,12 @@ const useHiscoresStore = defineStore('hiscores', () => {
   }
 
   const addNewHiscore = async (userId: string, score: number) => {
-    const hiscore = new Hiscore({ score, userId })
+    const hiscore = new Hiscore({ score, userId, hasDebugged: hasDebugged.value })
     await nyxDatabase.addDocument(NyxCollection.Hiscores, hiscore, Hiscore.Converter)
+    hasDebugged.value = false
   }
 
-  return { hiscores, addNewHiscore, subscribeHiscores, unsubscribeHiscores }
+  return { hiscores, hasDebugged, addNewHiscore, subscribeHiscores, unsubscribeHiscores }
 })
 
 export default useHiscoresStore

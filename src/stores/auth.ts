@@ -2,7 +2,7 @@ import Profile from '@/classes/Profile'
 import { auth, authProviderGoogle } from '@/firebase'
 import { nyxDatabase } from '@/main'
 import { NyxCollection } from '@/types'
-import { signInWithPopup, signOut, type User } from 'firebase/auth'
+import { signInWithPopup, signOut, type User, onAuthStateChanged } from 'firebase/auth'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
@@ -39,5 +39,11 @@ export default defineStore('auth', () => {
     user.value = null
   }
 
-  return { user, isLoggedIn, loginWithGoogle, logout }
+  const watchAuthState = () => {
+    onAuthStateChanged(auth, (firebaseUser) => {
+      user.value = firebaseUser ?? null
+    })
+  }
+
+  return { user, isLoggedIn, loginWithGoogle, logout, watchAuthState }
 })

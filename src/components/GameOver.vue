@@ -9,7 +9,7 @@ import { watch } from 'vue'
 import useProfilesStore from '@/stores/profiles'
 
 const store = useGameStore()
-const { isGameOver, score } = storeToRefs(store)
+const { isGameOver, score, debug } = storeToRefs(store)
 const { addNewHiscore } = useHiscoresStore()
 const { profile } = storeToRefs(useProfilesStore())
 
@@ -25,6 +25,7 @@ const onMainMenu = () => {
 
 watch(isGameOver, (newVal) => {
   if (!newVal || !profile.value?.id) return
+  debug.value.isEnabled = false
   addNewHiscore(profile.value.id, score.value)
 })
 </script>

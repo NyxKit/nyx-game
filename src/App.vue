@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Game, MainMenu, Hiscores, Settings, GameMenu, Debug, GameInterface, GameOver } from '@/components'
 import { NyxProgress, NyxModal } from 'nyx-kit/components'
@@ -7,16 +7,24 @@ import useGameStore from './stores/game'
 import useClientStore from './stores/client'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useInterfaceStore from './stores/interface'
-import useProfilesStore from './stores/profiles'
+import useAuthStore from './stores/auth'
+import { useHiscoresStore } from './stores'
 
 const { debug, isInMenu, isPreloading, preloadProgress } = storeToRefs(useGameStore())
 const { setScreenSize } = useClientStore()
 const { isSettingsVisible } = storeToRefs(useInterfaceStore())
-const { profile } = storeToRefs(useProfilesStore())
+const { watchAuthState } = useAuthStore()
+const { hasDebugged } = storeToRefs(useHiscoresStore())
 
 const version = import.meta.env.VITE_APP_VERSION
 
+watch(debug, (newVal) => {
+  if (!newVal.isEnabled) return
+  hasDebugged.value = true
+})
+
 onMounted(async () => {
+  watchAuthState()
   window.addEventListener('resize', setScreenSize)
 })
 
