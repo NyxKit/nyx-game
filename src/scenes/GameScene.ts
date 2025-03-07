@@ -48,6 +48,8 @@ export class GameScene extends Scene {
       throw new Error('No keyboard input found')
     }
 
+    this.sound.add('soundtrack', { loop: true, volume: 0.5 }).play()
+
     this.controls = new GameControls(this.input.keyboard)
     this.background = new Background(this, this.controls)
     this.player = new Player(this, this.controls)

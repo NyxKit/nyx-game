@@ -45,6 +45,10 @@ export class PreloaderScene extends Scene {
     // this.load.spritesheet('explosion/lg', 'explosion/lg.png', { frameWidth: 48, frameHeight: 48 })
 
     // this.load.atlas('beam', 'beam.png', 'beam.json')
+
+    this.load.audio('soundtrack', 'soundtracks/OutOfTheOrbit.mp3')
+    this.load.audio('damage', 'sfx/damage.mp3')
+    this.load.audio('beam', 'sfx/beam.mp3')
   }
 
   create () {

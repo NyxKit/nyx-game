@@ -35,6 +35,8 @@ export default class Player extends Phaser.GameObjects.Container {
   private dashCooldown: number = config.player.dashCooldown
   private lastDashTime: number = 0
   private dashDestinationPos: { x: number, y: number } = { x: 0, y: 0 }
+  private beamSound: Phaser.Sound.BaseSound | null = null
+  private damageSound: Phaser.Sound.BaseSound | null = null
 
   constructor (scene: GameScene, controls: GameControls) {
     super(scene, 0, 0)
@@ -53,6 +55,9 @@ export default class Player extends Phaser.GameObjects.Container {
     // Add container to scene
     scene.add.existing(this)
 
+    this.beamSound = scene.sound.add('beam', { volume: 0.5, loop: true })
+    this.damageSound = scene.sound.add('damage', { volume: 0.5 })
+
     // Add mouse input handling
     scene.input.on('pointerdown', this.createBeam, this)
     scene.input.on('pointerup', this.destroyBeam, this)
@@ -69,6 +74,7 @@ export default class Player extends Phaser.GameObjects.Container {
     const hp = clamp(value, 0, config.player.hpMax)
     this.store.setPlayerHp(hp)
     if (!isDamage) return
+    this.damageSound?.play()
     this.sprite.setTint(config.player.colorDamage)
     this.sprite.setPipeline('glow')
     window.setTimeout(() => {
@@ -140,10 +146,13 @@ export default class Player extends Phaser.GameObjects.Container {
     if (this.hasEnergy && this.beam?.isActive) {
       this.beam.handleScaling()
       this.energy -= this.energyDrainRate
+      if (!this.beamSound?.isPlaying) this.beamSound?.play()
     } else if (this.beam?.isActive) {
       this.beam.end()
+      this.beamSound?.stop()
     } else {
       this.energy += config.player.energyRegen
+      this.beamSound?.stop()
     }
   }
 
