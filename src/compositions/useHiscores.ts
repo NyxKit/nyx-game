@@ -12,7 +12,7 @@ const useHiscores = () => {
   const hiscoresData = computed(() => {
     return hiscores.value.map((hiscore) => {
       const profile = profiles.value.find((profile) => profile.id === hiscore.userId)
-      return { name: profile?.fullName, version: hiscore.version, score: hiscore.score }
+      return { name: profile?.fullName, score: hiscore.score, version: hiscore.version }
     }).sort((a, b) => b.score - a.score)
   })
 

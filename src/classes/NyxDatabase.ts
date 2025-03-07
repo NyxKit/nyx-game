@@ -36,7 +36,7 @@ export default class NyxDatabase {
     docId: string,
     converter?: FirestoreDataConverter<T>,
     suppressError: boolean = false
-  ) {
+  ): Promise<T|null> {
     const docRef = this.getDocRef(collectionName, docId, converter)
     const doc = await getDoc<T, DocumentData>(docRef)
     if (doc.exists()) return doc.data()
@@ -44,11 +44,11 @@ export default class NyxDatabase {
     return null
   }
 
-  async addDocument<T>(collectionName: NyxCollection, data: T, converter?: FirestoreDataConverter<T>) {
+  async addDocument<T>(collectionName: NyxCollection, data: T, converter?: FirestoreDataConverter<T>): Promise<string> {
     const colRef = this.getCollectionRef(collectionName)
     const docData = converter ? converter.toFirestore(data) : data as WithFieldValue<DocumentData>
     const docRef = await addDoc(colRef, docData)
-    return this.getDocument(collectionName, docRef.id, converter)
+    return docRef.id
   }
 
   async setDocument<T>(collectionName: NyxCollection, docId: string, data: T, converter?: FirestoreDataConverter<T>) {

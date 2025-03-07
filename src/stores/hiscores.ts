@@ -32,9 +32,10 @@ const useHiscoresStore = defineStore('hiscores', () => {
 
   const addNewHiscore = async (userId: string, score: number) => {
     const hiscore = new Hiscore({ score, userId, hasDebugged: hasDebugged.value })
-    const newHiscore = await nyxDatabase.addDocument(NyxCollection.Hiscores, hiscore, Hiscore.Converter)
+    const hiscoreId = await nyxDatabase.addDocument(NyxCollection.Hiscores, hiscore, Hiscore.Converter)
     hasDebugged.value = false
-    return newHiscore
+    hiscore.id = hiscoreId
+    return hiscore
   }
 
   return { hiscores, hasDebugged, addNewHiscore, subscribeHiscores, unsubscribeHiscores }

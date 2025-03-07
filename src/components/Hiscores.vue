@@ -13,7 +13,7 @@ const { hiscoresData } = useHiscores()
 
 <template>
   <NyxModal v-model="isHiscoresVisible" :size="NyxSize.Large" customClass="view-hiscores">
-    <NyxTable v-model="hiscoresData" :size="NyxSize.Small" gridTemplateColumns="1fr 1fr 10rem" header="sticky" />
+    <NyxTable v-model="hiscoresData" :size="NyxSize.Small" gridTemplateColumns="1fr 10rem 10rem" header="sticky" />
   </NyxModal>
 </template>
 
