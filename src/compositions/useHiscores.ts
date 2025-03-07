@@ -13,7 +13,7 @@ const useHiscores = () => {
     return hiscores.value.map((hiscore) => {
       const profile = profiles.value.find((profile) => profile.id === hiscore.userId)
       return { name: profile?.fullName, country: profile?.country, score: hiscore.score }
-    })
+    }).sort((a, b) => b.score - a.score)
   })
 
   onBeforeMount(() => {
