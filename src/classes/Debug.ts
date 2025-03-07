@@ -8,7 +8,7 @@ export default class Debug {
 
   constructor () {
     const data = JSON.parse(localStorage.getItem('debug') ?? '{}')
-    this._isEnabled = this.load(data, '_isEnabled')
+    this._isEnabled = false
     this._isCollisionDisabled = this.load(data, '_isCollisionDisabled')
     this._hasInfiniteEnergy = this.load(data, '_hasInfiniteEnergy')
     this._isImmortal = this.load(data, '_isImmortal')
