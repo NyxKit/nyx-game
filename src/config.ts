@@ -24,7 +24,7 @@ export default {
     colorDamage: 0xffaaaa,
   },
   asteroid: {
-    baseSpawnRate: 2000,
+    baseSpawnRate: 4000,
     minSpeed: 2,
     maxSpeedMultiplier: 3,
     rotationSpeed: 0.01,
@@ -32,22 +32,22 @@ export default {
     small: {
       hp: 20,
       speed: 1,
-      size: [2, 3],
+      size: [2, 2.5],
     },
     large: {
       hp: 50,
       speed: 1,
-      size: [4, 5],
+      size: [4.5, 5],
     },
   },
   powerUp: {
     rotationSpeed: 0.01,
     hpSmall: 1,
-    hpMedium: 3,
-    hpLarge: 5,
+    hpMedium: 5,
+    hpLarge: 15,
     energySmall: 2,
     energyMedium: 20,
-    energyLarge: 30,
+    energyLarge: 50,
   },
   beam: {
     damage: 1,

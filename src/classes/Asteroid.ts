@@ -31,8 +31,8 @@ export default class Asteroid implements AsteroidOptions {
     this.maxSpeed = (options.maxSpeed ?? 1) * config.asteroid.maxSpeedMultiplier
     this.isLarge = options.isLarge ?? false
     this.size = this.isLarge
-      ? getRandomBetween(config.asteroid.large.size[0], config.asteroid.large.size[1], 0.5)
-      : getRandomBetween(config.asteroid.small.size[0], config.asteroid.small.size[1], 0.5)
+      ? getRandomBetween(config.asteroid.large.size[0], config.asteroid.large.size[1], 0.1)
+      : getRandomBetween(config.asteroid.small.size[0], config.asteroid.small.size[1], 0.1)
     this.hp = this.isLarge ? config.asteroid.large.hp : config.asteroid.small.hp
     this.maxHp = this.hp
     this.sprite = this.create()
@@ -82,7 +82,7 @@ export default class Asteroid implements AsteroidOptions {
   private get velocity () {
     return {
       x: -this.speed * Math.cos(this.angle),
-      y: this.speed * Math.sin(this.angle)
+      y: (this.speed * 0.5) * Math.sin(this.angle)
     }
   }
 
@@ -101,10 +101,16 @@ export default class Asteroid implements AsteroidOptions {
       startY = getRandomBetween(0, this.scene.scale.height - src.height)
       this.angle = getRandomBetween(-15, 15) * Math.PI / 180 // Convert to radians
     } else {
-      // Spawn on top with random angle between 15-45 degrees
-      startX = getRandomBetween(this.scene.scale.width / 2, this.scene.scale.width) + src.width
-      startY = -src.height
-      this.angle = getRandomBetween(15, 45) * Math.PI / 180 // Convert to radians
+      const isSpawnOnTop = Math.random() < 0.5
+      if (isSpawnOnTop) {
+        startX = getRandomBetween(this.scene.scale.width / 2, this.scene.scale.width) + src.width
+        startY = -src.height
+        this.angle = getRandomBetween(15, 30) * Math.PI / 180 // Convert to radians
+      } else {
+        startX = getRandomBetween(0, this.scene.scale.width - src.width)
+        startY = this.scene.scale.height + src.height
+        this.angle = getRandomBetween(-15, -30) * Math.PI / 180 // Convert to radians
+      }
     }
 
     return this.scene.add
@@ -118,7 +124,7 @@ export default class Asteroid implements AsteroidOptions {
     this.sprite.y += this.velocity.y
     this.sprite.rotation += config.asteroid.rotationSpeed
 
-    const padding = 50
+    const padding = 500
 
     const shouldDestroy = this.sprite.x < -this.sprite.width - padding
       || this.sprite.y > this.scene.scale.height + this.sprite.height + padding

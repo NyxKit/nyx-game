@@ -14,12 +14,14 @@ export class GameScene extends Scene {
   private background: Background | null = null
   public player: Player | null = null
   public velocity = 1
+  private spawnRate = 0
+  private asteroidSpeed = 0
   private store = useGameStore()
   private asteroids: Asteroid[] = []
   private lastSpawnTime = 0
   private powerUps: PowerUp[] = []
   public audio: Audio | null = null
-  
+
   constructor () {
     super('Game')
   }
@@ -51,9 +53,7 @@ export class GameScene extends Scene {
       throw new Error('No keyboard input found')
     }
 
-    console.log('addding audio class')
     this.audio = new Audio(this)
-    console.log('playing soundtrack')
     this.audio.soundtrack?.play()
 
     this.controls = new GameControls(this.input.keyboard)
@@ -73,8 +73,8 @@ export class GameScene extends Scene {
     if (!this.player || !this.background) return
     if (this.store.isPaused) return
 
-    this.velocity = 1 + Math.log10(Math.max(1, this.store.score / 1000)) * 2 + Math.pow(this.store.score / 1000, 1.1)
-    // this.velocity = 1 + Math.log1p(Math.max(1, this.store.score / 1000)) * 3 + Math.pow(this.store.score / 1000, 1.05)
+    // this.velocity = 1 + Math.log10(Math.max(1, this.store.score / 1000)) * 2 + Math.pow(this.store.score / 1000, 1.1)
+    this.velocity = 1 + Math.log1p(Math.max(1, this.store.score / 500)) * 2 + Math.pow(this.store.score / 1000, 1.025)
     this.velocity = clamp(this.velocity, 1, 20)
 
     if (!this.store.isInGame) {
@@ -90,7 +90,7 @@ export class GameScene extends Scene {
     this.powerUps.forEach((powerUp) => powerUp.update(playerPos))
     this.background.update(this.velocity)
     this.player.update(this.velocity, time, delta)
-
+    
     this.trySpawnAsteroid()
 
     const playerBounds = this.player.bounds
@@ -143,10 +143,10 @@ export class GameScene extends Scene {
   }
 
   private trySpawnAsteroid () {
-    const spawnRate = config.asteroid.baseSpawnRate / this.velocity
+    this.spawnRate = config.asteroid.baseSpawnRate / this.velocity
     const timeSinceLastSpawn = this.time.now - this.lastSpawnTime
 
-    if (timeSinceLastSpawn >= spawnRate) {
+    if (timeSinceLastSpawn >= this.spawnRate) {
       this.lastSpawnTime = this.time.now
       this.spawnAsteroid()
     }
@@ -174,9 +174,13 @@ export class GameScene extends Scene {
   }
 
   spawnAsteroid () {
+    // this.asteroidSpeed = 1 + Math.log1p(this.store.score / 2000) * 1.5 + Math.pow(this.store.score / 5000, 1.05)
+    // this.asteroidSpeed = clamp(this.asteroidSpeed, 1, this.velocity * 0.8)
+    this.asteroidSpeed = this.velocity * 0.5
+
     const asteroid = new Asteroid(this, {
-      maxSpeed: this.velocity,
-      isLarge: Math.random() > 0.8,
+      maxSpeed: this.asteroidSpeed,
+      isLarge: Math.random() > 0.75,
       onDestroy: this.onDestroyAsteroid.bind(this),
     })
 
@@ -187,7 +191,7 @@ export class GameScene extends Scene {
     const powerUp = new PowerUp(this, {
       position,
       isLarge,
-      speed:this.velocity,
+      speed: this.asteroidSpeed,
       onDestroy: this.onDestroyPowerUp.bind(this)
     })
     this.powerUps.push(powerUp)

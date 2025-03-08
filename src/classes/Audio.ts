@@ -8,7 +8,7 @@ export class Audio {
   private store = useSettingsStore()
   public soundtrack: Phaser.Sound.WebAudioSound | null = null
   public sfx: KeyDict<Phaser.Sound.WebAudioSound | null> = {
-    playerBeam: null,
+    playerBeam: null, // TODO: continuously play this, ease volume in and out
     playerDamage: null,
     playerDash: null,
     playerDeath: null,

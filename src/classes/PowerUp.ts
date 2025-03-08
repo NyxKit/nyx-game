@@ -40,8 +40,8 @@ export default class PowerUp implements PowerUpOptions {
 
   private getRandomType (isLarge: boolean): PowerUpType {
     if (!isLarge) return PowerUpType.EnergySmall
-    const energyTypes = [PowerUpType.EnergyMedium, PowerUpType.EnergyLarge]
-    const hpTypes = [PowerUpType.HpMedium, PowerUpType.HpLarge]
+    const energyTypes = [PowerUpType.EnergyMedium, PowerUpType.EnergyMedium, PowerUpType.EnergyMedium, PowerUpType.EnergyLarge]
+    const hpTypes = [PowerUpType.HpMedium, PowerUpType.HpMedium, PowerUpType.HpMedium, PowerUpType.HpLarge]
     const ratio = this.store.energy / 100
     return Math.random() > ratio ? getRandomFromArray(energyTypes) : getRandomFromArray(hpTypes)
   }
