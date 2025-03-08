@@ -8,6 +8,7 @@ import { useHiscoresStore } from '@/stores'
 import { ref, watch } from 'vue'
 import useProfilesStore from '@/stores/profiles'
 import type Hiscore from '@/classes/Hiscore'
+import config from '@/config'
 
 const store = useGameStore()
 const { isGameOver, score, debug } = storeToRefs(store)
@@ -44,6 +45,9 @@ watch(isGameOver, async (newVal) => {
     <p>Score: {{ score }}</p>
     <p v-if="hiscore?.hasDebugged">
       You played with debug mode enabled. Hiscore will not be visible in the leaderboard.
+    </p>
+    <p v-if="hiscore?.score && hiscore.score < config.hiscores.threshold">
+      You need a minimum score of {{ config.hiscores.threshold }} to make it into the leaderboard.
     </p>
     <template #footer>
       <NyxButton @click="onRestart">Restart</NyxButton>

@@ -4,6 +4,7 @@ import { addDoc, query, where } from 'firebase/firestore'
 import { GameMode, NyxCollection } from '@/types'
 import Hiscore from '@/classes/Hiscore'
 import { nyxDatabase } from '@/main'
+import config from '@/config'
 
 const useHiscoresStore = defineStore('hiscores', () => {
   const hiscores = ref<Hiscore[]>([])
@@ -32,9 +33,11 @@ const useHiscoresStore = defineStore('hiscores', () => {
 
   const addNewHiscore = async (userId: string, score: number) => {
     const hiscore = new Hiscore({ score, userId, hasDebugged: hasDebugged.value })
-    const hiscoreId = await nyxDatabase.addDocument(NyxCollection.Hiscores, hiscore, Hiscore.Converter)
+    if (hiscore.score > config.hiscores.threshold) {
+      const hiscoreId = await nyxDatabase.addDocument(NyxCollection.Hiscores, hiscore, Hiscore.Converter)
+      hiscore.id = hiscoreId
+    }
     hasDebugged.value = false
-    hiscore.id = hiscoreId
     return hiscore
   }
 

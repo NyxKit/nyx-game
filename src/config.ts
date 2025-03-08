@@ -58,4 +58,7 @@ export default {
     maxAngle: Math.PI / 3,
     scaleX: 3,
   },
+  hiscores: {
+    threshold: 1000,
+  }
 }
