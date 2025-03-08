@@ -29,8 +29,11 @@ export class GameScene extends Scene {
     this.asteroids = []
     this.powerUps.forEach((powerUp) => powerUp.destroy())
     this.powerUps = []
+    this.player?.setPosition(200, this.scale.height / 2)
+    // this.audio?.soundtrack?.stop()
+    // this.audio = null
     this.lastSpawnTime = 0
-    this.scene.restart()
+    // this.scene.restart()
   }
 
   public togglePaused () {
@@ -47,7 +50,9 @@ export class GameScene extends Scene {
       throw new Error('No keyboard input found')
     }
 
+    console.log('addding audio class')
     this.audio = new Audio(this)
+    console.log('playing soundtrack')
     this.audio.soundtrack?.play()
 
     this.controls = new GameControls(this.input.keyboard)
