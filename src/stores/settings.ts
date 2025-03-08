@@ -14,6 +14,7 @@ const useSettingsStore = defineStore('settings', () => {
     },
     set (volume: number) {
       _currentVolume.value = volume
+      localStorage.setItem('settings', JSON.stringify({ currentVolume: volume }))
       EventBus.emit('setVolume', volume)
     }
   })

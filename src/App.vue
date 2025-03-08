@@ -8,8 +8,9 @@ import useClientStore from './stores/client'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useInterfaceStore from './stores/interface'
 import useAuthStore from './stores/auth'
-import { useHiscoresStore } from './stores'
+import { useHiscoresStore, useSettingsStore } from './stores'
 
+const { currentVolume } = storeToRefs(useSettingsStore())
 const { debug, isInMenu, isPreloading, preloadProgress } = storeToRefs(useGameStore())
 const { setScreenSize } = useClientStore()
 const { isSettingsVisible } = storeToRefs(useInterfaceStore())
@@ -24,8 +25,9 @@ watch(debug, (newVal) => {
 }, { immediate: true, deep: 1 })
 
 onMounted(async () => {
-  console.log('import.meta.env.DEV', import.meta.env.DEV)
   watchAuthState()
+  const settings = JSON.parse(localStorage.getItem('settings') ?? '{}')
+  currentVolume.value = settings.currentVolume !== undefined ? settings.currentVolume : 1
   window.addEventListener('resize', setScreenSize)
 })
 

@@ -31,7 +31,7 @@ export default class Player extends Phaser.GameObjects.Container {
   public beam: Beam | null = null
   private energyDrainRate = config.player.energyDrainRate // Energy drain per frame while shooting
 
-  public isDashing: boolean = false
+  private _isDashing: boolean = false
   private dashDistance: number = config.player.dashDistance
   private dashCooldown: number = config.player.dashCooldown
   private lastDashTime: number = 0
@@ -93,6 +93,19 @@ export default class Player extends Phaser.GameObjects.Container {
     if (this.store.debug.hasInfiniteEnergy) return
     const energy = clamp(value, 0, config.player.energyMax)
     this.store.setPlayerEnergy(energy)
+  }
+
+  public get isDashing () {
+    return this._isDashing
+  }
+
+  public set isDashing (value: boolean) {
+    this._isDashing = value
+    if (value) {
+      this.audio?.sfx.playerDash?.play()
+    } else {
+      // this.audio?.sfx.playerDash?.stop()
+    }
   }
 
   private get hasEnergy () {
@@ -239,7 +252,6 @@ export default class Player extends Phaser.GameObjects.Container {
       this.sprite.resetPipeline()
     }
 
-    this.audio?.sfx.playerDash?.play()
     this.updatePosition()
   }
 
