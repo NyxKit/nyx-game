@@ -57,8 +57,8 @@ export default class Player extends Phaser.GameObjects.Container {
     scene.add.existing(this)
 
     // Add mouse input handling
-    scene.input.on('pointerdown', this.createBeam, this)
-    scene.input.on('pointerup', this.destroyBeam, this)
+    scene.input.on('pointerdown', this.startBeam, this)
+    scene.input.on('pointerup', this.stopBeam, this)
     scene.input.on('pointermove', this.updateBeam, this)
   }
 
@@ -162,20 +162,17 @@ export default class Player extends Phaser.GameObjects.Container {
       this.beam.handleScaling()
       this.energy -= this.energyDrainRate
       if (this.audio?.sfx.playerBeam?.isPlaying) return
-      this.audio?.sfx.playerBeam?.play()
     } else if (this.beam?.isActive) {
-      this.beam.end()
-      this.audio?.sfx.playerBeam?.stop()
+      this.stopBeam()
     } else {
       this.energy += config.player.energyRegen
-      this.audio?.sfx.playerBeam?.stop()
     }
   }
 
   destroy(): void {
     if (this.beam) {
-      this.scene.input.off('pointerdown', this.createBeam, this)
-      this.scene.input.off('pointerup', this.destroyBeam, this)
+      this.scene.input.off('pointerdown', this.startBeam, this)
+      this.scene.input.off('pointerup', this.stopBeam, this)
       this.scene.input.off('pointermove', this.updateBeam, this)
       this.beam.destroy()
     }
@@ -255,13 +252,14 @@ export default class Player extends Phaser.GameObjects.Container {
     this.updatePosition()
   }
 
-  private createBeam () {
+  public startBeam () {
     if (!this.hasEnergy) return
+    this.audio?.playSfx('playerBeam')
     this.beam?.start(this.currentPosition)
   }
 
-  private destroyBeam () {
-    if (!this.hasEnergy) return
+  public stopBeam () {
+    this.audio?.stopSfx('playerBeam')
     this.beam?.end()
   }
 

@@ -32,7 +32,7 @@ export class GameScene extends Scene {
     this.powerUps.forEach((powerUp) => powerUp.destroy())
     this.powerUps = []
     this.player?.setPosition(200, this.scale.height / 2)
-    this.player?.beam?.end()
+    this.player?.stopBeam()
     // this.audio?.soundtrack?.stop()
     // this.audio = null
     this.lastSpawnTime = 0
