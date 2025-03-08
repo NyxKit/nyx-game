@@ -48,6 +48,7 @@ export default class Beam {
     this.isActive = true
     this.sprite
       .setAlpha(1)
+      .setOrigin(0, 0.5)
       .setScale(this.scaleX, this.scaleY)
     if (!this.sprite.anims) return
     this.sprite.anims.play('beam-start')
