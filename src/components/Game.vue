@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { EventBus } from '@/classes'
+import { GameEvents } from '@/classes/EventBus'
 import StartGame from '../game'
 import Phaser from 'phaser'
 import useGameStore from '@/stores/game'
@@ -12,8 +13,8 @@ const game = ref()
 
 const init = () => {
   game.value = StartGame('game')
-  EventBus.on('current-scene-ready', (scene: Phaser.Scene) => setCurrentScene(scene))
-  EventBus.on('preload-complete', () => setGameState(GameState.Menu))
+  EventBus.on(GameEvents.CurrentSceneReady, (scene: Phaser.Scene) => setCurrentScene(scene))
+  EventBus.on(GameEvents.PreloadComplete, () => setGameState(GameState.Menu))
 }
 
 onMounted(init)

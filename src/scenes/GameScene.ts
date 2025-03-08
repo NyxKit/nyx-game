@@ -8,6 +8,7 @@ import PowerUp from '@/classes/PowerUp'
 import { createSpriteAnimation } from '@/utils'
 import { Audio } from '@/classes/Audio'
 import config from '@/config'
+import { GameEvents } from '@/classes/EventBus'
 
 export class GameScene extends Scene {
   private controls: GameControls | null = null
@@ -63,10 +64,10 @@ export class GameScene extends Scene {
     this.player.setPosition(200, this.scale.height / 2)
 
     // createSpriteAnimation(this.anims, 'explosion-sm', 'explosion/sm', [0, 1, 2, 3], 0)
-    createSpriteAnimation(this.anims, 'explosion/md', 'explosion/md', [0, 1, 2, 3], 0) 
+    createSpriteAnimation(this.anims, 'explosion/md', 'explosion/md', [0, 1, 2, 3], 0)
     // createSpriteAnimation(this.anims, 'explosion-lg', 'explosion/lg', [0, 1, 2, 3], 0)
 
-    EventBus.emit('current-scene-ready', this)
+    EventBus.emit(GameEvents.CurrentSceneReady, this)
   }
 
   update (time: number, delta: number) {
@@ -90,7 +91,7 @@ export class GameScene extends Scene {
     this.powerUps.forEach((powerUp) => powerUp.update(playerPos))
     this.background.update(this.velocity)
     this.player.update(this.velocity, time, delta)
-    
+
     this.trySpawnAsteroid()
 
     const playerBounds = this.player.bounds
@@ -128,11 +129,11 @@ export class GameScene extends Scene {
       //   0,
       //   beamLine.x1,
       //   beamLine.y1,
-      //   beamLine.x2, 
+      //   beamLine.x2,
       //   beamLine.y2,
       //   0xff0000
       // ).setOrigin(0, 0).setDepth(2000)
-      
+
       this.asteroids.forEach((asteroid) => {
         const asteroidBounds = asteroid.sprite.getBounds()
         if (Phaser.Geom.Intersects.LineToRectangle(beamLine, asteroidBounds)) {

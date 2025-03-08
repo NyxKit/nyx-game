@@ -3,6 +3,7 @@ import useSettingsStore from '@/stores/settings'
 import type { KeyDict } from 'nyx-kit/types'
 import { EventBus } from '@/classes'
 import type { GameScene } from '@/scenes'
+import { GameEvents } from './EventBus'
 
 export class Audio {
   private scene: GameScene
@@ -33,7 +34,7 @@ export class Audio {
       this.sfx[key].play()
     }
 
-    EventBus.on('setVolume', (volume: number) => {
+    EventBus.on(GameEvents.SetVolume, (volume: number) => {
       this.updateVolume(volume)
     })
   }

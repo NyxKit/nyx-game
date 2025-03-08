@@ -1,4 +1,5 @@
 import { EventBus } from '@/classes'
+import { GameEvents } from '@/classes/EventBus'
 import useGameStore from '@/stores/game'
 import { Scene } from 'phaser'
 
@@ -18,7 +19,7 @@ export class PreloaderScene extends Scene {
     this.load.setPath('assets')
     this.load.image('player', 'whale.png')
     this.load.image('blackhole', 'blackhole.png')
-    
+
     this.load.image('background/stars', 'background/stars.png')
     this.load.image('background/dust', 'background/dust.png')
     this.load.image('background/nebulae', 'background/nebulae.png')
@@ -56,7 +57,7 @@ export class PreloaderScene extends Scene {
   create () {
     //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
     //  For example, you can define global animations here, so we can use them in other scenes.
-    EventBus.emit('preload-complete', this)
+    EventBus.emit(GameEvents.PreloadComplete, this)
     this.scene.start('Game')
   }
 }
