@@ -10,19 +10,24 @@ export default class Beam {
   private scene: GameScene
   private key: string = 'beam'
   public origin: { x: number; y: number } = { x: 0, y: 0 }
+  private originOffset: { x: number, y: number } = { x: -50, y: 0 }
+  public position: { x: number, y: number } = { x: 0, y: 0 }
   public id: string = uuidv4()
   public sprite: GameObjects.Sprite
   public isActive: boolean = false
   private beamStartTime: number = 0
   private scaleX: number = config.beam.scaleX
+  private currentAngle: number = 0
+  private readonly weight: number = 0.2 // 0.1 = heavy, 0.5 = lighter, 1.0 = equal to target
 
   constructor (scene: GameScene, origin: { x: number, y: number }) {
     this.scene = scene
     this.origin = origin
-    this.sprite = this.scene.add.sprite(this.origin.x - 50, this.origin.y, this.key)
+    this.position = { x: origin.x + this.originOffset.x, y: origin.y + this.originOffset.y }
+    this.sprite = this.scene.add.sprite(this.position.x, this.position.y, this.key)
       .setAlpha(0).setOrigin(0, 0.5)
     createSpriteAnimation(this.scene.anims, 'beam-start', 'beam', [0, 1, 2, 3, 4, 5, 6, 7], 0)
-    createSpriteAnimation(this.scene.anims, 'beam-active', 'beam', [8, 9, 10, 11, 12, 13, 14, 15]) 
+    createSpriteAnimation(this.scene.anims, 'beam-active', 'beam', [8, 9, 10, 11, 12, 13, 14, 15])
     createSpriteAnimation(this.scene.anims, 'beam-end', 'beam', [16, 17, 18, 19, 20, 21, 22, 23], 0)
   }
 
@@ -54,11 +59,15 @@ export default class Beam {
   update (pos: { x: number, y: number }) {
     if (!this.isActive) return
     const pointer = this.scene.input.activePointer
-    const angle = Phaser.Math.Angle.Between(pos.x, pos.y, pointer.worldX, pointer.worldY)
+    const { x, y } = { x: pos.x + this.position.x, y: pos.y + this.position.y }
+    const targetAngle = Phaser.Math.Angle.Between(x, y, pointer.worldX, pointer.worldY)
     const minAngle = config.beam.minAngle
     const maxAngle = config.beam.maxAngle
-    const clampedAngle = clamp(angle, minAngle, maxAngle)
-    this.sprite.setRotation(clampedAngle)
+    const clampedTargetAngle = clamp(targetAngle, minAngle, maxAngle)
+
+    // Smoothly interpolate between current angle and target angle
+    this.currentAngle += (clampedTargetAngle - this.currentAngle) * this.weight
+    this.sprite.setRotation(this.currentAngle)
   }
 
   end () {

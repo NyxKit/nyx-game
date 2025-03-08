@@ -59,7 +59,6 @@ export default class Player extends Phaser.GameObjects.Container {
     // Add mouse input handling
     scene.input.on('pointerdown', this.startBeam, this)
     scene.input.on('pointerup', this.stopBeam, this)
-    scene.input.on('pointermove', this.updateBeam, this)
   }
 
   public get hp () {
@@ -151,15 +150,16 @@ export default class Player extends Phaser.GameObjects.Container {
 
     if (this.isDashing) {
       this.handleDash()
-    } else {  
+    } else {
       this.updateVelocity()
       this.updatePosition()
     }
-    
+
     this.store.setPlayerPosition(this.x, this.y)
 
     if (this.hasEnergy && this.beam?.isActive) {
       this.beam.handleScaling()
+      this.updateBeam()
       this.energy -= this.energyDrainRate
       if (this.audio?.sfx.playerBeam?.isPlaying) return
     } else if (this.beam?.isActive) {
@@ -173,7 +173,6 @@ export default class Player extends Phaser.GameObjects.Container {
     if (this.beam) {
       this.scene.input.off('pointerdown', this.startBeam, this)
       this.scene.input.off('pointerup', this.stopBeam, this)
-      this.scene.input.off('pointermove', this.updateBeam, this)
       this.beam.destroy()
     }
 
@@ -225,10 +224,10 @@ export default class Player extends Phaser.GameObjects.Container {
     // Calculate direction to destination
     const dx = this.dashDestinationPos.x - this.x
     const dy = this.dashDestinationPos.y - this.y
-    
+
     // Calculate distance to destination
     const distance = Math.sqrt(dx * dx + dy * dy)
-    
+
     if (distance > 20) {
       // Normalize direction and apply dash speed
       const dashSpeed = config.player.dashSpeed // Using config value

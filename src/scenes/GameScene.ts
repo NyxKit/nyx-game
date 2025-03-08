@@ -75,7 +75,7 @@ export class GameScene extends Scene {
 
     // this.velocity = 1 + Math.log10(Math.max(1, this.store.score / 1000)) * 2 + Math.pow(this.store.score / 1000, 1.1)
     this.velocity = 1 + Math.log1p(Math.max(1, this.store.score / 500)) * 2 + Math.pow(this.store.score / 1000, 1.025)
-    this.velocity = clamp(this.velocity, 1, 20)
+    this.velocity = clamp(this.velocity, 1, 30)
 
     if (!this.store.isInGame) {
       this.background.update(this.velocity)
