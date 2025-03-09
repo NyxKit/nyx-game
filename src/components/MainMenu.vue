@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { NyxButton } from 'nyx-kit/components'
-import { NyxSize, NyxTheme } from 'nyx-kit/types'
+import { NyxButton, NyxAvatar } from 'nyx-kit/components'
+import { NyxSize, NyxTheme, type HexCode } from 'nyx-kit/types'
 import useInterfaceStore from '@/stores/interface'
 import useGameStore from '@/stores/game'
 import useProfilesStore from '@/stores/profiles'
@@ -11,15 +11,25 @@ import { storeToRefs } from 'pinia'
 const authStore = useAuthStore()
 const { profile } = storeToRefs(useProfilesStore())
 const { toggleHiscores, toggleSettings } = useInterfaceStore()
-const { setGameState } = useGameStore() 
+const { setGameState } = useGameStore()
 const { loginWithGoogle, logout } = authStore
 const { isLoggedIn } = storeToRefs(authStore)
+
+//@ts-ignore
+const avatarColor: HexCode = '#71657A'
 
 </script>
 
 <template>
   <div class="main-menu">
-    <header>{{ profile?.fullName }}</header>
+    <header v-if="profile">
+      <NyxAvatar
+        :src="profile.photoUrl ?? undefined"
+        :name="profile.displayName ?? undefined"
+        :size="NyxSize.Small"
+        :color="avatarColor"
+      />
+    </header>
     <section>
       <img src="@/assets/logo.png" />
       <nav v-if="isLoggedIn">

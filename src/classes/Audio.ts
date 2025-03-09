@@ -5,6 +5,18 @@ import { EventBus } from '@/classes'
 import type { GameScene } from '@/scenes'
 import { GameEvents } from './EventBus'
 
+interface AudioEventOptions {
+  volume?: number
+  fade?: boolean
+  duration?: number
+}
+
+const DEFAULT_AUDIO_EVENT_OPTIONS: AudioEventOptions = {
+  volume: 1,
+  fade: false,
+  duration: 200
+}
+
 export class Audio {
   private scene: GameScene
   private store = useSettingsStore()
@@ -14,6 +26,7 @@ export class Audio {
     playerDamage: null,
     playerDash: null,
     playerDeath: null,
+    playerScream: null
   }
 
   constructor (scene: GameScene) {
@@ -26,7 +39,8 @@ export class Audio {
       playerBeam: this.scene.sound.add('playerBeam', { volume: 0, loop: true }) as Phaser.Sound.WebAudioSound,
       playerDamage: this.scene.sound.add('playerDamage', { volume }) as Phaser.Sound.WebAudioSound,
       playerDash: this.scene.sound.add('playerDash', { volume }) as Phaser.Sound.WebAudioSound,
-      playerDeath: this.scene.sound.add('playerDeath', { volume }) as Phaser.Sound.WebAudioSound
+      playerDeath: this.scene.sound.add('playerDeath', { volume }) as Phaser.Sound.WebAudioSound,
+      playerScream: this.scene.sound.add('playerScream', { volume: volume * 0.5 }) as Phaser.Sound.WebAudioSound,
     }
 
     for (const key in this.sfx) {
@@ -43,34 +57,52 @@ export class Audio {
     this.scene.sound.setVolume(volume)
   }
 
-  public playSfx (key: keyof typeof this.sfx) {
+  public playSfx (key: keyof typeof this.sfx, options: AudioEventOptions = DEFAULT_AUDIO_EVENT_OPTIONS) {
     const sfx = this.sfx[key]!
-    if (!sfx.loop) {
+    const useTween = options.fade || sfx.loop
+    if (!useTween) {
       sfx.play()
     } else {
       this.scene.tweens.killTweensOf(sfx)
-      this.scene.tweens.add({
+      if (!sfx.loop) {
+        sfx.setVolume(0)
+        sfx.play()
+      }
+      const targetVolume = this.store.currentVolume * (options.volume ?? 1)
+      const tween = this.scene.tweens.add({
         targets: sfx,
-        volume: this.store.currentVolume,
-        duration: 200,
+        volume: targetVolume,
+        duration: options.duration,
         ease: 'Linear'
       })
     }
   }
 
-  public stopSfx (key: keyof typeof this.sfx) {
+  public stopSfx (key: keyof typeof this.sfx, options: AudioEventOptions = DEFAULT_AUDIO_EVENT_OPTIONS) {
     const sfx = this.sfx[key]!
-    if (!sfx.loop) {
+    const useTween = options.fade || sfx.loop
+    if (!useTween) {
       sfx.stop()
     } else {
-      this.scene.tweens.killTweensOf(sfx)
-      this.scene.tweens.add({
+      const tween = this.scene.tweens.add({
         targets: sfx,
         volume: 0,
-        duration: 200,
+        duration: options.duration,
         ease: 'Linear'
       })
+      if (sfx.loop) return
+      tween.on('complete', () => sfx.stop())
     }
+  }
+
+  public playAttack () {
+    this.playSfx('playerScream', { fade: true })
+    this.playSfx('playerBeam', { fade: true })
+  }
+
+  public stopAttack () {
+    this.stopSfx('playerScream', { fade: true })
+    this.stopSfx('playerBeam', { fade: true })
   }
 
   stopAll () {

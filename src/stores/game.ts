@@ -15,8 +15,8 @@ const useGameStore = defineStore('game', () => {
   const score = ref(0)
   const hp = ref(config.player.hpStart)
   const energy = ref(config.player.energyStart)
+  const playStart = ref(0)
 
-  const setGameState = (newState: GameState) => state.value = newState
   const increaseScore = (amount: number = 1) => score.value += amount
 
   const setPlayerHp = (value: number) => hp.value = clamp(value, 0, config.player.hpMax)
@@ -46,21 +46,24 @@ const useGameStore = defineStore('game', () => {
     hp.value = config.player.hpStart
     energy.value = config.player.energyStart
     score.value = 0
+    playStart.value = Date.now()
     if (currentScene.value && isGameScene(currentScene.value)) {
       currentScene.value.reset()
     }
+  }
+
+  const setGameState = (newState: GameState) => {
+    const oldState = state.value
+    if (oldState !== GameState.Paused && newState === GameState.Playing) {
+      reset()
+    }
+    state.value = newState
   }
 
   watch(hp, (newVal) => {
     if (state.value !== GameState.Playing) return
     if (newVal > 0) return
     setGameState(GameState.GameOver)
-  })
-
-  watch(state, (newVal, oldVal) => {
-    if (oldVal === GameState.Paused) return
-    if (newVal !== GameState.Playing) return
-    reset()
   })
 
   return {
@@ -76,6 +79,7 @@ const useGameStore = defineStore('game', () => {
     isPlaying,
     isPreloading,
     playerPosition,
+    playStart,
     preloadProgress,
     reset,
     score,

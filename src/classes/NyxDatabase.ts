@@ -98,7 +98,7 @@ export default class NyxDatabase {
       console.warn(`Unsubscribe called with key "${key}" while subscribe is waiting to complete.`)
     }
   }
-  
+
   public getCollectionRef = <T = DocumentData>(
     collectionName: NyxCollection,
     converter?: FirestoreDataConverter<T>

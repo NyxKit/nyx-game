@@ -31,7 +31,7 @@ const useProfilesStore = defineStore('profiles', () => {
   }
 
   const unsubscribeProfile = async () => {
-    nyxDatabase.unsubscribe('profile')
+    nyxDatabase.unsubscribe('profile', () => profile.value = null)
   }
 
   const subscribeProfiles = async () => {
@@ -50,23 +50,21 @@ const useProfilesStore = defineStore('profiles', () => {
     nyxDatabase.unsubscribe('profiles')
   }
 
-  const addNewProfile = async (profile: Profile) => {
-    await nyxDatabase.addDocument(NyxCollection.Profiles, profile, Profile.Converter)
-  }
-
   const updateProfile = async (profile: Profile) => {
     await nyxDatabase.setDocument(NyxCollection.Profiles, profile.id, profile, Profile.Converter)
   }
 
-  watch(user, async (newVal) => {
-    if (!newVal) return
-    await subscribeProfile(newVal.uid)
-  }, { immediate: true })
+  watch(user, async (newVal, oldVal) => {
+    if (newVal && newVal.uid !== oldVal?.uid) {
+      await subscribeProfile(newVal.uid)
+    } else {
+      await unsubscribeProfile()
+    }
+  })
 
   return {
     profile,
     profiles,
-    addNewProfile,
     updateProfile,
     subscribeProfile,
     unsubscribeProfile,

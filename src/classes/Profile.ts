@@ -10,7 +10,9 @@ export default class Profile {
   public country: string|null = null
   public createdAt: Date = new Date()
   public updatedAt: Date = new Date()
-  
+  public photoUrl: string|null = null
+  public phoneNumber: string|null = null
+
   constructor(data?: unknown) {
     if (!data) return
     this.id = NyxLoader.loadString(data, 'id')
@@ -19,6 +21,8 @@ export default class Profile {
     this.lastName = NyxLoader.loadStringOrNull(data, 'lastName', null)
     this.email = NyxLoader.loadStringOrNull(data, 'email', null)
     this.country = NyxLoader.loadStringOrNull(data, 'country', null)
+    this.photoUrl = NyxLoader.loadStringOrNull(data, 'photoUrl', null)
+    this.phoneNumber = NyxLoader.loadStringOrNull(data, 'phoneNumber', null)
     // this.createdAt = NyxLoader.loadDate(data, 'createdAt')
     // this.updatedAt = NyxLoader.loadDate(data, 'updatedAt')
   }
@@ -42,6 +46,8 @@ export default class Profile {
       country: this.country,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
+      photoUrl: this.photoUrl,
+      phoneNumber: this.phoneNumber
     }
   }
 

@@ -5,6 +5,7 @@ import { NyxCollection } from '@/types'
 import { signInWithPopup, signOut, type User, onAuthStateChanged } from 'firebase/auth'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import useProfilesStore from './profiles'
 
 export default defineStore('auth', () => {
   const user = ref<User|null>(null)
@@ -13,15 +14,16 @@ export default defineStore('auth', () => {
   const onLogin = async () => {
     if (!user.value) throw new Error('User not logged in.')
     const profile = await nyxDatabase.getDocument(NyxCollection.Profiles, user.value.uid, Profile.Converter, true)
-    if (profile) return
     const newProfile = new Profile({
       id: user.value.uid,
       displayName: user.value.displayName,
       email: user.value.email,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      phoneNumber: user.value.phoneNumber,
+      photoUrl: user.value.photoURL,
+      createdAt: profile ? profile.createdAt : new Date(),
+      updatedAt: profile ? profile.updatedAt : new Date()
     })
-    await nyxDatabase.setDocument(NyxCollection.Profiles, user.value.uid, newProfile, Profile.Converter)
+    nyxDatabase.setDocument(NyxCollection.Profiles, user.value.uid, newProfile, Profile.Converter)
   }
 
   const loginWithGoogle = async () => {

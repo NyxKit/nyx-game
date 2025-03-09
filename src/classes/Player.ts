@@ -161,7 +161,6 @@ export default class Player extends Phaser.GameObjects.Container {
       this.beam.handleScaling()
       this.updateBeam()
       this.energy -= this.energyDrainRate
-      if (this.audio?.sfx.playerBeam?.isPlaying) return
     } else if (this.beam?.isActive) {
       this.stopBeam()
     } else {
@@ -252,13 +251,15 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   public startBeam () {
+    if (!this.store.isPlaying) return
     if (!this.hasEnergy) return
-    this.audio?.playSfx('playerBeam')
+    this.audio?.playAttack()
     this.beam?.start(this.currentPosition)
   }
 
   public stopBeam () {
-    this.audio?.stopSfx('playerBeam')
+    if (!this.store.isPlaying) return
+    this.audio?.stopAttack()
     this.beam?.end()
   }
 
