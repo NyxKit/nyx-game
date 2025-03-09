@@ -13,6 +13,7 @@ export default {
     dashSpeed: 30,
     dashCooldown: 500,
     dashDamageReduction: 0.5,
+    dashEnergyCost: 2,
     teleportDistance: 250,
     teleportCooldown: 1000,
     velocity: 2,

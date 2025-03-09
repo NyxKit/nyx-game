@@ -102,6 +102,8 @@ export default class Player extends Phaser.GameObjects.Container {
     this._isDashing = value
     if (value) {
       this.audio?.sfx.playerDash?.play()
+      this.energy -= config.player.dashEnergyCost
+      // this.stopBeam()
     } else {
       // this.audio?.sfx.playerDash?.stop()
     }
@@ -258,6 +260,7 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   public stopBeam () {
+    if (!this.beam?.isActive) return
     if (!this.store.isPlaying) return
     this.audio?.stopAttack()
     this.beam?.end()
@@ -265,6 +268,7 @@ export default class Player extends Phaser.GameObjects.Container {
 
   private updateBeam () {
     if (!this.hasEnergy) return
+    if (!this.beam?.isActive) return
     this.beam?.update(this.currentPosition)
   }
 }
