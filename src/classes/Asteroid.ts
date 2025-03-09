@@ -1,4 +1,5 @@
 import config from '@/config'
+import type { GameScene } from '@/scenes'
 import type { OnDestroyEvent } from '@/types'
 import { clamp, getRandomBetween } from 'nyx-kit/utils'
 import type { GameObjects } from 'phaser'
@@ -19,12 +20,12 @@ export default class Asteroid implements AsteroidOptions {
   public minSpeed = config.asteroid.minSpeed
   public isLarge = false
   public onDestroy: OnDestroyEvent
-  private scene: Phaser.Scene
+  private scene: GameScene
   private key: string
   private size = 1
   private angle: number = 0
 
-  constructor (scene: Phaser.Scene, options: AsteroidOptions) {
+  constructor (scene: GameScene, options: AsteroidOptions) {
     this.id = uuidv4()
     this.key = `asteroid/${getRandomBetween(1, 6)}`
     this.scene = scene
@@ -56,11 +57,11 @@ export default class Asteroid implements AsteroidOptions {
     // const yellowTint = 0xFFFFC0 // Pale yellow blended with white
     const orangeTint = 0xFFD580 // Soft orange-yellow blend
     const whiteTint = 0xFFFFFF // Base white color
-    
+
     // Blend between white and red based on HP
     const tint = Phaser.Display.Color.Interpolate.ColorWithColor(
       Phaser.Display.Color.ValueToColor(orangeTint),
-      Phaser.Display.Color.ValueToColor(whiteTint), 
+      Phaser.Display.Color.ValueToColor(whiteTint),
       100,
       hpPercentage * 100
     )
@@ -94,7 +95,7 @@ export default class Asteroid implements AsteroidOptions {
 
     let startX: number
     let startY: number
-    
+
     if (isSpawnOnRight) {
       // Spawn on right side with random Y position and angle between -15 and 15 degrees
       startX = this.scene.scale.width + src.width
@@ -137,6 +138,10 @@ export default class Asteroid implements AsteroidOptions {
     this.onDestroy(this.id, { isDestroyedByPlayer, position, size: this.size, isLarge: this.isLarge })
     const { x, y } = { x: this.sprite.x, y: this.sprite.y }
     this.sprite.destroy()
+
+    if (isDestroyedByPlayer) {
+      this.scene.audio?.sfx.asteroidExplosion?.play()
+    }
 
     const explosion = this.scene.add.sprite(x, y, 'explosion/md')
       .setScale(this.size * 0.5)

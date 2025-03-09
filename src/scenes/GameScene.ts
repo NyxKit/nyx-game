@@ -99,6 +99,7 @@ export class GameScene extends Scene {
     const powerUp = this.isCollisionPowerUpDetected(playerBounds)
 
     if (asteroid) {
+      this.audio?.playBeamHit()
       if (this.player?.isDashing) {
         this.player.hp -= asteroid.damage * config.player.dashDamageReduction
         asteroid.destroy(true)
@@ -106,6 +107,8 @@ export class GameScene extends Scene {
         this.player.hp -= asteroid.damage
         asteroid.destroy(false)
       }
+    } else {
+      this.audio?.stopBeamHit()
     }
 
     if (powerUp) {

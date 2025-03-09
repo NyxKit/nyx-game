@@ -42,6 +42,7 @@ export default class PowerUp implements PowerUpOptions {
     if (!isLarge) return PowerUpType.EnergySmall
     const energyTypes = [PowerUpType.EnergyMedium, PowerUpType.EnergyMedium, PowerUpType.EnergyMedium, PowerUpType.EnergyLarge]
     const hpTypes = [PowerUpType.HpMedium, PowerUpType.HpMedium, PowerUpType.HpMedium, PowerUpType.HpLarge]
+    if (this.store.hp === config.player.hpMax) return getRandomFromArray(energyTypes)
     const ratio = this.store.energy / 100
     return Math.random() > ratio ? getRandomFromArray(energyTypes) : getRandomFromArray(hpTypes)
   }
@@ -69,7 +70,7 @@ export default class PowerUp implements PowerUpOptions {
     if (distance < threshold) {
       const vx = (dx / distance) * this.speed * 3
       const vy = (dy / distance) * this.speed * 3
-      
+
       this.sprite.x += vx
       this.sprite.y += vy
     } else {

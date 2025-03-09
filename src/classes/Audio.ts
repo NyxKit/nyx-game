@@ -26,7 +26,9 @@ export class Audio {
     playerDamage: null,
     playerDash: null,
     playerDeath: null,
-    playerScream: null
+    playerScream: null,
+    asteroidExplosion: null,
+    powerUp: null
   }
 
   constructor (scene: GameScene) {
@@ -41,6 +43,8 @@ export class Audio {
       playerDash: this.scene.sound.add('playerDash', { volume }) as Phaser.Sound.WebAudioSound,
       playerDeath: this.scene.sound.add('playerDeath', { volume }) as Phaser.Sound.WebAudioSound,
       playerScream: this.scene.sound.add('playerScream', { volume: volume * 0.5 }) as Phaser.Sound.WebAudioSound,
+      asteroidExplosion: this.scene.sound.add('asteroidExplosion', { volume }) as Phaser.Sound.WebAudioSound,
+      powerUp: this.scene.sound.add('powerUp', { volume }) as Phaser.Sound.WebAudioSound
     }
 
     for (const key in this.sfx) {
@@ -97,12 +101,36 @@ export class Audio {
 
   public playAttack () {
     this.playSfx('playerScream', { fade: true })
-    this.playSfx('playerBeam', { fade: true })
+    this.playSfx('playerBeam', { fade: true, volume: 0.2 })
   }
 
   public stopAttack () {
     this.stopSfx('playerScream', { fade: true })
     this.stopSfx('playerBeam', { fade: true })
+  }
+
+  public playBeamHit () {
+    // const sfx = this.sfx.playerBeam
+    // if (sfx === null) return
+    // this.scene.tweens.killTweensOf(sfx)
+    // const tween = this.scene.tweens.add({
+    //   targets: sfx,
+    //   volume: this.store.currentVolume * 0.4,
+    //   duration: 200,
+    //   ease: 'Linear'
+    // })
+  }
+
+  public stopBeamHit () {
+    // const sfx = this.sfx.playerBeam
+    // if (sfx === null) return
+    // this.scene.tweens.killTweensOf(sfx)
+    // const tween = this.scene.tweens.add({
+    //   targets: sfx,
+    //   volume: this.store.currentVolume * 0.2,
+    //   duration: 200,
+    //   ease: 'Linear'
+    // })
   }
 
   stopAll () {
