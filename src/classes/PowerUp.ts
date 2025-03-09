@@ -28,6 +28,7 @@ export default class PowerUp implements PowerUpOptions {
   constructor (scene: GameScene, options?: PowerUpOptions) {
     this.scene = scene
     this.type = options?.type ?? this.getRandomType(options?.isLarge ?? false)
+    this.isLarge = options?.isLarge ?? false
     this.position = options?.position ?? { x: 0, y: 0 }
     this.sprite = this.create()
     this.speed = options?.speed ?? 5
@@ -86,7 +87,10 @@ export default class PowerUp implements PowerUpOptions {
   }
 
   destroy (isDestroyedByPlayer: boolean = false) {
-    this.onDestroy(this.id, { isDestroyedByPlayer, type: this.type, position: this.position })
     this.sprite.destroy()
+    if (isDestroyedByPlayer && this.type !== PowerUpType.EnergySmall) {
+      this.scene.audio?.playSfx('powerUp')
+    }
+    this.onDestroy(this.id, { isDestroyedByPlayer, type: this.type, position: this.position })
   }
 }
