@@ -6,15 +6,19 @@ import type { GameScene } from '@/scenes'
 import { GameEvents } from './EventBus'
 
 interface AudioEventOptions {
-  volume?: number
-  fade?: boolean
-  duration?: number
+  volume: number
+  fade: boolean
+  duration: number
+  force: boolean
+  cooldown: number //ms
 }
 
 const DEFAULT_AUDIO_EVENT_OPTIONS: AudioEventOptions = {
   volume: 1,
   fade: false,
-  duration: 200
+  duration: 200,
+  force: false,
+  cooldown: 0
 }
 
 export class Audio {
@@ -28,7 +32,18 @@ export class Audio {
     playerDeath: null,
     playerScream: null,
     asteroidExplosion: null,
-    powerUp: null
+    powerUp: null,
+    noEnergy: null
+  }
+  private lastPlay: KeyDict<number> = {
+    playerBeam: 0,
+    playerDamage: 0,
+    playerDash: 0,
+    playerDeath: 0,
+    playerScream: 0,
+    asteroidExplosion: 0,
+    powerUp: 0,
+    noEnergy: 0
   }
 
   constructor (scene: GameScene) {
@@ -44,7 +59,8 @@ export class Audio {
       playerDeath: this.scene.sound.add('playerDeath', { volume }) as Phaser.Sound.WebAudioSound,
       playerScream: this.scene.sound.add('playerScream', { volume: volume * 0.5 }) as Phaser.Sound.WebAudioSound,
       asteroidExplosion: this.scene.sound.add('asteroidExplosion', { volume }) as Phaser.Sound.WebAudioSound,
-      powerUp: this.scene.sound.add('powerUp', { volume }) as Phaser.Sound.WebAudioSound
+      powerUp: this.scene.sound.add('powerUp', { volume }) as Phaser.Sound.WebAudioSound,
+      noEnergy: this.scene.sound.add('noEnergy', { volume }) as Phaser.Sound.WebAudioSound
     }
 
     for (const key in this.sfx) {
@@ -61,9 +77,13 @@ export class Audio {
     this.scene.sound.setVolume(volume)
   }
 
-  public playSfx (key: keyof typeof this.sfx, options: AudioEventOptions = DEFAULT_AUDIO_EVENT_OPTIONS) {
+  public playSfx (key: keyof typeof this.sfx, options: Partial<AudioEventOptions> = DEFAULT_AUDIO_EVENT_OPTIONS) {
+    const _options: AudioEventOptions = { ...DEFAULT_AUDIO_EVENT_OPTIONS, ...options }
     const sfx = this.sfx[key]!
-    const useTween = options.fade || sfx.loop
+    if (sfx.isPlaying && !sfx.loop && !_options.force) return
+    const now = this.scene.time.now
+    if (_options.cooldown > 0 && now - this.lastPlay[key] < _options.cooldown) return
+    const useTween = _options.fade || sfx.loop
     if (!useTween) {
       sfx.play()
     } else {
@@ -72,31 +92,38 @@ export class Audio {
         sfx.setVolume(0)
         sfx.play()
       }
-      const targetVolume = this.store.currentVolume * (options.volume ?? 1)
+      const targetVolume = this.store.currentVolume * _options.volume
       const tween = this.scene.tweens.add({
         targets: sfx,
         volume: targetVolume,
-        duration: options.duration,
+        duration: _options.duration,
         ease: 'Linear'
       })
     }
+    if (_options.cooldown > 0) {
+      this.lastPlay[key] = now
+    } else {
+      this.lastPlay[key] = 0
+    }
   }
 
-  public stopSfx (key: keyof typeof this.sfx, options: AudioEventOptions = DEFAULT_AUDIO_EVENT_OPTIONS) {
+  public stopSfx (key: keyof typeof this.sfx, options: Partial<AudioEventOptions> = DEFAULT_AUDIO_EVENT_OPTIONS) {
+    const _options: AudioEventOptions = { ...DEFAULT_AUDIO_EVENT_OPTIONS, ...options }
     const sfx = this.sfx[key]!
-    const useTween = options.fade || sfx.loop
+    const useTween = _options.fade || sfx.loop
     if (!useTween) {
       sfx.stop()
     } else {
       const tween = this.scene.tweens.add({
         targets: sfx,
         volume: 0,
-        duration: options.duration,
+        duration: _options.duration,
         ease: 'Linear'
       })
       if (sfx.loop) return
       tween.on('complete', () => sfx.stop())
     }
+    this.lastPlay[key] = 0
   }
 
   public playAttack () {

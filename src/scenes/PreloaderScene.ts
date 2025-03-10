@@ -55,6 +55,7 @@ export class PreloaderScene extends Scene {
     this.load.audio('playerScream', 'sfx/playerScream.mp3')
     this.load.audio('asteroidExplosion', 'sfx/asteroidExplosion.mp3')
     this.load.audio('powerUp', 'sfx/powerUp.mp3')
+    this.load.audio('noEnergy', 'sfx/noEnergy.mp3')
   }
 
   create () {

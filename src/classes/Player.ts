@@ -71,17 +71,13 @@ export default class Player extends Phaser.GameObjects.Container {
     const hp = clamp(value, 0, config.player.hpMax)
     this.store.setPlayerHp(hp)
     if (!isDamage) return
+    this.stopBeam()
     if (hp <= 0) {
       this.audio?.sfx.playerDeath?.play()
     } else {
       this.audio?.sfx.playerDamage?.play()
     }
-    this.sprite.setTint(config.player.colorDamage)
-    this.sprite.setPipeline('glow')
-    window.setTimeout(() => {
-      this.sprite.clearTint()
-      this.sprite.resetPipeline()
-    }, 200)
+    this.playDamageAnimation()
   }
 
   public get energy () {
@@ -101,7 +97,8 @@ export default class Player extends Phaser.GameObjects.Container {
   public set isDashing (value: boolean) {
     this._isDashing = value
     if (value) {
-      this.audio?.sfx.playerDash?.play()
+      this.audio?.stopSfx('noEnergy')
+      this.audio?.playSfx('playerDash')
       this.energy -= config.player.dashEnergyCost
       // this.stopBeam()
     } else {
@@ -142,17 +139,7 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   update (velocity: number, time: number, delta: number) {
-    const currentTime = this.scene.time.now
-    if (this.controls.space && currentTime - this.lastDashTime >= this.dashCooldown && this.hasEnergyForDash) {
-      this.isDashing = true
-      this.lastDashTime = currentTime
-      this.dashDestinationPos = {
-        x: this.x + (this.controls.left ? -this.dashDistance : this.controls.right ? this.dashDistance : 0),
-        y: this.y + (this.controls.up ? -this.dashDistance : this.controls.down ? this.dashDistance : 0)
-      }
-      this.dashDestinationPos = this.getClampedPosition(this.dashDestinationPos.x, this.dashDestinationPos.y)
-      this.controls.space = false
-    }
+    this.setDashTargetLocation()
 
     if (this.isDashing) {
       this.handleDash()
@@ -168,6 +155,7 @@ export default class Player extends Phaser.GameObjects.Container {
       this.updateBeam()
       this.energy -= this.energyDrainRate
     } else if (this.beam?.isActive) {
+      this.audio?.playSfx('noEnergy')
       this.stopBeam()
     } else {
       this.energy += config.player.energyRegen
@@ -225,6 +213,26 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
+  private setDashTargetLocation () {
+    if (!this.controls.space) return
+    if (!this.controls.left && !this.controls.right && !this.controls.up && !this.controls.down) return
+    const currentTime = this.scene.time.now
+    const isDashOnCooldown = currentTime - this.lastDashTime < this.dashCooldown
+    if (isDashOnCooldown) return
+    if (!this.hasEnergyForDash) {
+      this.audio?.playSfx('noEnergy', { cooldown: 2000 })
+      return
+    }
+    this.isDashing = true
+    this.lastDashTime = currentTime
+    this.dashDestinationPos = {
+      x: this.x + (this.controls.left ? -this.dashDistance : this.controls.right ? this.dashDistance : 0),
+      y: this.y + (this.controls.up ? -this.dashDistance : this.controls.down ? this.dashDistance : 0)
+    }
+    this.dashDestinationPos = this.getClampedPosition(this.dashDestinationPos.x, this.dashDestinationPos.y)
+    this.controls.space = false
+  }
+
   private handleDash () {
     // Calculate direction to destination
     const dx = this.dashDestinationPos.x - this.x
@@ -274,5 +282,14 @@ export default class Player extends Phaser.GameObjects.Container {
     if (!this.hasEnergyForBeam) return
     if (!this.beam?.isActive) return
     this.beam?.update(this.currentPosition)
+  }
+
+  private playDamageAnimation () {
+    this.sprite.setTint(config.player.colorDamage)
+    this.sprite.setPipeline('glow')
+    window.setTimeout(() => {
+      this.sprite.clearTint()
+      this.sprite.resetPipeline()
+    }, 200)
   }
 }
