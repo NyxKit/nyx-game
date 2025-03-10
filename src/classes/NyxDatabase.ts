@@ -34,7 +34,7 @@ export default class NyxDatabase {
   async getDocument<T>(
     collectionName: NyxCollection,
     docId: string,
-    converter?: FirestoreDataConverter<T>,
+    converter: FirestoreDataConverter<T>,
     suppressError: boolean = false
   ): Promise<T|null> {
     const docRef = this.getDocRef(collectionName, docId, converter)
@@ -44,19 +44,32 @@ export default class NyxDatabase {
     return null
   }
 
-  async addDocument<T>(collectionName: NyxCollection, data: T, converter?: FirestoreDataConverter<T>): Promise<string> {
-    const colRef = this.getCollectionRef(collectionName)
-    const docData = converter ? converter.toFirestore(data) : data as WithFieldValue<DocumentData>
-    const docRef = await addDoc(colRef, docData)
+  async addDocument<T>(
+    collectionName: NyxCollection,
+    data: T,
+    converter: FirestoreDataConverter<T>
+  ): Promise<string> {
+    const colRef = this.getCollectionRef(collectionName, converter)
+    const docRef = await addDoc(colRef, data)
     return docRef.id
   }
 
-  async setDocument<T>(collectionName: NyxCollection, docId: string, data: T, converter?: FirestoreDataConverter<T>) {
+  async setDocument<T>(
+    collectionName: NyxCollection,
+    docId: string,
+    data: T,
+    converter: FirestoreDataConverter<T>
+  ) {
     const docRef = this.getDocRef(collectionName, docId, converter)
     await setDoc(docRef, data)
   }
 
-  async updateDocument<T>(collectionName: NyxCollection, docId: string, data: Partial<T>, converter?: FirestoreDataConverter<T>) {
+  async updateDocument<T>(
+    collectionName: NyxCollection,
+    docId: string,
+    data: Partial<T>,
+    converter: FirestoreDataConverter<T>
+  ) {
     const docRef = this.getDocRef(collectionName, docId, converter)
     await updateDoc(docRef, data)
   }
@@ -101,31 +114,25 @@ export default class NyxDatabase {
 
   public getCollectionRef = <T = DocumentData>(
     collectionName: NyxCollection,
-    converter?: FirestoreDataConverter<T>
-    ) => {
-    return !!converter
-      ? collection(this.db, collectionName).withConverter(converter)
-      : collection(this.db, collectionName) as CollectionReference<T>
+    converter: FirestoreDataConverter<T>
+  ) => {
+    return collection(this.db, collectionName).withConverter(converter)
   }
 
   public getDocRef = <T = DocumentData>(
     collectionName: NyxCollection,
     docId: string|null,
-    converter?: FirestoreDataConverter<T>
+    converter: FirestoreDataConverter<T>
   ) => {
-    const colRef = this.getCollectionRef<T>(collectionName)
-    if (docId !== null) return !!converter
-      ? doc(colRef, docId).withConverter(converter)
-      : doc(colRef, docId) as DocumentReference<T>
-    else return !!converter
-      ? doc(colRef).withConverter(converter)
-      : doc(colRef) as DocumentReference<T>
+    const colRef = this.getCollectionRef<T>(collectionName, converter)
+    if (docId !== null) return doc(colRef, docId)
+    else return doc(colRef)
   }
 
   public getSnapshot = async <T = DocumentData>(
     collectionName: NyxCollection,
     docId: string|null,
-    converter?: FirestoreDataConverter<T>
+    converter: FirestoreDataConverter<T>
   ) => {
     const docRef = this.getDocRef<T>(collectionName, docId, converter)
     return await getDoc<T, DocumentData>(docRef)
@@ -134,7 +141,7 @@ export default class NyxDatabase {
   public getDocData = async <T = DocumentData>(
     collectionName: NyxCollection,
     docId: string|null,
-    converter?: FirestoreDataConverter<T>
+    converter: FirestoreDataConverter<T>
   ) => {
     const docSnap = await this.getSnapshot<T>(collectionName, docId, converter)
     if (docSnap.exists()) return docSnap.data()
@@ -158,7 +165,7 @@ export default class NyxDatabase {
 
   public getCollectionData = async <T = DocumentData>(
     collectionName: NyxCollection,
-    converter?: FirestoreDataConverter<T>
+    converter: FirestoreDataConverter<T>
   ) => {
     const colRef = this.getCollectionRef<T>(collectionName, converter)
     const querySnap = await getDocs<T, DocumentData>(colRef as Query<T>)
@@ -167,7 +174,10 @@ export default class NyxDatabase {
     return []
   }
 
-  private getData<T>(snapshot: QueryDocumentSnapshot<DocumentData>, converter?: FirestoreDataConverter<T>) {
+  private getData<T>(
+    snapshot: QueryDocumentSnapshot<DocumentData>,
+    converter?: FirestoreDataConverter<T>
+  ) {
     return converter ? converter.fromFirestore(snapshot) : (snapshot.data() as T)
   }
 
