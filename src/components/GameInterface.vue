@@ -34,23 +34,25 @@ const onClickHp = () => {
 
 <template>
   <header class="game-interface" v-if="isInGame">
-    <NyxProgress
-      class="game-interface__progress"
-      :modelValue="hp"
-      :max="100"
-      :size="NyxSize.XLarge"
-      :theme="NyxTheme.Danger"
-      showValue="start"
-    />
-    <span class="game-interface__score" @click="onClickHp">{{ score }}</span>
-    <NyxProgress
-      class="game-interface__progress"
-      :modelValue="energy"
-      :max="100"
-      :size="NyxSize.XLarge"
-      :theme="NyxTheme.Secondary"
-      showValue="start"
-    />
+    <section class="game-interface__stats">
+      <NyxProgress
+        class="game-interface__progress-hp"
+        :modelValue="hp"
+        :max="100"
+        :size="NyxSize.XLarge"
+        :theme="NyxTheme.Danger"
+        showValue="start"
+        @click="onClickHp"
+      />
+      <NyxProgress
+        class="game-interface__progress-energy"
+        :modelValue="energy"
+        :max="100"
+        :size="NyxSize.XLarge"
+        :theme="NyxTheme.Secondary"
+      />
+    </section>
+    <span class="game-interface__score">{{ score }}</span>
   </header>
 </template>
 
@@ -65,17 +67,30 @@ const onClickHp = () => {
   justify-content: center;
   align-items: center;
   padding: 1rem;
-  // background-color: var(--nyx-c-bg);
   gap: 1rem;
+  pointer-events: none;
+  user-select: none;
 
-  &__progress {
+  &__stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 20rem;
+    width: 33%;
+  }
+
+  &__progress-hp {
     height: 2rem;
-    flex: 1;
+    pointer-events: all;
+  }
+
+  &__progress-energy {
+    border-radius: 3px;
   }
 
   &__score {
     flex: 1;
-    text-align: center;
+    text-align: right;
     font-size: 2rem;
     font-weight: bold;
     color: var(--nyx-c-text);

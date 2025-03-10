@@ -71,7 +71,6 @@ export default class Player extends Phaser.GameObjects.Container {
     const hp = clamp(value, 0, config.player.hpMax)
     this.store.setPlayerHp(hp)
     if (!isDamage) return
-    this.stopBeam()
     if (hp <= 0) {
       this.audio?.sfx.playerDeath?.play()
     } else {

@@ -1,6 +1,9 @@
 import { AUTO, Game } from 'phaser'
 import { BootScene, PreloaderScene, GameScene } from '@/scenes'
 
+const params = new URLSearchParams(document.location.search)
+const fps = params.get('fps') ?? '0'
+
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Phaser.Types.Core.GameConfig = {
@@ -11,8 +14,7 @@ const config: Phaser.Types.Core.GameConfig = {
   backgroundColor: '#000000',
   pixelArt: true,
   fps: {
-    target: 60,
-    min: 60,
+    limit: parseInt(fps),
     // forceSetTimeOut: true
   },
   scene: [
