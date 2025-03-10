@@ -71,12 +71,14 @@ export default class Asteroid implements AsteroidOptions {
   }
 
   public get damage () {
-    return this.hp * config.asteroid.damageMultiplier
+    const maxDamage = this.isLarge ? config.asteroid.large.damage : config.asteroid.small.damage
+    const hpRatio = this.hp / this.maxHp
+    return maxDamage * hpRatio
   }
 
   private get speed () {
-    const healthRatio = this.hp / this.maxHp
-    const speed = this.minSpeed + ((this.maxSpeed - this.minSpeed) * healthRatio)
+    const hpRatio = this.hp / this.maxHp
+    const speed = this.minSpeed + ((this.maxSpeed - this.minSpeed) * hpRatio)
     return clamp(speed, this.minSpeed, this.maxSpeed)
   }
 

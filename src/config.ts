@@ -29,14 +29,15 @@ export default {
     minSpeed: 2,
     maxSpeedMultiplier: 3,
     rotationSpeed: 0.01,
-    damageMultiplier: 0.5,
     small: {
-      hp: 20,
+      hp: 50,
+      damage: 20,
       speed: 1,
       size: [2, 2.5],
     },
     large: {
-      hp: 50,
+      hp: 100,
+      damage: 40,
       speed: 1,
       size: [4.5, 5],
     },
