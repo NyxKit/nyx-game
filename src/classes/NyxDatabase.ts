@@ -7,9 +7,9 @@ import type {
   QueryDocumentSnapshot, DocumentSnapshot, WithFieldValue, Firestore
 } from 'firebase/firestore'
 import { initializeApp, type FirebaseApp, type FirebaseOptions } from 'firebase/app'
-import { getAnalytics, type Analytics } from 'firebase/analytics'
-import { getAuth, type Auth } from 'firebase/auth'
-import { GoogleAuthProvider } from 'firebase/auth/web-extension'
+// import { getAnalytics, type Analytics } from 'firebase/analytics'
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, type Auth, type AuthProvider } from 'firebase/auth'
+// import { GoogleAuthProvider } from 'firebase/auth/web-extension'
 
 const __CONFIG__ = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -40,17 +40,23 @@ export default class NyxDatabase {
 
   public app: FirebaseApp
   public db: Firestore
-  public analytics: Analytics
+  // public analytics: Analytics
   public auth: Auth
-  public authProviders = {
+  public authProviders: KeyDict<AuthProvider> = {
     google: new GoogleAuthProvider()
   }
 
   constructor (options: FirebaseOptions = __CONFIG__) {
     this.app = initializeApp(options)
     this.db = initializeFirestore(this.app, { ignoreUndefinedProperties: true })
-    this.analytics = getAnalytics(this.app)
     this.auth = getAuth(this.app)
+    // this.analytics = getAnalytics(this.app)
+  }
+
+  public async signIn (provider: keyof typeof this.authProviders = 'google') {
+    console.log('this.auth', this.auth)
+    const result = await signInWithPopup(this.auth, this.authProviders[provider])
+    return result
   }
 
   public getRunningKeys (prefix: string = '') {

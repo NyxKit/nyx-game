@@ -26,7 +26,7 @@ export default defineStore('auth', () => {
 
   const loginWithGoogle = async () => {
     try {
-      const result = await signInWithPopup(nyxDatabase.auth, nyxDatabase.authProviders.google)
+      const result = await nyxDatabase.signIn()
       user.value = result.user
       await onLogin()
     } catch (error) {
