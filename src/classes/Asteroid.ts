@@ -122,10 +122,10 @@ export default class Asteroid implements AsteroidOptions {
       .setDepth(100)
   }
 
-  update () {
+  update (dt: number) {
     this.sprite.x += this.velocity.x
     this.sprite.y += this.velocity.y
-    this.sprite.rotation += config.asteroid.rotationSpeed
+    this.sprite.rotation += config.asteroid.rotationSpeed * dt
 
     const padding = 500
 

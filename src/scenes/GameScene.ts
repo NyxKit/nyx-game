@@ -73,12 +73,14 @@ export class GameScene extends Scene {
     if (!this.player || !this.background) return
     if (this.store.isPaused) return
 
+    const dt = delta / 1000
+
     // this.velocity = 1 + Math.log10(Math.max(1, this.store.score / 1000)) * 2 + Math.pow(this.store.score / 1000, 1.1)
-    this.velocity = 1 + Math.log1p(Math.max(1, this.store.score / 500)) * 2 + Math.pow(this.store.score / 1000, 1.025)
-    this.velocity = clamp(this.velocity, 1, 30)
+    const v = 1 + Math.log1p(Math.max(1, this.store.score / 500)) * 2 + Math.pow(this.store.score / 1000, 1.025)
+    this.velocity = clamp(v * dt * 60, 1, 30)
 
     if (!this.store.isInGame) {
-      this.background.update(this.velocity)
+      this.background.update(dt, this.velocity)
       return
     }
 
@@ -86,10 +88,10 @@ export class GameScene extends Scene {
 
     const playerPos = this.player.currentPosition
 
-    this.asteroids.forEach((asteroid) => asteroid.update())
-    this.powerUps.forEach((powerUp) => powerUp.update(playerPos))
-    this.background.update(this.velocity)
-    this.player.update(this.velocity, time, delta)
+    this.asteroids.forEach((asteroid) => asteroid.update(dt))
+    this.powerUps.forEach((powerUp) => powerUp.update(dt, playerPos))
+    this.background.update(dt, this.velocity)
+    this.player.update(dt, this.velocity)
 
     this.trySpawnAsteroid()
 

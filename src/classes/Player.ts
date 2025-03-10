@@ -137,13 +137,13 @@ export default class Player extends Phaser.GameObjects.Container {
     )
   }
 
-  update (velocity: number, time: number, delta: number) {
+  update (dt: number, velocity: number) {
     this.setDashTargetLocation()
 
     if (this.isDashing) {
-      this.handleDash()
+      this.handleDash(dt)
     } else {
-      this.updateVelocity()
+      this.updateVelocity(dt)
       this.updatePosition()
     }
 
@@ -151,7 +151,7 @@ export default class Player extends Phaser.GameObjects.Container {
 
     if (this.hasEnergyForBeam && this.beam?.isActive) {
       this.beam.handleScaling()
-      this.updateBeam()
+      this.updateBeam(dt)
       this.energy -= this.energyDrainRate
     } else if (this.beam?.isActive) {
       this.audio?.playSfx('noEnergy')
@@ -173,43 +173,49 @@ export default class Player extends Phaser.GameObjects.Container {
 
   private getClampedPosition (x: number, y: number) {
     return {
-      x: clamp(x, 0, this.scene.scale.width - this.sprite.width),
-      y: clamp(y, 0, this.scene.scale.height - this.sprite.height)
+      x: clamp(x, this.sprite.width / 2, this.scene.scale.width - this.sprite.width / 2),
+      y: clamp(y, this.sprite.height / 2, this.scene.scale.height - this.sprite.height / 2)
     }
   }
 
   private updatePosition () {
-    this.x += this.velocity.x
-    this.y += this.velocity.y
-    const clampedPosition = this.getClampedPosition(this.x, this.y)
-    this.x = clampedPosition.x
-    this.y = clampedPosition.y
+    const newX = this.x + this.velocity.x
+    const newY = this.y + this.velocity.y
+    const { x, y } = this.getClampedPosition(newX, newY)
+    this.x = x
+    this.y = y
   }
 
-  private updateVelocity () {
+  private updateVelocity (dt: number) {
+    let vx = 0
+    let vy = 0
+
     if (this.controls.left) {
-      this.velocity.x = Math.max(this.velocity.x - this.acceleration.x, -this.maxVelocity.x)
+      vx = Math.max(this.velocity.x - this.acceleration.x, -this.maxVelocity.x)
     } else if (this.controls.right) {
-      this.velocity.x = Math.min(this.velocity.x + this.acceleration.x, this.maxVelocity.x)
+      vx = Math.min(this.velocity.x + this.acceleration.x, this.maxVelocity.x)
     } else {
       if (this.velocity.x > 0) {
-        this.velocity.x = Math.max(0, this.velocity.x - this.deceleration.x)
+        vx = Math.max(0, this.velocity.x - this.deceleration.x)
       } else if (this.velocity.x < 0) {
-        this.velocity.x = Math.min(0, this.velocity.x + this.deceleration.x)
+        vx = Math.min(0, this.velocity.x + this.deceleration.x)
       }
     }
 
     if (this.controls.up) {
-      this.velocity.y = Math.max(this.velocity.y - this.acceleration.y, -this.maxVelocity.y)
+      vy = Math.max(this.velocity.y - this.acceleration.y, -this.maxVelocity.y)
     } else if (this.controls.down) {
-      this.velocity.y = Math.min(this.velocity.y + this.acceleration.y, this.maxVelocity.y)
+      vy = Math.min(this.velocity.y + this.acceleration.y, this.maxVelocity.y)
     } else {
       if (this.velocity.y > 0) {
-        this.velocity.y = Math.max(0, this.velocity.y - this.deceleration.y)
+        vy = Math.max(0, this.velocity.y - this.deceleration.y)
       } else if (this.velocity.y < 0) {
-        this.velocity.y = Math.min(0, this.velocity.y + this.deceleration.y)
+        vy = Math.min(0, this.velocity.y + this.deceleration.y)
       }
     }
+
+    this.velocity.x = vx * (dt * 60)
+    this.velocity.y = vy * (dt * 60)
   }
 
   private setDashTargetLocation () {
@@ -224,41 +230,46 @@ export default class Player extends Phaser.GameObjects.Container {
     }
     this.isDashing = true
     this.lastDashTime = currentTime
-    this.dashDestinationPos = {
+    const targetPos = {
       x: this.x + (this.controls.left ? -this.dashDistance : this.controls.right ? this.dashDistance : 0),
       y: this.y + (this.controls.up ? -this.dashDistance : this.controls.down ? this.dashDistance : 0)
     }
-    this.dashDestinationPos = this.getClampedPosition(this.dashDestinationPos.x, this.dashDestinationPos.y)
+    this.dashDestinationPos = this.getClampedPosition(targetPos.x, targetPos.y)
     this.controls.space = false
   }
 
-  private handleDash () {
+  private handleDash (dt: number) {
     // Calculate direction to destination
     const dx = this.dashDestinationPos.x - this.x
     const dy = this.dashDestinationPos.y - this.y
+    let vx = 0
+    let vy = 0
 
     // Calculate distance to destination
-    const distance = Math.sqrt(dx * dx + dy * dy)
+    const distance = Math.max(Math.sqrt(dx * dx + dy * dy), 0)
 
-    if (distance > 20) {
+    if (distance > 25) {
       // Normalize direction and apply dash speed
-      const dashSpeed = config.player.dashSpeed // Using config value
-      this.velocity.x = (dx / distance) * dashSpeed
-      this.velocity.y = (dy / distance) * dashSpeed
+      const dashSpeed = config.player.dashSpeed
+      vx = (dx / distance) * dashSpeed
+      vy = (dy / distance) * dashSpeed
 
       // Add blue/white shine effect while dashing
       this.sprite.setTint(config.player.colorDash)
       this.sprite.setPipeline('glow')
     } else {
       // Reached destination, stop dashing
-      this.velocity.x = this.controls.right ? this.maxVelocity.x : this.controls.left ? -this.maxVelocity.x : 0
-      this.velocity.y = this.controls.down ? this.maxVelocity.y : this.controls.up ? -this.maxVelocity.y : 0
+      vx = this.controls.right ? this.maxVelocity.x : this.controls.left ? -this.maxVelocity.x : 0
+      vy = this.controls.down ? this.maxVelocity.y : this.controls.up ? -this.maxVelocity.y : 0
       this.isDashing = false
 
       // Remove shine effect
       this.sprite.clearTint()
       this.sprite.resetPipeline()
     }
+
+    this.velocity.x = vx * (dt * 60)
+    this.velocity.y = vy * (dt * 60)
 
     this.updatePosition()
   }
@@ -277,10 +288,10 @@ export default class Player extends Phaser.GameObjects.Container {
     this.beam?.end()
   }
 
-  private updateBeam () {
+  private updateBeam (dt: number) {
     if (!this.hasEnergyForBeam) return
     if (!this.beam?.isActive) return
-    this.beam?.update(this.currentPosition)
+    this.beam?.update(dt, this.currentPosition)
   }
 
   private playDamageAnimation () {

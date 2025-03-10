@@ -53,11 +53,11 @@ export default class Beam {
     if (!this.sprite.anims) return
     this.sprite.anims.play('beam-start')
       .once('animationcomplete', () => this.isActive && this.sprite.anims.play('beam-active'))
-    this.update(pos)
+    this.update(0, pos)
     this.beamStartTime = this.scene.time.now
   }
 
-  update (pos: { x: number, y: number }) {
+  update (dt: number, pos: { x: number, y: number }) {
     if (!this.isActive) return
     const pointer = this.scene.input.activePointer
     const { x, y } = { x: pos.x + this.position.x, y: pos.y + this.position.y }
@@ -67,7 +67,7 @@ export default class Beam {
     const clampedTargetAngle = clamp(targetAngle, minAngle, maxAngle)
 
     // Smoothly interpolate between current angle and target angle
-    this.currentAngle += (clampedTargetAngle - this.currentAngle) * this.weight
+    this.currentAngle += (clampedTargetAngle - this.currentAngle) * this.weight * (dt * 60)
     this.sprite.setRotation(this.currentAngle)
   }
 

@@ -61,7 +61,7 @@ export default class PowerUp implements PowerUpOptions {
       .setDepth(100)
   }
 
-  update (playerPosition: { x: number; y: number }) {
+  update (dt: number, playerPosition: { x: number; y: number }) {
     const dx = playerPosition.x - this.sprite.x
     const dy = playerPosition.y - this.sprite.y
     const distance = Math.sqrt(dx * dx + dy * dy)
@@ -72,13 +72,13 @@ export default class PowerUp implements PowerUpOptions {
       const vx = (dx / distance) * this.speed * 3
       const vy = (dy / distance) * this.speed * 3
 
-      this.sprite.x += vx
-      this.sprite.y += vy
+      this.sprite.x += vx * (dt * 60)
+      this.sprite.y += vy * (dt * 60)
     } else {
-      this.sprite.x -= this.speed * 3
+      this.sprite.x -= this.speed * 3 * (dt * 60)
     }
 
-    this.sprite.rotation += config.powerUp.rotationSpeed
+    this.sprite.rotation += config.powerUp.rotationSpeed * dt
 
     const shouldDestroy = this.sprite.x < -this.sprite.width
       || this.sprite.y > this.scene.scale.height + this.sprite.height

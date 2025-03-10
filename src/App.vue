@@ -129,5 +129,6 @@ main, .view, canvas {
   opacity: 0.7;
   z-index: 1000;
   padding: 1rem;
+  pointer-events: none;
 }
 </style>

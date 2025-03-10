@@ -12,7 +12,7 @@ export default class Background {
   private bgStars: GameObjects.TileSprite
   private bgNebulae: GameObjects.TileSprite
   private bgPlanets: GameObjects.TileSprite
-  
+
   private velocity: number = 1
 
   constructor(scene: Scene, controls: GameControls) {
@@ -24,7 +24,7 @@ export default class Background {
     this.bgPlanets = createTiledImage(scene, 'background/planets', { depth: 40, alpha: 1 })
   }
 
-  update (velocity: number) {
+  update (dt: number, velocity: number) {
     this.velocity = velocity
     this.bgDust.tilePositionX += this.velocity * 0.25
     this.bgNebulae.tilePositionX += this.velocity * 0.25

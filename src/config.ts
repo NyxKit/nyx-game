@@ -13,7 +13,7 @@ export default {
     dashSpeed: 30,
     dashCooldown: 500,
     dashDamageReduction: 0.5,
-    dashEnergyCost: 2,
+    dashEnergyCost: 0,
     teleportDistance: 250,
     teleportCooldown: 1000,
     velocity: 2,
@@ -28,7 +28,7 @@ export default {
     baseSpawnRate: 4000,
     minSpeed: 2,
     maxSpeedMultiplier: 3,
-    rotationSpeed: 0.01,
+    rotationSpeed: 0.5,
     small: {
       hp: 50,
       damage: 20,
@@ -45,7 +45,7 @@ export default {
     },
   },
   powerUp: {
-    rotationSpeed: 0.01,
+    rotationSpeed: 0.5,
     hpSmall: 1,
     hpMedium: 5,
     hpLarge: 15,
