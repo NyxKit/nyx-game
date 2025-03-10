@@ -33,6 +33,7 @@ const toggleCredits = () => isCreditsModalVisible.value = !isCreditsModalVisible
       <p>Without them, this game would still be a flaming mess. With them, it is now a slightly less flaming mess.</p>
       <p>May their keyboards rest in peace. 🫡</p>
       <NyxTable
+        v-if="false"
         class="credits__table"
         v-model="attributions"
         :size="NyxSize.Small"
