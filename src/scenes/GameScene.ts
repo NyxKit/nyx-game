@@ -15,7 +15,6 @@ export class GameScene extends Scene {
   private background: Background | null = null
   public player: Player | null = null
   public velocity = 1
-  private spawnRate = 0
   private asteroidSpeed = 0
   private store = useGameStore()
   private asteroids: Asteroid[] = []
@@ -147,10 +146,15 @@ export class GameScene extends Scene {
   }
 
   private trySpawnAsteroid () {
-    this.spawnRate = config.asteroid.baseSpawnRate / this.velocity
+    let spawnRate = config.asteroid.baseSpawnRate / this.velocity
+    if (this.store.score > 2000) {
+      const scoreModifier = Math.log1p((this.store.score - 2000) / 1000)
+      spawnRate = spawnRate / (1 + scoreModifier)
+    }
+
     const timeSinceLastSpawn = this.time.now - this.lastSpawnTime
 
-    if (timeSinceLastSpawn >= this.spawnRate) {
+    if (timeSinceLastSpawn >= spawnRate) {
       this.lastSpawnTime = this.time.now
       this.spawnAsteroid()
     }
@@ -204,7 +208,7 @@ export class GameScene extends Scene {
   private onDestroyAsteroid (id: string, options?: KeyDict<any>) {
     this.asteroids = this.asteroids.filter((asteroid) => asteroid.id !== id)
     if (!options?.isDestroyedByPlayer) return
-    this.store.increaseScore(Math.round(options.size * 2))
+    this.store.increaseScore(options.isLarge ? config.asteroid.large.score : config.asteroid.small.score)
     this.spawnPowerUp(options.position, options.isLarge)
   }
 

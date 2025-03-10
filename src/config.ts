@@ -34,12 +34,14 @@ export default {
       damage: 20,
       speed: 1,
       size: [2, 2.5],
+      score: 10
     },
     large: {
       hp: 100,
       damage: 40,
       speed: 1,
       size: [4.5, 5],
+      score: 25
     },
   },
   powerUp: {
@@ -47,7 +49,7 @@ export default {
     hpSmall: 1,
     hpMedium: 5,
     hpLarge: 15,
-    energySmall: 2,
+    energySmall: 3,
     energyMedium: 20,
     energyLarge: 50,
   },

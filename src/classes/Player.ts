@@ -109,8 +109,12 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
-  private get hasEnergy () {
+  private get hasEnergyForBeam () {
     return this.energy >= this.energyDrainRate || this.store.debug.hasInfiniteEnergy
+  }
+
+  private get hasEnergyForDash () {
+    return this.energy >= config.player.dashEnergyCost || this.store.debug.hasInfiniteEnergy
   }
 
   public get currentPosition () {
@@ -139,7 +143,7 @@ export default class Player extends Phaser.GameObjects.Container {
 
   update (velocity: number, time: number, delta: number) {
     const currentTime = this.scene.time.now
-    if (this.controls.space && currentTime - this.lastDashTime >= this.dashCooldown) {
+    if (this.controls.space && currentTime - this.lastDashTime >= this.dashCooldown && this.hasEnergyForDash) {
       this.isDashing = true
       this.lastDashTime = currentTime
       this.dashDestinationPos = {
@@ -159,7 +163,7 @@ export default class Player extends Phaser.GameObjects.Container {
 
     this.store.setPlayerPosition(this.x, this.y)
 
-    if (this.hasEnergy && this.beam?.isActive) {
+    if (this.hasEnergyForBeam && this.beam?.isActive) {
       this.beam.handleScaling()
       this.updateBeam()
       this.energy -= this.energyDrainRate
@@ -254,7 +258,7 @@ export default class Player extends Phaser.GameObjects.Container {
 
   public startBeam () {
     if (!this.store.isPlaying) return
-    if (!this.hasEnergy) return
+    if (!this.hasEnergyForBeam) return
     this.audio?.playAttack()
     this.beam?.start(this.currentPosition)
   }
@@ -267,7 +271,7 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   private updateBeam () {
-    if (!this.hasEnergy) return
+    if (!this.hasEnergyForBeam) return
     if (!this.beam?.isActive) return
     this.beam?.update(this.currentPosition)
   }
