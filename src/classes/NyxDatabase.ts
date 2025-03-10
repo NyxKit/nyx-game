@@ -1,12 +1,24 @@
 
 import { NyxCollection } from '@/types'
 import type { KeyDict } from 'nyx-kit/types'
-import { getFirestore, doc, getDoc, getDocs, collection, onSnapshot, addDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { doc, getDoc, getDocs, collection, onSnapshot, addDoc, setDoc, updateDoc, initializeFirestore } from 'firebase/firestore'
 import type {
   Query, DocumentData, CollectionReference, FirestoreDataConverter, DocumentReference, FirestoreError,
-  QueryDocumentSnapshot, DocumentSnapshot,
-  WithFieldValue
+  QueryDocumentSnapshot, DocumentSnapshot, WithFieldValue, Firestore
 } from 'firebase/firestore'
+import { initializeApp, type FirebaseApp, type FirebaseOptions } from 'firebase/app'
+import { getAnalytics, type Analytics } from 'firebase/analytics'
+import { getAuth, type Auth } from 'firebase/auth'
+import { GoogleAuthProvider } from 'firebase/auth/web-extension'
+
+const __CONFIG__ = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+} as const
 
 interface NyxSubscription {
   key: string
@@ -24,8 +36,22 @@ interface NyxSubscriptionParams<T> {
 }
 
 export default class NyxDatabase {
-  private db = getFirestore()
   private subscriptions: KeyDict<NyxSubscription> = {}
+
+  public app: FirebaseApp
+  public db: Firestore
+  public analytics: Analytics
+  public auth: Auth
+  public authProviders = {
+    google: new GoogleAuthProvider()
+  }
+
+  constructor (options: FirebaseOptions = __CONFIG__) {
+    this.app = initializeApp(options)
+    this.db = initializeFirestore(this.app, { ignoreUndefinedProperties: true })
+    this.analytics = getAnalytics(this.app)
+    this.auth = getAuth(this.app)
+  }
 
   public getRunningKeys (prefix: string = '') {
     return Object.keys(this.subscriptions).filter((key) => key.startsWith(prefix))
@@ -44,19 +70,33 @@ export default class NyxDatabase {
     return null
   }
 
-  async addDocument<T>(collectionName: NyxCollection, data: T, converter?: FirestoreDataConverter<T>): Promise<string> {
+  async addDocument<T>(
+    collectionName: NyxCollection,
+    data: T,
+    converter?: FirestoreDataConverter<T>
+  ): Promise<string> {
     const colRef = this.getCollectionRef(collectionName)
     const docData = converter ? converter.toFirestore(data) : data as WithFieldValue<DocumentData>
     const docRef = await addDoc(colRef, docData)
     return docRef.id
   }
 
-  async setDocument<T>(collectionName: NyxCollection, docId: string, data: T, converter?: FirestoreDataConverter<T>) {
+  async setDocument<T>(
+    collectionName: NyxCollection,
+    docId: string,
+    data: T,
+    converter?: FirestoreDataConverter<T>
+  ) {
     const docRef = this.getDocRef(collectionName, docId, converter)
     await setDoc(docRef, data)
   }
 
-  async updateDocument<T>(collectionName: NyxCollection, docId: string, data: Partial<T>, converter?: FirestoreDataConverter<T>) {
+  async updateDocument<T>(
+    collectionName: NyxCollection,
+    docId: string,
+    data: Partial<T>,
+    converter?: FirestoreDataConverter<T>
+  ) {
     const docRef = this.getDocRef(collectionName, docId, converter)
     await updateDoc(docRef, data)
   }
@@ -167,7 +207,10 @@ export default class NyxDatabase {
     return []
   }
 
-  private getData<T>(snapshot: QueryDocumentSnapshot<DocumentData>, converter?: FirestoreDataConverter<T>) {
+  private getData<T>(
+    snapshot: QueryDocumentSnapshot<DocumentData>,
+    converter?: FirestoreDataConverter<T>
+  ) {
     return converter ? converter.fromFirestore(snapshot) : (snapshot.data() as T)
   }
 

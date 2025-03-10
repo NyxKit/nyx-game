@@ -7,8 +7,6 @@ import { useTeleportPosition } from 'nyx-kit/compositions'
 import { computed, ref, toRaw, useTemplateRef, type DefineComponent, onMounted, onUnmounted, watch } from 'vue'
 import { GameState } from '@/types'
 import type { GameScene } from '@/scenes'
-import { firestore } from '@/firebase'
-import { enableNetwork, disableNetwork } from 'firebase/firestore'
 import config from '@/config'
 
 const gameStore = useGameStore()
@@ -20,20 +18,6 @@ const nyxCard = useTemplateRef<DefineComponent>('nyxCard')
 
 const isConfigModalVisible = ref(false)
 const isDebugPanelVisible = ref(false)
-const _isOnline = ref(true)
-const isOnline = computed({
-  get () {
-    return _isOnline.value
-  },
-  async set (value: boolean) {
-    if (value) {
-      await enableNetwork(firestore)
-    } else {
-      await disableNetwork(firestore)
-    }
-    _isOnline.value = value
-  }
-})
 
 const { cssVariables } = useTeleportPosition(nyxButton, nyxCard, {
   gap: ref(NyxSize.XLarge),
@@ -128,9 +112,6 @@ watch(state, () => isConfigModalVisible.value = false)
           <NyxFormField #default="{ id }">
             <NyxCheckbox :id="id" v-model="debug.isCollisionDisabled" label="Disable Collision" />
           </NyxFormField>
-          <NyxFormField #default="{ id }">
-            <NyxCheckbox :id="id" v-model="isOnline" label="Firestore Online" />
-          </NyxFormField>
           <NyxButton class="debug__card-button" @click="addAsteroid">Spawn Asteroid</NyxButton>
           <NyxButton class="debug__card-button" @click="isConfigModalVisible = true">View config</NyxButton>
           <NyxButton class="debug__card-button" @click="disableDebug">Disable debug</NyxButton>
@@ -152,7 +133,7 @@ watch(state, () => isConfigModalVisible.value = false)
       width: 7.5rem;
     }
   }
-  
+
   .debug__card {
     opacity: 0;
     pointer-events: none;

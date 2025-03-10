@@ -1,11 +1,9 @@
 import Profile from '@/classes/Profile'
-import { auth, authProviderGoogle } from '@/firebase'
 import { nyxDatabase } from '@/main'
 import { NyxCollection } from '@/types'
 import { signInWithPopup, signOut, type User, onAuthStateChanged } from 'firebase/auth'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import useProfilesStore from './profiles'
 
 export default defineStore('auth', () => {
   const user = ref<User|null>(null)
@@ -28,7 +26,7 @@ export default defineStore('auth', () => {
 
   const loginWithGoogle = async () => {
     try {
-      const result = await signInWithPopup(auth, authProviderGoogle)
+      const result = await signInWithPopup(nyxDatabase.auth, nyxDatabase.authProviders.google)
       user.value = result.user
       await onLogin()
     } catch (error) {
@@ -37,12 +35,12 @@ export default defineStore('auth', () => {
   }
 
   const logout = async () => {
-    await signOut(auth)
+    await signOut(nyxDatabase.auth)
     user.value = null
   }
 
   const watchAuthState = () => {
-    onAuthStateChanged(auth, (firebaseUser) => {
+    onAuthStateChanged(nyxDatabase.auth, (firebaseUser) => {
       user.value = firebaseUser ?? null
     })
   }
