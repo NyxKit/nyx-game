@@ -146,17 +146,16 @@ export default class Player extends Phaser.GameObjects.Container {
     )
   }
 
-  update (dt: number, velocity: number) {
+  update (dt: number) {
     this.setDashTargetLocation()
     this.stamina += config.player.staminaRegen
+    const { vx, vy } = this.isDashing ? this.getVelocityDash(dt) : this.getVelocity(dt)
 
-    if (this.isDashing) {
-      this.handleDash(dt)
-    } else {
-      this.updateVelocity(dt)
-      this.updatePosition()
-    }
-
+    const newPos = this.getPosition(vx, vy)
+    this.x = newPos.x
+    this.y = newPos.y
+    this.velocity.x = vx
+    this.velocity.y = vy
     this.store.setPlayerPosition(this.x, this.y)
 
     if (this.hasEnergyForBeam && this.beam?.isActive) {
@@ -188,54 +187,62 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
-  private updatePosition () {
-    const newX = this.x + this.velocity.x
-    const newY = this.y + this.velocity.y
-    const { x, y } = this.getClampedPosition(newX, newY)
-    this.x = x
-    this.y = y
+  private getPosition (vx: number, vy: number): { x: number, y: number } {
+    const newX = this.x + vx
+    const newY = this.y + vy
+    const pos = this.getClampedPosition(newX, newY)
+    return pos
   }
 
-  private updateVelocity (dt: number) {
-    let vx = 0
-    let vy = 0
+  private getVelocity (dt: number): { vx: number, vy: number } {
+    let vx = this.velocity.x
+    let vy = this.velocity.y
 
     if (this.controls.left) {
-      vx = Math.max(this.velocity.x - this.acceleration.x, -this.maxVelocity.x)
+      vx = clamp(vx - this.acceleration.x, -this.maxVelocity.x, this.maxVelocity.x)
     } else if (this.controls.right) {
-      vx = Math.min(this.velocity.x + this.acceleration.x, this.maxVelocity.x)
+      vx = clamp(vx + this.acceleration.x, -this.maxVelocity.x, this.maxVelocity.x)
     } else {
-      if (this.velocity.x > 0) {
-        vx = Math.max(0, this.velocity.x - this.deceleration.x)
-      } else if (this.velocity.x < 0) {
-        vx = Math.min(0, this.velocity.x + this.deceleration.x)
+      if (vx > 0) {
+        vx = clamp(Math.max(0, vx - this.deceleration.x), -this.maxVelocity.x, this.maxVelocity.x)
+      } else if (vx < 0) {
+        vx = clamp(Math.min(0, vx + this.deceleration.x), -this.maxVelocity.x, this.maxVelocity.x)
       }
     }
 
     if (this.controls.up) {
-      vy = Math.max(this.velocity.y - this.acceleration.y, -this.maxVelocity.y)
+      vy = clamp(vy - this.acceleration.y, -this.maxVelocity.y, this.maxVelocity.y)
     } else if (this.controls.down) {
-      vy = Math.min(this.velocity.y + this.acceleration.y, this.maxVelocity.y)
+      vy = clamp(vy + this.acceleration.y, -this.maxVelocity.y, this.maxVelocity.y)
     } else {
-      if (this.velocity.y > 0) {
-        vy = Math.max(0, this.velocity.y - this.deceleration.y)
-      } else if (this.velocity.y < 0) {
-        vy = Math.min(0, this.velocity.y + this.deceleration.y)
+      if (vy > 0) {
+        vy = clamp(Math.max(0, vy - this.deceleration.y), -this.maxVelocity.y, this.maxVelocity.y)
+      } else if (vy < 0) {
+        vy = clamp(Math.min(0, vy + this.deceleration.y), -this.maxVelocity.y, this.maxVelocity.y)
       }
     }
 
-    this.velocity.x = vx * (dt * 60)
-    this.velocity.y = vy * (dt * 60)
+    vx *= (dt * 60)
+    vy *= (dt * 60)
+
+    return { vx, vy }
   }
 
   private setDashTargetLocation () {
     if (!this.controls.space) return
-    if (!this.controls.left && !this.controls.right && !this.controls.up && !this.controls.down) return
+    if (!this.controls.left && !this.controls.right && !this.controls.up && !this.controls.down) {
+      this.controls.space = false
+      return
+    }
     const currentTime = this.scene.time.now
     const isDashOnCooldown = currentTime - this.lastDashTime < this.dashCooldown
-    if (isDashOnCooldown) return
+    if (isDashOnCooldown) {
+      this.controls.space = false
+      return
+    }
     if (!this.hasStaminaForDash) {
       this.audio?.playSfx('noEnergy', { cooldown: 2000 })
+      this.controls.space = false
       return
     }
     this.isDashing = true
@@ -248,12 +255,12 @@ export default class Player extends Phaser.GameObjects.Container {
     this.controls.space = false
   }
 
-  private handleDash (dt: number) {
+  private getVelocityDash (dt: number): { vx: number, vy: number } {
     // Calculate direction to destination
     const dx = this.dashDestinationPos.x - this.x
     const dy = this.dashDestinationPos.y - this.y
-    let vx = 0
-    let vy = 0
+    let vx = this.velocity.x
+    let vy = this.velocity.y
 
     // Calculate distance to destination
     const distance = Math.max(Math.sqrt(dx * dx + dy * dy), 0)
@@ -278,10 +285,10 @@ export default class Player extends Phaser.GameObjects.Container {
       this.sprite.resetPipeline()
     }
 
-    this.velocity.x = vx * (dt * 60)
-    this.velocity.y = vy * (dt * 60)
+    vx *= (dt * 60)
+    vy *= (dt * 60)
 
-    this.updatePosition()
+    return { vx, vy }
   }
 
   public startBeam () {
