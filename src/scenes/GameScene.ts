@@ -54,7 +54,7 @@ export class GameScene extends Scene {
     }
 
     this.audio = new Audio(this)
-    this.audio.soundtrack?.play()
+    this.audio.playSoundtrack()
 
     this.controls = new GameControls(this.input.keyboard)
     this.background = new Background(this, this.controls)

@@ -47,7 +47,10 @@ export class PreloaderScene extends Scene {
 
     // this.load.atlas('beam', 'beam.png', 'beam.json')
 
-    this.load.audio('soundtrack', 'soundtracks/OutOfTheOrbit.mp3')
+    this.load.audio('soundtrack/0', 'soundtracks/Stars.mp3')
+    this.load.audio('soundtrack/1', 'soundtracks/NoGravity.mp3')
+    this.load.audio('soundtrack/2', 'soundtracks/OutOfTheOrbit.mp3')
+    this.load.audio('soundtrack/3', 'soundtracks/FarBeyond.mp3')
     this.load.audio('playerDamage', 'sfx/playerDamage.mp3')
     this.load.audio('playerBeam', 'sfx/playerBeam.mp3')
     this.load.audio('playerDash', 'sfx/playerDash.mp3')

@@ -24,7 +24,7 @@ const DEFAULT_AUDIO_EVENT_OPTIONS: AudioEventOptions = {
 export class Audio {
   private scene: GameScene
   private store = useSettingsStore()
-  public soundtrack: Phaser.Sound.WebAudioSound | null = null
+  public soundtracks: Phaser.Sound.WebAudioSound[] = []
   public sfx: KeyDict<Phaser.Sound.WebAudioSound | null> = {
     playerBeam: null,
     playerDamage: null,
@@ -48,10 +48,15 @@ export class Audio {
 
   constructor (scene: GameScene) {
     this.scene = scene
-
     const volume = this.store.currentVolume
 
-    this.soundtrack = this.scene.sound.add('soundtrack', { loop: true, volume: volume * 0.8 }) as Phaser.Sound.WebAudioSound
+    this.soundtracks = [
+      this.scene.sound.add('soundtrack/0', { loop: false, volume: volume * 0.8 }) as Phaser.Sound.WebAudioSound,
+      this.scene.sound.add('soundtrack/1', { loop: false, volume: volume * 0.8 }) as Phaser.Sound.WebAudioSound,
+      this.scene.sound.add('soundtrack/2', { loop: false, volume: volume * 0.8 }) as Phaser.Sound.WebAudioSound,
+      this.scene.sound.add('soundtrack/3', { loop: false, volume: volume * 0.8 }) as Phaser.Sound.WebAudioSound
+    ]
+
     this.sfx = {
       playerBeam: this.scene.sound.add('playerBeam', { volume: 0, loop: true }) as Phaser.Sound.WebAudioSound,
       playerDamage: this.scene.sound.add('playerDamage', { volume }) as Phaser.Sound.WebAudioSound,
@@ -68,13 +73,19 @@ export class Audio {
       this.sfx[key].play()
     }
 
-    EventBus.on(GameEvents.SetVolume, (volume: number) => {
-      this.updateVolume(volume)
-    })
+    EventBus.on(GameEvents.SetVolume, this.updateVolume.bind(this))
   }
 
   private updateVolume (volume: number) {
     this.scene.sound.setVolume(volume)
+  }
+
+  public playSoundtrack (index: number = 0) {
+    if (this.soundtracks.length === 0) return
+    const track = this.soundtracks[index]
+    const newIndex = (index + 1) % this.soundtracks.length
+    track.once('complete', () => this.playSoundtrack(newIndex))
+    track.play()
   }
 
   public playSfx (key: keyof typeof this.sfx, options: Partial<AudioEventOptions> = DEFAULT_AUDIO_EVENT_OPTIONS) {
