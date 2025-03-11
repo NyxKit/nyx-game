@@ -110,6 +110,9 @@ watch(state, () => isConfigModalVisible.value = false)
             <NyxCheckbox :id="id" v-model="debug.hasInfiniteEnergy" label="Infinite Energy" />
           </NyxFormField>
           <NyxFormField #default="{ id }">
+            <NyxCheckbox :id="id" v-model="debug.hasInfiniteStamina" label="Infinite Stamina" />
+          </NyxFormField>
+          <NyxFormField #default="{ id }">
             <NyxCheckbox :id="id" v-model="debug.isCollisionDisabled" label="Disable Collision" />
           </NyxFormField>
           <NyxButton class="debug__card-button" @click="addAsteroid">Spawn Asteroid</NyxButton>

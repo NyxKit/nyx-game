@@ -4,6 +4,7 @@ export default class Debug {
   private _isEnabled = false
   private _isCollisionDisabled = false
   private _hasInfiniteEnergy = true
+  private _hasInfiniteStamina = true
   private _isImmortal = true
 
   constructor () {
@@ -11,6 +12,7 @@ export default class Debug {
     this._isEnabled = import.meta.env.DEV ? this.load(data, '_isEnabled') : false
     this._isCollisionDisabled = this.load(data, '_isCollisionDisabled')
     this._hasInfiniteEnergy = this.load(data, '_hasInfiniteEnergy')
+    this._hasInfiniteStamina = this.load(data, '_hasInfiniteStamina')
     this._isImmortal = this.load(data, '_isImmortal')
   }
 
@@ -37,6 +39,15 @@ export default class Debug {
     this.save()
   }
 
+  get isImmortal () {
+    return this.isEnabled && this._isImmortal
+  }
+
+  set isImmortal (value: boolean) {
+    this._isImmortal = value
+    this.save()
+  }
+
   get hasInfiniteEnergy () {
     return this.isEnabled && this._hasInfiniteEnergy
   }
@@ -46,12 +57,12 @@ export default class Debug {
     this.save()
   }
 
-  get isImmortal () {
-    return this.isEnabled && this._isImmortal
+  get hasInfiniteStamina () {
+    return this.isEnabled && this._hasInfiniteStamina
   }
 
-  set isImmortal (value: boolean) {
-    this._isImmortal = value
+  set hasInfiniteStamina (value: boolean) {
+    this._hasInfiniteStamina = value
     this.save()
   }
 

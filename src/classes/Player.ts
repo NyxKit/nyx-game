@@ -89,6 +89,16 @@ export default class Player extends Phaser.GameObjects.Container {
     this.store.setPlayerEnergy(energy)
   }
 
+  public get stamina () {
+    return this.store.stamina
+  }
+
+  public set stamina (value: number) {
+    if (this.store.debug.hasInfiniteStamina) return
+    const stamina = clamp(value, 0, this.store.maxStamina)
+    this.store.setPlayerStamina(stamina)
+  }
+
   public get isDashing () {
     return this._isDashing
   }
@@ -98,8 +108,7 @@ export default class Player extends Phaser.GameObjects.Container {
     if (value) {
       this.audio?.stopSfx('noEnergy')
       this.audio?.playSfx('playerDash')
-      this.energy -= config.player.dashEnergyCost
-      // this.stopBeam()
+      this.stamina -= config.player.dashStaminaCost
     } else {
       // this.audio?.sfx.playerDash?.stop()
     }
@@ -109,8 +118,8 @@ export default class Player extends Phaser.GameObjects.Container {
     return this.energy >= this.energyDrainRate || this.store.debug.hasInfiniteEnergy
   }
 
-  private get hasEnergyForDash () {
-    return this.energy >= config.player.dashEnergyCost || this.store.debug.hasInfiniteEnergy
+  private get hasStaminaForDash () {
+    return this.stamina >= config.player.dashStaminaCost || this.store.debug.hasInfiniteStamina
   }
 
   public get currentPosition () {
@@ -139,6 +148,7 @@ export default class Player extends Phaser.GameObjects.Container {
 
   update (dt: number, velocity: number) {
     this.setDashTargetLocation()
+    this.stamina += config.player.staminaRegen
 
     if (this.isDashing) {
       this.handleDash(dt)
@@ -224,7 +234,7 @@ export default class Player extends Phaser.GameObjects.Container {
     const currentTime = this.scene.time.now
     const isDashOnCooldown = currentTime - this.lastDashTime < this.dashCooldown
     if (isDashOnCooldown) return
-    if (!this.hasEnergyForDash) {
+    if (!this.hasStaminaForDash) {
       this.audio?.playSfx('noEnergy', { cooldown: 2000 })
       return
     }
