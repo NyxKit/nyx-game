@@ -17,8 +17,8 @@ export default class Asteroid implements AsteroidOptions {
   public sprite: GameObjects.Image
   private _hp: number = 1
   private maxHp: number = 1
-  public maxSpeed = 3
-  public minSpeed = config.asteroid.minSpeed
+  public maxSpeed = 3 * UNIT
+  public minSpeed = config.asteroid.minSpeed * UNIT
   public isLarge = false
   public onDestroy: OnDestroyEvent
   private scene: GameScene
@@ -30,7 +30,7 @@ export default class Asteroid implements AsteroidOptions {
     this.id = uuidv4()
     this.key = `asteroid/${getRandomBetween(1, 6)}`
     this.scene = scene
-    this.maxSpeed = (options.maxSpeed ?? 1) * config.asteroid.maxSpeedMultiplier
+    this.maxSpeed = (options.maxSpeed ?? 1) * config.asteroid.maxSpeedMultiplier * UNIT
     this.isLarge = options.isLarge ?? false
     this.size = this.isLarge
       ? getRandomBetween(config.asteroid.large.size[0], config.asteroid.large.size[1], 0.1)
