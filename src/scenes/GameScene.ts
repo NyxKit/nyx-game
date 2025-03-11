@@ -91,7 +91,7 @@ export class GameScene extends Scene {
     this.asteroids.forEach((asteroid) => asteroid.update(dt))
     this.powerUps.forEach((powerUp) => powerUp.update(dt, playerPos))
     this.background.update(dt, this.velocity)
-    this.player.update(dt, this.velocity)
+    this.player.update(dt)
 
     this.trySpawnAsteroid()
 
