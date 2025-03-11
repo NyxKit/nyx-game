@@ -6,6 +6,7 @@ import Beam from './Beam'
 import type { GameScene } from '@/scenes'
 import config from '@/config'
 import type { Audio } from './Audio'
+import { UNIT } from '@/scenes/GameScene'
 
 export default class Player extends Phaser.GameObjects.Container {
   public sprite: GameObjects.Image
@@ -13,26 +14,26 @@ export default class Player extends Phaser.GameObjects.Container {
   private controls: GameControls
   private store = useGameStore()
   private velocity = {
-    x: config.player.velocity,
-    y: config.player.velocity
+    x: config.player.velocity * UNIT,
+    y: config.player.velocity * UNIT
   }
   private maxVelocity = {
-    x: config.player.maxVelocity,
-    y: config.player.maxVelocity
+    x: config.player.maxVelocity * UNIT,
+    y: config.player.maxVelocity * UNIT
   }
   private acceleration = {
-    x: config.player.acceleration,
-    y: config.player.acceleration
+    x: config.player.acceleration * UNIT,
+    y: config.player.acceleration * UNIT
   }
   private deceleration = {
-    x: config.player.deceleration,
-    y: config.player.deceleration
+    x: config.player.deceleration * UNIT,
+    y: config.player.deceleration * UNIT
   }
   public beam: Beam | null = null
   private energyDrainRate = config.player.energyDrainRate // Energy drain per frame while shooting
 
   private _isDashing: boolean = false
-  private dashDistance: number = config.player.dashDistance
+  private dashDistance: number = config.player.dashDistance * UNIT
   private dashCooldown: number = config.player.dashCooldown
   private lastDashTime: number = 0
   private dashDestinationPos: { x: number, y: number } = { x: 0, y: 0 }
@@ -50,7 +51,7 @@ export default class Player extends Phaser.GameObjects.Container {
     this.add(this.beam.sprite)
 
     // Create the player sprite after so it renders on top
-    this.sprite = scene.add.image(0, 0, 'player')
+    this.sprite = scene.add.image(0, 0, 'player').setScale(UNIT)
     this.add(this.sprite)
 
     // Add container to scene

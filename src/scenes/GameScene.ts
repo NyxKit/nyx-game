@@ -10,7 +10,9 @@ import { Audio } from '@/classes/Audio'
 import config from '@/config'
 import { GameEvents } from '@/classes/EventBus'
 
-export class GameScene extends Scene {
+export let UNIT = 1
+
+export default class GameScene extends Scene {
   private controls: GameControls | null = null
   private background: Background | null = null
   public player: Player | null = null
@@ -21,6 +23,7 @@ export class GameScene extends Scene {
   private lastSpawnTime = 0
   private powerUps: PowerUp[] = []
   public audio: Audio | null = null
+  public unit: number = 1
 
   constructor () {
     super('Game')
@@ -55,6 +58,7 @@ export class GameScene extends Scene {
 
     this.audio = new Audio(this)
     this.audio.playSoundtrack()
+    UNIT = this.scale.width / 1920
 
     this.controls = new GameControls(this.input.keyboard)
     this.background = new Background(this, this.controls)

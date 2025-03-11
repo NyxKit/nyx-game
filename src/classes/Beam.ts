@@ -1,10 +1,10 @@
 import type { GameScene } from '@/scenes'
-import { type OnDestroyEvent } from '@/types'
 import { createSpriteAnimation } from '@/utils'
-import type { GameObjects, Scene } from 'phaser'
+import type { GameObjects } from 'phaser'
 import { v4 as uuidv4 } from 'uuid'
 import { clamp } from 'nyx-kit/utils'
 import config from '@/config'
+import { UNIT } from '@/scenes/GameScene'
 
 export default class Beam {
   private scene: GameScene
@@ -23,7 +23,7 @@ export default class Beam {
   constructor (scene: GameScene, origin: { x: number, y: number }) {
     this.scene = scene
     this.origin = origin
-    this.position = { x: origin.x + this.originOffset.x, y: origin.y + this.originOffset.y }
+    this.position = { x: (origin.x + this.originOffset.x) * UNIT, y: (origin.y + this.originOffset.y) * UNIT }
     this.sprite = this.scene.add.sprite(this.position.x, this.position.y, this.key)
       .setAlpha(0).setOrigin(0, 0.5)
     createSpriteAnimation(this.scene.anims, 'beam-start', 'beam', [0, 1, 2, 3, 4, 5, 6, 7], 0)
@@ -49,7 +49,7 @@ export default class Beam {
     this.sprite
       .setAlpha(1)
       .setOrigin(0, 0.5)
-      .setScale(this.scaleX, this.scaleY)
+      .setScale(this.scaleX * UNIT, this.scaleY * UNIT)
     if (!this.sprite.anims) return
     this.sprite.anims.play('beam-start')
       .once('animationcomplete', () => this.isActive && this.sprite.anims.play('beam-active'))
@@ -75,7 +75,7 @@ export default class Beam {
     this.isActive = false
     this.sprite.anims.stop()
     this.sprite.anims.play('beam-end')
-      .once('animationcomplete', () => this.sprite.setScale(this.scaleX, this.scaleY))
+      .once('animationcomplete', () => this.sprite.setScale(this.scaleX * UNIT, this.scaleY * UNIT))
     this.beamStartTime = 0
   }
 
@@ -89,6 +89,6 @@ export default class Beam {
     const scaleDuration = config.beam.scaleDuration
     const scaleProgress = Math.min(1, (this.scene.time.now - this.beamStartTime) / scaleDuration)
     const beamScale = this.scaleX + (maxScale - this.scaleX) * scaleProgress
-    this.sprite.setScale(beamScale, this.scaleY)
+    this.sprite.setScale(beamScale * UNIT, this.scaleY * UNIT)
   }
 }

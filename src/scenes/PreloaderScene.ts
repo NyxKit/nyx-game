@@ -3,7 +3,7 @@ import { GameEvents } from '@/classes/EventBus'
 import useGameStore from '@/stores/game'
 import { Scene } from 'phaser'
 
-export class PreloaderScene extends Scene {
+export default class PreloaderScene extends Scene {
   constructor () {
     super('Preloader')
   }

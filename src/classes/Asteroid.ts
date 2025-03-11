@@ -1,5 +1,6 @@
 import config from '@/config'
 import type { GameScene } from '@/scenes'
+import { UNIT } from '@/scenes/GameScene'
 import type { OnDestroyEvent } from '@/types'
 import { clamp, getRandomBetween } from 'nyx-kit/utils'
 import type { GameObjects } from 'phaser'
@@ -118,7 +119,7 @@ export default class Asteroid implements AsteroidOptions {
 
     return this.scene.add
       .image(startX, startY, this.key)
-      .setScale(this.size)
+      .setScale(this.size * UNIT)
       .setDepth(100)
   }
 
@@ -146,7 +147,7 @@ export default class Asteroid implements AsteroidOptions {
     }
 
     const explosion = this.scene.add.sprite(x, y, 'explosion/md')
-      .setScale(this.size * 0.5)
+      .setScale(this.size * 0.5 * UNIT)
       .setDepth(100)
     explosion.anims.play('explosion/md')
       .once('animationcomplete', () => explosion.destroy())

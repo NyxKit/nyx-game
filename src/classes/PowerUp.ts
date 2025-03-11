@@ -1,5 +1,6 @@
 import config from '@/config'
 import type { GameScene } from '@/scenes'
+import { UNIT } from '@/scenes/GameScene'
 import { useGameStore } from '@/stores'
 import { PowerUpType, type OnDestroyEvent } from '@/types'
 import { getRandomBetween, getRandomFromArray } from 'nyx-kit/utils'
@@ -57,7 +58,7 @@ export default class PowerUp implements PowerUpOptions {
       .image(this.position.x, this.position.y, this.key)
       .setOrigin(0.5, 0.5)
       .setRotation(getRandomBetween(0, Math.PI * 2))
-      .setScale(scale)
+      .setScale(scale * UNIT)
       .setDepth(100)
   }
 
