@@ -300,7 +300,6 @@ export default class Player extends Phaser.GameObjects.Container {
 
   public stopBeam () {
     if (!this.beam?.isActive) return
-    if (!this.store.isPlaying) return
     this.audio?.stopAttack()
     this.beam?.end()
   }

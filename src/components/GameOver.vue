@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { NyxModal, NyxButton } from 'nyx-kit/components'
-import { NyxSize } from 'nyx-kit/types'
+import { NyxModal, NyxButton, NyxSpinner } from 'nyx-kit/components'
+import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useGameStore from '@/stores/game'
 import { GameState } from '@/types'
 import { storeToRefs } from 'pinia'
@@ -17,12 +17,10 @@ const { profile } = storeToRefs(useProfilesStore())
 const hiscore = ref<Hiscore|null>(null)
 
 const onRestart = () => {
-  store.reset()
   store.setGameState(GameState.Playing)
 }
 
 const onMainMenu = () => {
-  store.reset()
   store.setGameState(GameState.Menu)
 }
 
@@ -30,8 +28,8 @@ watch(isGameOver, async (newVal) => {
   hiscore.value = null
   if (!newVal || !profile.value?.id) return
   debug.value.isEnabled = false
-  // debug.value.isEnabled = import.meta.env.DEV ? debug.value.isEnabled : false
   hiscore.value = await addNewHiscore(profile.value.id, score.value)
+  store.reset()
 })
 </script>
 
@@ -40,18 +38,45 @@ watch(isGameOver, async (newVal) => {
     v-if="isGameOver"
     :size="NyxSize.Small"
     static
+    title="Game Over"
   >
-    <h1>Game Over</h1>
-    <p>Score: {{ score }}</p>
-    <p v-if="hiscore?.hasDebugged">
-      You played with debug mode enabled. Hiscore will not be visible in the leaderboard.
-    </p>
-    <p v-if="hiscore?.score && hiscore.score < config.hiscores.threshold">
-      You need a minimum score of {{ config.hiscores.threshold }} to make it into the leaderboard.
-    </p>
+    <section v-if="hiscore" class="game-over__body">
+      <p>Score: {{ hiscore.score }}</p>
+      <p v-if="hiscore?.hasDebugged">
+        You played with debug mode enabled. Hiscore will not be visible in the leaderboard.
+      </p>
+      <p v-if="hiscore.score < config.hiscores.threshold">
+        You need a minimum score of {{ config.hiscores.threshold }} to make it into the leaderboard.
+      </p>
+    </section>
+    <section v-else class="game-over__body game-over__body-spinner">
+      <NyxSpinner :size="NyxSize.Large" />
+    </section>
     <template #footer>
-      <NyxButton @click="onRestart">Restart</NyxButton>
-      <NyxButton @click="onMainMenu">Main Menu</NyxButton>
+      <section class="game-over__footer">
+        <NyxButton :theme="NyxTheme.Warning" @click="onRestart">Restart</NyxButton>
+        <NyxButton :theme="NyxTheme.Danger" @click="onMainMenu">Quit</NyxButton>
+      </section>
     </template>
   </NyxModal>
 </template>
+
+<style lang="scss">
+.game-over {
+  &__footer {
+    display: flex;
+    gap: 2rem;
+  }
+
+  &__body {
+    min-height: 10rem;
+    display: flex;
+    flex-direction: column;
+
+    &-spinner {
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+</style>
