@@ -2,10 +2,10 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useGameStore } from '@/stores'
 import { NyxProgress } from 'nyx-kit/components'
-import { NyxSize, NyxTheme } from 'nyx-kit/types'
+import { NyxProgressVariant, NyxSize, NyxTheme } from 'nyx-kit/types'
 import { storeToRefs } from 'pinia'
 
-const { hp, energy, score, isPlaying, isPaused, debug, isInGame } = storeToRefs(useGameStore())
+const { hp, energy, stamina, maxStamina, score, isPlaying, isPaused, debug, isInGame } = storeToRefs(useGameStore())
 
 const interval = ref<number | null>(null)
 const numClicksDebug = ref(0)
@@ -48,8 +48,16 @@ const onClickHp = () => {
         class="game-interface__progress-energy"
         :modelValue="energy"
         :max="100"
-        :size="NyxSize.XLarge"
+        :size="NyxSize.Medium"
         :theme="NyxTheme.Secondary"
+      />
+      <NyxProgress
+        class="game-interface__progress-stamina"
+        :modelValue="stamina"
+        :max="maxStamina"
+        :size="NyxSize.Medium"
+        :theme="NyxTheme.Success"
+        :variant="NyxProgressVariant.Dots"
       />
     </section>
     <span class="game-interface__score">{{ score }}</span>
@@ -80,12 +88,7 @@ const onClickHp = () => {
   }
 
   &__progress-hp {
-    height: 2rem;
     pointer-events: all;
-  }
-
-  &__progress-energy {
-    border-radius: 3px;
   }
 
   &__score {

@@ -15,6 +15,8 @@ const useGameStore = defineStore('game', () => {
   const score = ref(0)
   const hp = ref(config.player.hpStart)
   const energy = ref(config.player.energyStart)
+  const stamina = ref(config.player.staminaStart)
+  const maxStamina = ref(config.player.staminaMax)
   const playStart = ref(0)
 
   const increaseScore = (amount: number = 1) => score.value += amount
@@ -90,6 +92,8 @@ const useGameStore = defineStore('game', () => {
     setPreloadProgress,
     setPlayerPosition,
     state,
+    stamina,
+    maxStamina,
     togglePaused,
   }
 })

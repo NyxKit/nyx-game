@@ -45,7 +45,7 @@ onBeforeUnmount(async () => {
       :min="0"
       :max="1"
       :theme="NyxTheme.Primary"
-      :size="NyxSize.XLarge"
+      :size="NyxSize.Medium"
     />
   </div>
   <transition name="fade">
