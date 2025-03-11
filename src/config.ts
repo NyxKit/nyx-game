@@ -12,6 +12,7 @@ export default {
     staminaStart: 2,
     staminaMax: 3,
     staminaRegen: 0.1,
+    staminaMaxScoreThreshold: 1000,
     dashDistance: 250,
     dashSpeed: 30,
     dashCooldown: 500,
