@@ -18,6 +18,9 @@ const { isLoggedIn } = storeToRefs(authStore)
 //@ts-ignore
 const avatarColor: HexCode = '#71657A'
 
+const params = new URLSearchParams(document.location.search)
+const isDebugUrl = import.meta.env.DEV && !!params.get('debug')
+
 </script>
 
 <template>
@@ -32,7 +35,7 @@ const avatarColor: HexCode = '#71657A'
     </header>
     <section>
       <img src="@/assets/logo.png" />
-      <nav v-if="isLoggedIn">
+      <nav v-if="isLoggedIn || isDebugUrl">
         <NyxButton
           class="button-play"
           :theme="NyxTheme.Primary"

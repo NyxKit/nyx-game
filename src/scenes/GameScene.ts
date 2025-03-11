@@ -90,6 +90,7 @@ export default class GameScene extends Scene {
 
     if (!this.store.isPlaying) return
 
+    this.store.score += dt
     const playerPos = this.player.currentPosition
 
     this.asteroids.forEach((asteroid) => asteroid.update(dt))

@@ -32,8 +32,12 @@ const useHiscoresStore = defineStore('hiscores', () => {
   }
 
   const addNewHiscore = async (userId: string, score: number) => {
-    const hiscore = new Hiscore({ score, userId, hasDebugged: hasDebugged.value })
-    if (hiscore.score > config.hiscores.threshold) {
+    const hiscore = new Hiscore({
+      userId,
+      score: Math.floor(score),
+      hasDebugged: hasDebugged.value
+    })
+    if (hiscore.score >= config.hiscores.threshold) {
       const hiscoreId = await nyxDatabase.addDocument(NyxCollection.Hiscores, hiscore, Hiscore.Converter)
       hiscore.id = hiscoreId
     }

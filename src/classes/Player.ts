@@ -150,9 +150,9 @@ export default class Player extends Phaser.GameObjects.Container {
   update (dt: number) {
     this.setDashTargetLocation()
     this.stamina += config.player.staminaRegen
-    const { vx, vy } = this.isDashing ? this.getVelocityDash(dt) : this.getVelocity(dt)
+    const { vx, vy } = this.isDashing ? this.getVelocityDash() : this.getVelocity()
 
-    const newPos = this.getPosition(vx, vy)
+    const newPos = this.getPosition(vx, vy, dt)
     this.x = newPos.x
     this.y = newPos.y
     this.velocity.x = vx
@@ -171,31 +171,14 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
-  destroy(): void {
-    if (this.beam) {
-      this.scene.input.off('pointerdown', this.startBeam, this)
-      this.scene.input.off('pointerup', this.stopBeam, this)
-      this.beam.destroy()
-    }
-
-    super.destroy()
-  }
-
-  private getClampedPosition (x: number, y: number) {
-    return {
-      x: clamp(x, this.sprite.width / 2, this.scene.scale.width - this.sprite.width / 2),
-      y: clamp(y, this.sprite.height / 2, this.scene.scale.height - this.sprite.height / 2)
-    }
-  }
-
-  private getPosition (vx: number, vy: number): { x: number, y: number } {
-    const newX = this.x + vx
-    const newY = this.y + vy
+  private getPosition (vx: number, vy: number, dt: number): { x: number, y: number } {
+    const newX = this.x + vx * (dt * 60)
+    const newY = this.y + vy * (dt * 60)
     const pos = this.getClampedPosition(newX, newY)
     return pos
   }
 
-  private getVelocity (dt: number): { vx: number, vy: number } {
+  private getVelocity (): { vx: number, vy: number } {
     let vx = this.velocity.x
     let vy = this.velocity.y
 
@@ -222,9 +205,6 @@ export default class Player extends Phaser.GameObjects.Container {
         vy = clamp(Math.min(0, vy + this.deceleration.y), -this.maxVelocity.y, this.maxVelocity.y)
       }
     }
-
-    vx *= (dt * 60)
-    vy *= (dt * 60)
 
     return { vx, vy }
   }
@@ -256,7 +236,7 @@ export default class Player extends Phaser.GameObjects.Container {
     this.controls.space = false
   }
 
-  private getVelocityDash (dt: number): { vx: number, vy: number } {
+  private getVelocityDash (): { vx: number, vy: number } {
     // Calculate direction to destination
     const dx = this.dashDestinationPos.x - this.x
     const dy = this.dashDestinationPos.y - this.y
@@ -268,7 +248,7 @@ export default class Player extends Phaser.GameObjects.Container {
 
     if (distance > 25) {
       // Normalize direction and apply dash speed
-      const dashSpeed = config.player.dashSpeed
+      const dashSpeed = config.player.dashSpeed * UNIT
       vx = (dx / distance) * dashSpeed
       vy = (dy / distance) * dashSpeed
 
@@ -285,9 +265,6 @@ export default class Player extends Phaser.GameObjects.Container {
       this.sprite.clearTint()
       this.sprite.resetPipeline()
     }
-
-    vx *= (dt * 60)
-    vy *= (dt * 60)
 
     return { vx, vy }
   }
@@ -318,5 +295,22 @@ export default class Player extends Phaser.GameObjects.Container {
       this.sprite.clearTint()
       this.sprite.resetPipeline()
     }, 200)
+  }
+
+  private getClampedPosition (x: number, y: number) {
+    return {
+      x: clamp(x, this.sprite.displayWidth / 2, this.scene.scale.width - this.sprite.displayWidth / 2),
+      y: clamp(y, this.sprite.displayHeight / 2, this.scene.scale.height - this.sprite.displayHeight / 2)
+    }
+  }
+
+  destroy(): void {
+    if (this.beam) {
+      this.scene.input.off('pointerdown', this.startBeam, this)
+      this.scene.input.off('pointerup', this.stopBeam, this)
+      this.beam.destroy()
+    }
+
+    super.destroy()
   }
 }

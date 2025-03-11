@@ -10,13 +10,6 @@ const { hp, energy, stamina, maxStamina, score, isPlaying, isPaused, debug, isIn
 const interval = ref<number | null>(null)
 const numClicksDebug = ref(0)
 
-onMounted(() => {
-  interval.value = window.setInterval(() => {
-    if (!isPlaying.value || isPaused.value) return
-    score.value += 1
-  }, 500)
-})
-
 onBeforeUnmount(() => {
   if (!interval.value) return
   window.clearInterval(interval.value)
@@ -60,7 +53,7 @@ const onClickHp = () => {
         :variant="NyxProgressVariant.Dots"
       />
     </section>
-    <span class="game-interface__score">{{ score }}</span>
+    <span class="game-interface__score">{{ Math.floor(score) }}</span>
   </header>
 </template>
 
