@@ -17,7 +17,6 @@ export default {
     dashDistance: 250,
     dashSpeed: 30,
     dashCooldown: 500,
-    dashDamageReduction: 0.5,
     dashStaminaCost: 1,
     teleportDistance: 250,
     teleportCooldown: 1000,
@@ -50,6 +49,7 @@ export default {
     },
   },
   powerUp: {
+    baseSpawnRate: 0.5,
     rotationSpeed: 0.5,
     hpSmall: 1,
     hpMedium: 5,

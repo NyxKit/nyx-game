@@ -107,7 +107,6 @@ export default class GameScene extends Scene {
     if (asteroid) {
       this.audio?.playBeamHit()
       if (this.player?.isDashing) {
-        this.player.hp -= asteroid.damage * config.player.dashDamageReduction
         asteroid.destroy(true)
       } else {
         this.player.hp -= asteroid.damage
@@ -216,6 +215,7 @@ export default class GameScene extends Scene {
     this.asteroids = this.asteroids.filter((asteroid) => asteroid.id !== id)
     if (!options?.isDestroyedByPlayer) return
     this.store.increaseScore(options.isLarge ? config.asteroid.large.score : config.asteroid.small.score)
+    if (Math.random() <= config.powerUp.baseSpawnRate) return
     this.spawnPowerUp(options.position, options.isLarge)
   }
 
