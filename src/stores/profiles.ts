@@ -54,6 +54,12 @@ const useProfilesStore = defineStore('profiles', () => {
     await nyxDatabase.setDocument(NyxCollection.Profiles, profile.id, profile, Profile.Converter)
   }
 
+  const updateLastLogin = async () => {
+    if (!profile.value) return
+    profile.value.lastLoginAt = new Date()
+    await updateProfile(profile.value)
+  }
+
   watch(user, async (newVal, oldVal) => {
     if (newVal && newVal.uid !== oldVal?.uid) {
       await subscribeProfile(newVal.uid)
@@ -62,9 +68,15 @@ const useProfilesStore = defineStore('profiles', () => {
     }
   })
 
+  watch(profile, async (newVal, oldVal) => {
+    if (!newVal || !!oldVal) return
+    updateLastLogin()
+  })
+
   return {
     profile,
     profiles,
+    updateLastLogin,
     updateProfile,
     subscribeProfile,
     unsubscribeProfile,

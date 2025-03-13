@@ -1,4 +1,4 @@
-import type { QueryDocumentSnapshot } from 'firebase/firestore'
+import { Timestamp, type QueryDocumentSnapshot } from 'firebase/firestore'
 import { NyxLoader } from 'nyx-kit/classes'
 
 export default class Profile {
@@ -10,8 +10,10 @@ export default class Profile {
   public country: string|null = null
   public createdAt: Date = new Date()
   public updatedAt: Date = new Date()
+  public lastLoginAt: Date = new Date()
   public photoUrl: string|null = null
   public phoneNumber: string|null = null
+  public isSuperUser: boolean = false
 
   constructor(data?: unknown) {
     if (!data) return
@@ -23,8 +25,10 @@ export default class Profile {
     this.country = NyxLoader.loadStringOrNull(data, 'country', null)
     this.photoUrl = NyxLoader.loadStringOrNull(data, 'photoUrl', null)
     this.phoneNumber = NyxLoader.loadStringOrNull(data, 'phoneNumber', null)
-    // this.createdAt = NyxLoader.loadDate(data, 'createdAt')
-    // this.updatedAt = NyxLoader.loadDate(data, 'updatedAt')
+    this.isSuperUser = NyxLoader.loadBoolean(data, 'isSuperUser', false)
+    this.createdAt = NyxLoader.loadDate(data, 'createdAt', this.createdAt)
+    this.updatedAt = NyxLoader.loadDate(data, 'updatedAt', this.updatedAt)
+    this.lastLoginAt = NyxLoader.loadDate(data, 'lastLoginAt', this.lastLoginAt)
   }
 
   public get fullName () {
@@ -44,10 +48,12 @@ export default class Profile {
       lastName: this.lastName,
       email: this.email,
       country: this.country,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      createdAt: Timestamp.fromDate(this.createdAt),
+      updatedAt: Timestamp.fromDate(this.updatedAt),
+      lastLoginAt: Timestamp.fromDate(this.lastLoginAt),
       photoUrl: this.photoUrl,
-      phoneNumber: this.phoneNumber
+      phoneNumber: this.phoneNumber,
+      isSuperUser: this.isSuperUser
     }
   }
 

@@ -18,6 +18,7 @@ export default defineStore('auth', () => {
       email: user.value.email,
       phoneNumber: user.value.phoneNumber,
       photoUrl: user.value.photoURL,
+      isSuperUser: !!profile?.isSuperUser,
       createdAt: profile ? profile.createdAt : new Date(),
       updatedAt: profile ? profile.updatedAt : new Date()
     })
@@ -39,9 +40,10 @@ export default defineStore('auth', () => {
     user.value = null
   }
 
-  const watchAuthState = () => {
+  const watchAuthState = (callback?: Function) => {
     onAuthStateChanged(nyxDatabase.auth, (firebaseUser) => {
       user.value = firebaseUser ?? null
+      callback?.(user.value)
     })
   }
 

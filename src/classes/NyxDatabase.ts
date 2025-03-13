@@ -54,7 +54,6 @@ export default class NyxDatabase {
   }
 
   public async signIn (provider: keyof typeof this.authProviders = 'google') {
-    console.log('this.auth', this.auth)
     const result = await signInWithPopup(this.auth, this.authProviders[provider])
     return result
   }
