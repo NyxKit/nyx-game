@@ -153,10 +153,12 @@ export default class GameScene extends Scene {
 
   private trySpawnAsteroid () {
     let spawnRate = config.asteroid.baseSpawnRate / this.velocity
-    if (this.store.score > 2000) {
-      const scoreModifier = Math.log1p((this.store.score - 2000) / 1000)
-      spawnRate = spawnRate / (1 + scoreModifier)
-    }
+    // if (this.store.score > 2000) {
+    //   const scoreModifier = Math.log1p((this.store.score - 2000) / 1000)
+    //   spawnRate = spawnRate / (1 + scoreModifier)
+    // }
+    const scoreModifier = Math.log1p(this.store.score / 1000)
+    spawnRate = spawnRate / (1 + scoreModifier)
 
     const timeSinceLastSpawn = this.time.now - this.lastSpawnTime
 
