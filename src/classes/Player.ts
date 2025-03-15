@@ -46,12 +46,14 @@ export default class Player extends Phaser.GameObjects.Container {
     this.audio = scene.audio
 
     // Create the beam first so it renders behind the player
-    const playerSpriteSrc = this.scene.textures.get('player').getSourceImage()
+    // const playerSpriteSrc = this.scene.textures.get('player').getSourceImage()
+    const playerSpriteSrc = { width: 128 }
     this.beam = new Beam(this.scene, { x: playerSpriteSrc.width / 2, y: 0 })
     this.add(this.beam.sprite)
 
     // Create the player sprite after so it renders on top
-    this.sprite = scene.add.image(0, 0, 'player').setScale(UNIT)
+    // this.sprite = scene.add.image(0, 0, 'player').setScale(UNIT)
+    this.sprite = this.scene.add.sprite(0, 0, 'player').setScale(2 * UNIT)
     this.add(this.sprite)
 
     // Add container to scene
