@@ -18,7 +18,7 @@ export const createSpriteAnimation = (
   anims: Phaser.Animations.AnimationManager,
   key: string,
   src: string,
-  frames: number[],
+  frames?: number[],
   repeat: number = -1,
 ) => {
   return anims.create({

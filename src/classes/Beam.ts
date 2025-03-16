@@ -10,7 +10,7 @@ export default class Beam {
   private scene: GameScene
   private key: string = 'beam'
   public origin: { x: number; y: number } = { x: 0, y: 0 }
-  private originOffset: { x: number, y: number } = { x: -50, y: 0 }
+  private originOffset: { x: number, y: number } = { x: 0, y: 0 }
   public position: { x: number, y: number } = { x: 0, y: 0 }
   public id: string = uuidv4()
   public sprite: GameObjects.Sprite
@@ -26,9 +26,9 @@ export default class Beam {
     this.position = { x: (origin.x + this.originOffset.x) * UNIT, y: (origin.y + this.originOffset.y) * UNIT }
     this.sprite = this.scene.add.sprite(this.position.x, this.position.y, this.key)
       .setAlpha(0).setOrigin(0, 0.5)
-    createSpriteAnimation(this.scene.anims, 'beam-start', 'beam', [0, 1, 2, 3, 4, 5, 6, 7], 0)
-    createSpriteAnimation(this.scene.anims, 'beam-active', 'beam', [8, 9, 10, 11, 12, 13, 14, 15])
-    createSpriteAnimation(this.scene.anims, 'beam-end', 'beam', [16, 17, 18, 19, 20, 21, 22, 23], 0)
+    createSpriteAnimation(this.scene.anims, 'beam-start', this.key, [0, 1, 2, 3, 4, 5, 6, 7], 0)
+    createSpriteAnimation(this.scene.anims, 'beam-active', this.key, [8, 9, 10, 11, 12, 13, 14, 15])
+    createSpriteAnimation(this.scene.anims, 'beam-end', this.key, [16, 17, 18, 19, 20, 21, 22, 23], 0)
   }
 
   get bounds () {
