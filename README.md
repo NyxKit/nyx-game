@@ -35,3 +35,5 @@
 - https://nikitakart.itch.io/celestial-objects
 - https://freesound.org/people/bolkmar/sounds/420363/
 - https://pixie.haus/
+- https://lospec.com/
+- https://www.pureref.com/
