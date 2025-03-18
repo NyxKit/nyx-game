@@ -10,7 +10,7 @@ import { UNIT } from '@/scenes/GameScene'
 import { createSpriteAnimation } from '@/utils'
 
 export default class Player extends Phaser.GameObjects.Container {
-  public sprite: GameObjects.Sprite|GameObjects.Image
+  public sprite: GameObjects.Sprite
   public scene: GameScene
   private controls: GameControls
   private store = useGameStore()
@@ -51,23 +51,22 @@ export default class Player extends Phaser.GameObjects.Container {
     // Create the beam first so it renders behind the player
     // const playerSpriteSrc = this.scene.textures.get('player').getSourceImage()
     const playerSpriteSrc = { width: 128 * scaleSprite, height: 64 * scaleSprite }
-    this.beam = new Beam(this.scene, { x: (playerSpriteSrc.width / 2), y: -playerSpriteSrc.height / 2 })
+    this.beam = new Beam(this.scene, { x: (playerSpriteSrc.width / 2), y: -35 })
     this.add(this.beam.sprite)
 
     // Create the player sprite after so it renders on top
-    this.sprite = scene.add.image(0, 0, 'playerImage').setScale(UNIT)
-    // this.sprite = this.scene.add.sprite(0, 0, 'player/idle').setScale(scaleSprite)
+    // this.sprite = scene.add.image(0, 0, 'playerImage').setScale(UNIT)
+    this.sprite = this.scene.add.sprite(0, 0, 'player/idle').setScale(scaleSprite)
     this.add(this.sprite)
 
-    // this.scene.anims.create({
-    //   key: 'player-idle',
-    //   frames: this.scene.anims.generateFrameNames('player/idle', { start: 0, end: 28 }),
-    //   frameRate: 24,
-    //   repeat: -1
-    // })
-    // createSpriteAnimation(this.scene.anims, 'player-idle', 'player/idle')
+    this.scene.anims.create({
+      key: 'player-idle',
+      frames: this.scene.anims.generateFrameNames('player/idle', { start: 0, end: 28 }),
+      frameRate: 8,
+      repeat: -1
+    })
 
-    // this.sprite.anims.play('player-idle')
+    this.sprite.anims.play('player-idle')
 
     // Add container to scene
     scene.add.existing(this)

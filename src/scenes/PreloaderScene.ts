@@ -39,14 +39,11 @@ export default class PreloaderScene extends Scene {
     this.load.image('powerup/energy-medium', 'powerup/blue1.png')
     this.load.image('powerup/energy-large', 'powerup/blue2.png')
 
-    // this.load.spritesheet('player', 'player.png', { frameWidth: 128, frameHeight: 128 })
     this.load.spritesheet('beam', 'beam.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('player/idle', 'player/idle.png', { frameWidth: 128, frameHeight: 64 })
     // this.load.spritesheet('explosion/sm', 'explosion/sm.png', { frameWidth: 16, frameHeight: 16 })
     this.load.spritesheet('explosion/md', 'explosion/md.png', { frameWidth: 32, frameHeight: 32 })
     // this.load.spritesheet('explosion/lg', 'explosion/lg.png', { frameWidth: 48, frameHeight: 48 })
-
-    // this.load.atlas('beam', 'beam.png', 'beam.json')
 
     this.load.audio('soundtrack/0', 'soundtracks/Stars.mp3')
     this.load.audio('soundtrack/1', 'soundtracks/NoGravity.mp3')

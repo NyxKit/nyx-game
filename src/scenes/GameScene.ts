@@ -125,22 +125,11 @@ export default class GameScene extends Scene {
       const beam = this.player.beam.sprite
       // Calculate beam line starting from player position
       const beamLine = new Phaser.Geom.Line(
-        this.player.x + (this.player.sprite.width / 2) - 50,
-        this.player.y,
-        this.player.x + Math.cos(beam.rotation) * beam.displayWidth,
-        this.player.y + Math.sin(beam.rotation) * beam.displayWidth
+        this.player.x + this.player.beam.position.x,
+        this.player.y + this.player.beam.position.y,
+        this.player.x + this.player.beam.position.x + Math.cos(beam.rotation) * beam.displayWidth,
+        this.player.y + this.player.beam.position.y + Math.sin(beam.rotation) * beam.displayWidth
       )
-
-      // Draw debug line
-      // this.line = this.add.line(
-      //   0,
-      //   0,
-      //   beamLine.x1,
-      //   beamLine.y1,
-      //   beamLine.x2,
-      //   beamLine.y2,
-      //   0xff0000
-      // ).setOrigin(0, 0).setDepth(2000)
 
       this.asteroids.forEach((asteroid) => {
         const asteroidBounds = asteroid.sprite.getBounds()
@@ -189,7 +178,7 @@ export default class GameScene extends Scene {
     return false
   }
 
-  spawnAsteroid () {
+  public spawnAsteroid () {
     // this.asteroidSpeed = 1 + Math.log1p(this.store.score / 2000) * 1.5 + Math.pow(this.store.score / 5000, 1.05)
     // this.asteroidSpeed = clamp(this.asteroidSpeed, 1, this.velocity * 0.8)
     this.asteroidSpeed = this.velocity * 0.5
@@ -203,7 +192,7 @@ export default class GameScene extends Scene {
     this.asteroids.push(asteroid)
   }
 
-  spawnPowerUp (position: { x: number; y: number }, isLarge: boolean) {
+  public spawnPowerUp (position: { x: number; y: number }, isLarge: boolean) {
     const powerUp = new PowerUp(this, {
       position,
       isLarge,
