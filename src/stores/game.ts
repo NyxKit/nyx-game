@@ -1,4 +1,5 @@
-import { Debug } from '@/classes'
+import { Debug, EventBus } from '@/classes'
+import { GameEvents } from '@/classes/EventBus'
 import config from '@/config'
 import { GameState } from '@/types'
 import { isGameScene } from '@/utils'
@@ -38,6 +39,7 @@ const useGameStore = defineStore('game', () => {
     } else {
       state.value = newVal ? GameState.Paused : GameState.Playing
     }
+    EventBus.emit(GameEvents.TogglePaused, state.value === GameState.Paused)
   }
 
   const setPlayerPosition = (x: number, y: number) => playerPosition.value = { x, y }

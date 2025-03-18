@@ -27,6 +27,8 @@ export default class GameScene extends Scene {
 
   constructor () {
     super('Game')
+
+    EventBus.addListener(GameEvents.TogglePaused, this.togglePaused.bind(this))
   }
 
   reset () {
@@ -42,9 +44,8 @@ export default class GameScene extends Scene {
     // this.scene.restart()
   }
 
-  public togglePaused () {
-    this.store.togglePaused()
-    if (this.store.isPaused) {
+  public togglePaused (isPaused: boolean) {
+    if (isPaused) {
       this.scene.pause()
     } else {
       this.scene.resume()

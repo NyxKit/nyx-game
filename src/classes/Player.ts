@@ -161,7 +161,7 @@ export default class Player extends Phaser.GameObjects.Container {
     )
   }
 
-  update (dt: number) {
+  public update (dt: number) {
     this.setDashTargetLocation()
     this.stamina += config.player.staminaRegen
     const { vx, vy } = this.isDashing ? this.getVelocityDash() : this.getVelocity()
