@@ -42,6 +42,7 @@ export default class GameScene extends Scene {
     // this.audio = null
     this.lastSpawnTime = 0
     // this.scene.restart()
+    this.togglePaused(false)
   }
 
   public togglePaused (isPaused: boolean) {
