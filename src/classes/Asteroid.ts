@@ -3,7 +3,7 @@ import type { GameScene } from '@/scenes'
 import { UNIT } from '@/scenes/GameScene'
 import type { OnDestroyEvent } from '@/types'
 import { clamp, getRandomBetween } from 'nyx-kit/utils'
-import type { GameObjects } from 'phaser'
+import { Physics } from 'phaser'
 import { v4 as uuidv4 } from 'uuid'
 
 interface AsteroidOptions {
@@ -12,9 +12,9 @@ interface AsteroidOptions {
   onDestroy: OnDestroyEvent
 }
 
-export default class Asteroid implements AsteroidOptions {
+export default class Asteroid {
   public id: string
-  public sprite: GameObjects.Image
+  public sprite: Physics.Arcade.Sprite
   private _hp: number = 1
   private maxHp: number = 1
   public maxSpeed = 3 * UNIT
@@ -54,10 +54,8 @@ export default class Asteroid implements AsteroidOptions {
     if (!this.sprite) return
     // Calculate red tint based on remaining HP percentage
     const hpPercentage = this._hp / this.maxHp
-    // const redTint = 0x7B3636 // Dark red blended with black
-    // const yellowTint = 0xFFFFC0 // Pale yellow blended with white
-    const orangeTint = 0xFFD580 // Soft orange-yellow blend
-    const whiteTint = 0xFFFFFF // Base white color
+    const orangeTint = 0xFFD580
+    const whiteTint = 0xFFFFFF
 
     // Blend between white and red based on HP
     const tint = Phaser.Display.Color.Interpolate.ColorWithColor(
@@ -80,56 +78,56 @@ export default class Asteroid implements AsteroidOptions {
   private get speed () {
     const hpRatio = this.hp / this.maxHp
     const speed = this.minSpeed + ((this.maxSpeed - this.minSpeed) * hpRatio)
-    return clamp(speed, this.minSpeed, this.maxSpeed)
-  }
-
-  private get velocity () {
-    return {
-      x: -this.speed * Math.cos(this.angle),
-      y: (this.speed * 0.5) * Math.sin(this.angle)
-    }
+    return clamp(speed, this.minSpeed, this.maxSpeed) * 60 // Multiply by 60 for physics system
   }
 
   create () {
-    const src = this.scene.textures.get(this.key).getSourceImage()
-
-    // 75% chance of spawning on right vs top
+    // 75% chance of spawning on right vs top/bottom
     const isSpawnOnRight = Math.random() < 0.75
 
     let startX: number
     let startY: number
+    let velocityX: number
+    let velocityY: number
 
     if (isSpawnOnRight) {
-      // Spawn on right side with random Y position and angle between -15 and 15 degrees
-      startX = this.scene.scale.width + src.width
-      startY = getRandomBetween(0, this.scene.scale.height - src.height)
-      this.angle = getRandomBetween(-15, 15) * Math.PI / 180 // Convert to radians
+      // Spawn on right side with random Y position
+      startX = this.scene.scale.width + 100 // Add padding to ensure it's off screen
+      startY = getRandomBetween(0, this.scene.scale.height)
+      this.angle = getRandomBetween(-15, 15) * Math.PI / 180
     } else {
       const isSpawnOnTop = Math.random() < 0.5
       if (isSpawnOnTop) {
-        startX = getRandomBetween(this.scene.scale.width / 2, this.scene.scale.width) + src.width
-        startY = -src.height
-        this.angle = getRandomBetween(15, 30) * Math.PI / 180 // Convert to radians
+        startX = getRandomBetween(this.scene.scale.width / 2, this.scene.scale.width)
+        startY = -100 // Add padding to ensure it's off screen
+        this.angle = getRandomBetween(15, 30) * Math.PI / 180
       } else {
-        startX = getRandomBetween(0, this.scene.scale.width - src.width)
-        startY = this.scene.scale.height + src.height
-        this.angle = getRandomBetween(-15, -30) * Math.PI / 180 // Convert to radians
+        startX = getRandomBetween(0, this.scene.scale.width)
+        startY = this.scene.scale.height + 100 // Add padding to ensure it's off screen
+        this.angle = getRandomBetween(-30, -15) * Math.PI / 180
       }
     }
 
-    return this.scene.add
-      .image(startX, startY, this.key)
+    // Create physics sprite
+    const sprite = this.scene.physics.add.sprite(startX, startY, this.key)
       .setScale(this.size * UNIT)
       .setDepth(100)
+
+    // Calculate velocity based on angle and speed
+    velocityX = -Math.cos(this.angle) * this.speed
+    velocityY = Math.sin(this.angle) * (this.speed * 0.5)
+
+    // Set initial velocity
+    sprite.setVelocity(velocityX, velocityY)
+
+    return sprite
   }
 
   update (dt: number) {
-    this.sprite.x += this.velocity.x
-    this.sprite.y += this.velocity.y
+    // Update rotation
     this.sprite.rotation += config.asteroid.rotationSpeed * dt
 
     const padding = 500
-
     const shouldDestroy = this.sprite.x < -this.sprite.width - padding
       || this.sprite.y > this.scene.scale.height + this.sprite.height + padding
 
@@ -139,8 +137,7 @@ export default class Asteroid implements AsteroidOptions {
   destroy (isDestroyedByPlayer: boolean = false) {
     const position = { x: this.sprite.x, y: this.sprite.y }
     this.onDestroy(this.id, { isDestroyedByPlayer, position, size: this.size, isLarge: this.isLarge })
-    const { x, y } = { x: this.sprite.x, y: this.sprite.y }
-    this.sprite.destroy()
+    const { x, y } = position
 
     if (isDestroyedByPlayer) {
       this.scene.audio?.sfx.asteroidExplosion?.play()
@@ -151,6 +148,8 @@ export default class Asteroid implements AsteroidOptions {
       .setDepth(100)
     explosion.anims.play('explosion/md')
       .once('animationcomplete', () => explosion.destroy())
+
+    this.sprite.destroy()
   }
 }
 

@@ -1,4 +1,4 @@
-import { GameObjects } from 'phaser'
+import { GameObjects, Physics } from 'phaser'
 import type GameControls from './GameControls'
 import { clamp } from 'nyx-kit/utils'
 import useGameStore from '@/stores/game'
@@ -10,7 +10,7 @@ import { UNIT } from '@/scenes/GameScene'
 import { createSpriteAnimation } from '@/utils'
 
 export default class Player extends Phaser.GameObjects.Container {
-  public sprite: GameObjects.Sprite
+  public sprite: Physics.Arcade.Sprite
   public scene: GameScene
   private controls: GameControls
   private store = useGameStore()
@@ -54,9 +54,16 @@ export default class Player extends Phaser.GameObjects.Container {
     this.beam = new Beam(this.scene, { x: (playerSpriteSrc.width / 2), y: -35 })
     this.add(this.beam.sprite)
 
-    // Create the player sprite after so it renders on top
-    // this.sprite = scene.add.image(0, 0, 'playerImage').setScale(UNIT)
-    this.sprite = this.scene.add.sprite(0, 0, 'player/idle').setScale(scaleSprite)
+    // Create the player sprite and enable physics
+    this.sprite = this.scene.physics.add.sprite(0, 0, 'player/idle')
+      .setScale(scaleSprite)
+    
+    // Set up physics properties
+    this.sprite.setCollideWorldBounds(true)
+    this.sprite.setBounce(0)
+    this.sprite.setDrag(this.deceleration.x * 1000, this.deceleration.y * 1000)
+    this.sprite.setMaxVelocity(this.maxVelocity.x * 60, this.maxVelocity.y * 60)
+    
     this.add(this.sprite)
 
     this.scene.anims.create({
@@ -164,13 +171,16 @@ export default class Player extends Phaser.GameObjects.Container {
   public update (dt: number) {
     this.setDashTargetLocation()
     this.stamina += config.player.staminaRegen
-    const { vx, vy } = this.isDashing ? this.getVelocityDash() : this.getVelocity()
 
-    const newPos = this.getPosition(vx, vy, dt)
-    this.x = newPos.x
-    this.y = newPos.y
-    this.velocity.x = vx
-    this.velocity.y = vy
+    if (this.isDashing) {
+      this.handleDashMovement()
+    } else {
+      this.handleNormalMovement()
+    }
+
+    // Update container position to match sprite
+    this.x = this.sprite.x
+    this.y = this.sprite.y
     this.store.setPlayerPosition(this.x, this.y)
 
     if (this.hasEnergyForBeam && this.beam?.isActive) {
@@ -185,42 +195,48 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
-  private getPosition (vx: number, vy: number, dt: number): { x: number, y: number } {
-    const newX = this.x + vx * (dt * 60)
-    const newY = this.y + vy * (dt * 60)
-    const pos = this.getClampedPosition(newX, newY)
-    return pos
-  }
-
-  private getVelocity (): { vx: number, vy: number } {
-    let vx = this.velocity.x
-    let vy = this.velocity.y
+  private handleNormalMovement() {
+    const acceleration = this.acceleration.x * 1000
 
     if (this.controls.left) {
-      vx = clamp(vx - this.acceleration.x, -this.maxVelocity.x, this.maxVelocity.x)
+      this.sprite.setAccelerationX(-acceleration)
     } else if (this.controls.right) {
-      vx = clamp(vx + this.acceleration.x, -this.maxVelocity.x, this.maxVelocity.x)
+      this.sprite.setAccelerationX(acceleration)
     } else {
-      if (vx > 0) {
-        vx = clamp(Math.max(0, vx - this.deceleration.x), -this.maxVelocity.x, this.maxVelocity.x)
-      } else if (vx < 0) {
-        vx = clamp(Math.min(0, vx + this.deceleration.x), -this.maxVelocity.x, this.maxVelocity.x)
-      }
+      this.sprite.setAccelerationX(0)
     }
 
     if (this.controls.up) {
-      vy = clamp(vy - this.acceleration.y, -this.maxVelocity.y, this.maxVelocity.y)
+      this.sprite.setAccelerationY(-acceleration)
     } else if (this.controls.down) {
-      vy = clamp(vy + this.acceleration.y, -this.maxVelocity.y, this.maxVelocity.y)
+      this.sprite.setAccelerationY(acceleration)
     } else {
-      if (vy > 0) {
-        vy = clamp(Math.max(0, vy - this.deceleration.y), -this.maxVelocity.y, this.maxVelocity.y)
-      } else if (vy < 0) {
-        vy = clamp(Math.min(0, vy + this.deceleration.y), -this.maxVelocity.y, this.maxVelocity.y)
-      }
+      this.sprite.setAccelerationY(0)
     }
+  }
 
-    return { vx, vy }
+  private handleDashMovement() {
+    const dx = this.dashDestinationPos.x - this.sprite.x
+    const dy = this.dashDestinationPos.y - this.sprite.y
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    
+    if (distance > 25) {
+      const dashSpeed = config.player.dashSpeed * UNIT * 60
+      this.sprite.setVelocity(
+        (dx / distance) * dashSpeed,
+        (dy / distance) * dashSpeed
+      )
+      this.sprite.setTint(config.player.colorDash)
+      this.sprite.setPipeline('glow')
+    } else {
+      this.isDashing = false
+      this.sprite.setVelocity(
+        this.controls.right ? this.maxVelocity.x * 60 : this.controls.left ? -this.maxVelocity.x * 60 : 0,
+        this.controls.down ? this.maxVelocity.y * 60 : this.controls.up ? -this.maxVelocity.y * 60 : 0
+      )
+      this.sprite.clearTint()
+      this.sprite.resetPipeline()
+    }
   }
 
   private setDashTargetLocation () {
@@ -248,39 +264,6 @@ export default class Player extends Phaser.GameObjects.Container {
     }
     this.dashDestinationPos = this.getClampedPosition(targetPos.x, targetPos.y)
     this.controls.space = false
-  }
-
-  private getVelocityDash (): { vx: number, vy: number } {
-    // Calculate direction to destination
-    const dx = this.dashDestinationPos.x - this.x
-    const dy = this.dashDestinationPos.y - this.y
-    let vx = this.velocity.x
-    let vy = this.velocity.y
-
-    // Calculate distance to destination
-    const distance = Math.max(Math.sqrt(dx * dx + dy * dy), 0)
-
-    if (distance > 25) {
-      // Normalize direction and apply dash speed
-      const dashSpeed = config.player.dashSpeed * UNIT
-      vx = (dx / distance) * dashSpeed
-      vy = (dy / distance) * dashSpeed
-
-      // Add blue/white shine effect while dashing
-      this.sprite.setTint(config.player.colorDash)
-      this.sprite.setPipeline('glow')
-    } else {
-      // Reached destination, stop dashing
-      vx = this.controls.right ? this.maxVelocity.x : this.controls.left ? -this.maxVelocity.x : 0
-      vy = this.controls.down ? this.maxVelocity.y : this.controls.up ? -this.maxVelocity.y : 0
-      this.isDashing = false
-
-      // Remove shine effect
-      this.sprite.clearTint()
-      this.sprite.resetPipeline()
-    }
-
-    return { vx, vy }
   }
 
   public startBeam () {
@@ -324,7 +307,7 @@ export default class Player extends Phaser.GameObjects.Container {
       this.scene.input.off('pointerup', this.stopBeam, this)
       this.beam.destroy()
     }
-
+    this.sprite.destroy()
     super.destroy()
   }
 }

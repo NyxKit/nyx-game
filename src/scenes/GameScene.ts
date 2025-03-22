@@ -9,6 +9,7 @@ import { createSpriteAnimation } from '@/utils'
 import { Audio } from '@/classes/Audio'
 import config from '@/config'
 import { GameEvents } from '@/classes/EventBus'
+import type { Types } from 'phaser'
 
 export let UNIT = 1
 
@@ -27,7 +28,6 @@ export default class GameScene extends Scene {
 
   constructor () {
     super('Game')
-
     EventBus.addListener(GameEvents.TogglePaused, this.togglePaused.bind(this))
   }
 
@@ -38,17 +38,16 @@ export default class GameScene extends Scene {
     this.powerUps = []
     this.player?.setPosition(200, this.scale.height / 2)
     this.player?.stopBeam()
-    // this.audio?.soundtrack?.stop()
-    // this.audio = null
     this.lastSpawnTime = 0
-    // this.scene.restart()
     this.togglePaused(false)
   }
 
   public togglePaused (isPaused: boolean) {
     if (isPaused) {
+      this.physics.pause()
       this.scene.pause()
     } else {
+      this.physics.resume()
       this.scene.resume()
     }
   }
@@ -68,9 +67,21 @@ export default class GameScene extends Scene {
     this.player.setDepth(1000)
     this.player.setPosition(200, this.scale.height / 2)
 
-    // createSpriteAnimation(this.anims, 'explosion-sm', 'explosion/sm', [0, 1, 2, 3], 0)
     createSpriteAnimation(this.anims, 'explosion/md', 'explosion/md', [0, 1, 2, 3], 0)
-    // createSpriteAnimation(this.anims, 'explosion-lg', 'explosion/lg', [0, 1, 2, 3], 0)
+
+    // Set up collision groups
+    if (this.player?.sprite) {
+      // Initial asteroids will be handled when spawned
+      this.asteroids.forEach(asteroid => {
+        if (asteroid.sprite instanceof Phaser.Physics.Arcade.Sprite) {
+          this.physics.add.collider(
+            this.player!.sprite,
+            asteroid.sprite,
+            this.handlePlayerAsteroidCollision.bind(this) as Types.Physics.Arcade.ArcadePhysicsCallback
+          )
+        }
+      })
+    }
 
     EventBus.emit(GameEvents.CurrentSceneReady, this)
   }
@@ -81,7 +92,6 @@ export default class GameScene extends Scene {
 
     const dt = delta / 1000
 
-    // this.velocity = 1 + Math.log10(Math.max(1, this.store.score / 1000)) * 2 + Math.pow(this.store.score / 1000, 1.1)
     const v = 1 + Math.log1p(Math.max(1, this.store.score / 500)) * 2 + Math.pow(this.store.score / 1000, 1.025)
     this.velocity = clamp(v * dt * 60, 1, 30)
 
@@ -101,26 +111,6 @@ export default class GameScene extends Scene {
     this.player.update(dt)
 
     this.trySpawnAsteroid()
-
-    const playerBounds = this.player.bounds
-    const asteroid = this.isCollisionAsteroidDetected(playerBounds)
-    const powerUp = this.isCollisionPowerUpDetected(playerBounds)
-
-    if (asteroid) {
-      this.audio?.playBeamHit()
-      if (this.player?.isDashing) {
-        asteroid.destroy(true)
-      } else {
-        this.player.hp -= asteroid.damage
-        asteroid.destroy(false)
-      }
-    } else {
-      this.audio?.stopBeamHit()
-    }
-
-    if (powerUp) {
-      powerUp.destroy(true)
-    }
 
     // Check beam collision with asteroids
     if (this.player?.beam?.isActive) {
@@ -142,12 +132,31 @@ export default class GameScene extends Scene {
     }
   }
 
+  private handlePlayerAsteroidCollision(
+    playerObj: Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile,
+    asteroidObj: Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile
+  ) {
+    if (this.store.debug.isCollisionDisabled) return
+
+    // Type guard to ensure we have the correct sprite types
+    if (!this.player?.sprite || 
+        !(playerObj instanceof Phaser.Physics.Arcade.Sprite) || 
+        !(asteroidObj instanceof Phaser.Physics.Arcade.Sprite)) return
+
+    const asteroid = this.asteroids.find(a => a.sprite === asteroidObj)
+    if (!asteroid) return
+
+    this.audio?.playBeamHit()
+    if (this.player.isDashing) {
+      asteroid.destroy(true)
+    } else {
+      this.player.hp -= asteroid.damage
+      asteroid.destroy(false)
+    }
+  }
+
   private trySpawnAsteroid () {
     let spawnRate = config.asteroid.baseSpawnRate / this.velocity
-    // if (this.store.score > 2000) {
-    //   const scoreModifier = Math.log1p((this.store.score - 2000) / 1000)
-    //   spawnRate = spawnRate / (1 + scoreModifier)
-    // }
     const scoreModifier = Math.log1p(this.store.score / 1000)
     spawnRate = spawnRate / (1 + scoreModifier)
 
@@ -159,30 +168,7 @@ export default class GameScene extends Scene {
     }
   }
 
-  private isCollisionAsteroidDetected (playerBounds: Phaser.Geom.Rectangle): Asteroid | false {
-    if (this.store.debug.isCollisionDisabled) return false
-    for (const asteroid of this.asteroids) {
-      const asteroidBounds = asteroid.sprite.getBounds()
-      if (Phaser.Geom.Rectangle.Overlaps(playerBounds, asteroidBounds)) {
-        return asteroid
-      }
-    }
-    return false
-  }
-
-  private isCollisionPowerUpDetected (playerBounds: Phaser.Geom.Rectangle): PowerUp | false {
-    for (const powerUp of this.powerUps) {
-      const powerUpBounds = powerUp.sprite.getBounds()
-      if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, powerUpBounds)) {
-        return powerUp
-      }
-    }
-    return false
-  }
-
   public spawnAsteroid () {
-    // this.asteroidSpeed = 1 + Math.log1p(this.store.score / 2000) * 1.5 + Math.pow(this.store.score / 5000, 1.05)
-    // this.asteroidSpeed = clamp(this.asteroidSpeed, 1, this.velocity * 0.8)
     this.asteroidSpeed = this.velocity * 0.5
 
     const asteroid = new Asteroid(this, {
@@ -192,6 +178,15 @@ export default class GameScene extends Scene {
     })
 
     this.asteroids.push(asteroid)
+
+    // Add the new asteroid to the collision system
+    if (this.player?.sprite) {
+      this.physics.add.collider(
+        this.player.sprite,
+        asteroid.sprite,
+        this.handlePlayerAsteroidCollision.bind(this) as Types.Physics.Arcade.ArcadePhysicsCallback
+      )
+    }
   }
 
   public spawnPowerUp (position: { x: number; y: number }, isLarge: boolean) {
@@ -202,6 +197,15 @@ export default class GameScene extends Scene {
       onDestroy: this.onDestroyPowerUp.bind(this)
     })
     this.powerUps.push(powerUp)
+
+    // Add overlap detection with player
+    if (this.player?.sprite) {
+      this.physics.add.overlap(
+        this.player.sprite,
+        powerUp.sprite,
+        () => powerUp.destroy(true)
+      )
+    }
   }
 
   private onDestroyAsteroid (id: string, options?: KeyDict<any>) {
