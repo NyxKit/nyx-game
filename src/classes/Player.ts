@@ -80,7 +80,7 @@ export default class Player extends Phaser.GameObjects.Container {
     const body = this.body as Phaser.Physics.Arcade.Body
     body.setCollideWorldBounds(true)
     body.setBounce(0)
-    body.setDrag(this.deceleration.x * 1000 * UNIT, this.deceleration.y * 1000 * UNIT)
+    body.setDrag(this.deceleration.x * 1000 * UNIT, this.deceleration.y * 500 * UNIT)
     body.setVelocity(this.velocity.x, this.velocity.y)
     body.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
     
@@ -232,7 +232,7 @@ export default class Player extends Phaser.GameObjects.Container {
   }
 
   private handleNormalMovement() {
-    const acceleration = this.acceleration.x * 1000 * UNIT
+    const acceleration = this.acceleration.x * 2000 * UNIT
     const body = this.body as Phaser.Physics.Arcade.Body
 
     if (this.controls.left) {
