@@ -61,7 +61,7 @@ export default class Player extends Phaser.GameObjects.Container {
 
     // Create the beam positioned relative to sprite's base dimensions
     const spriteBaseWidth = 128 // Base sprite width before scaling
-    this.beam = new Beam(this.scene, { x: spriteBaseWidth / 2, y: 0 })
+    this.beam = new Beam(this.scene, { x: spriteBaseWidth / 2, y: -20 })
     this.add(this.beam.sprite)
     this.beam.sprite.setDepth(0)
     
@@ -86,8 +86,6 @@ export default class Player extends Phaser.GameObjects.Container {
     
     // Set the physics body size to match the sprite's actual dimensions
     const padding = config.player.boundsPadding
-
-    console.log(this.sprite.displayWidth, this.sprite.displayHeight)
     
     // Use the sprite's actual display dimensions
     body.setSize(
