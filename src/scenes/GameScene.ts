@@ -71,12 +71,12 @@ export default class GameScene extends Scene {
     createSpriteAnimation(this.anims, 'explosion/md', 'explosion/md', [0, 1, 2, 3], 0)
 
     // Set up collision groups
-    if (this.player?.sprite) {
+    if (this.player) {
       // Initial asteroids will be handled when spawned
       this.asteroids.forEach(asteroid => {
         if (asteroid.sprite instanceof Phaser.Physics.Arcade.Sprite) {
           this.physics.add.collider(
-            this.player!.sprite,
+            this.player!,
             asteroid.sprite,
             this.handlePlayerAsteroidCollision.bind(this) as Types.Physics.Arcade.ArcadePhysicsCallback
           )
@@ -145,9 +145,9 @@ export default class GameScene extends Scene {
   ) {
     if (this.store.debug.isCollisionDisabled) return
 
-    // Type guard to ensure we have the correct sprite types
-    if (!this.player?.sprite) return
-    if (!(playerObj instanceof Phaser.Physics.Arcade.Sprite)) return
+    // Type guard to ensure we have the correct types
+    if (!this.player) return
+    if (!(playerObj instanceof Phaser.GameObjects.Container)) return
     if (!(asteroidObj instanceof Phaser.Physics.Arcade.Sprite)) return
 
     const asteroid = this.asteroids.find((a) => a.sprite === asteroidObj)
@@ -187,9 +187,9 @@ export default class GameScene extends Scene {
     this.asteroids.push(asteroid)
 
     // Add the new asteroid to the collision system
-    if (this.player?.sprite) {
+    if (this.player) {
       this.physics.add.collider(
-        this.player.sprite,
+        this.player,
         asteroid.sprite,
         this.handlePlayerAsteroidCollision.bind(this) as Types.Physics.Arcade.ArcadePhysicsCallback
       )
@@ -206,9 +206,9 @@ export default class GameScene extends Scene {
     this.powerUps.push(powerUp)
 
     // Add overlap detection with player
-    if (this.player?.sprite) {
+    if (this.player) {
       this.physics.add.overlap(
-        this.player.sprite,
+        this.player,
         powerUp.sprite,
         () => powerUp.destroy(true)
       )

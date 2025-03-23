@@ -10,7 +10,7 @@ import { UNIT } from '@/scenes/GameScene'
 import { createSpriteAnimation } from '@/utils'
 
 export default class Player extends Phaser.GameObjects.Container {
-  public sprite: Physics.Arcade.Sprite
+  public sprite: Phaser.GameObjects.Sprite
   public scene: GameScene
   private controls: GameControls
   private store = useGameStore()
@@ -53,30 +53,54 @@ export default class Player extends Phaser.GameObjects.Container {
 
     const scaleSprite = 3 * UNIT
     
-    // Create the beam first so it renders behind the player
-    const playerSpriteSrc = { width: 128 * scaleSprite, height: 64 * scaleSprite }
-    this.beam = new Beam(this.scene, { x: (playerSpriteSrc.width / 2) * UNIT, y: -35 * UNIT })
-    this.add(this.beam.sprite)
-
-    // Create the physics-enabled player sprite
-    this.sprite = this.scene.physics.add.sprite(0, 0, 'player/idle')
+    // Create the sprite (no physics)
+    this.sprite = this.scene.add.sprite(0, 0, 'player/idle')
       .setScale(scaleSprite)
+    this.add(this.sprite)
+    this.sprite.setDepth(1)
+
+    // Create the beam positioned relative to sprite's base dimensions
+    const spriteBaseWidth = 128 // Base sprite width before scaling
+    this.beam = new Beam(this.scene, { x: spriteBaseWidth / 2, y: 0 })
+    this.add(this.beam.sprite)
+    this.beam.sprite.setDepth(0)
     
-    // Set up physics properties
+    // Set up container physics
+    scene.physics.world.enable(this)
     this.setupPhysics()
     this.setupAnimations()
 
     // Add container to scene and set up input
     scene.add.existing(this)
+    this.setDepth(1000)
     this.setupInput()
   }
 
   private setupPhysics() {
-    this.sprite.setCollideWorldBounds(true)
-    this.sprite.setBounce(0)
-    this.sprite.setDrag(this.deceleration.x * 1000 * UNIT, this.deceleration.y * 1000 * UNIT)
-    this.sprite.setVelocity(this.velocity.x, this.velocity.y)
-    this.sprite.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
+    const body = this.body as Phaser.Physics.Arcade.Body
+    body.setCollideWorldBounds(true)
+    body.setBounce(0)
+    body.setDrag(this.deceleration.x * 1000 * UNIT, this.deceleration.y * 1000 * UNIT)
+    body.setVelocity(this.velocity.x, this.velocity.y)
+    body.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
+    
+    // Set the physics body size to match the sprite's actual dimensions
+    const padding = config.player.boundsPadding
+    const spriteBaseWidth = 128 // Base sprite width
+    const spriteBaseHeight = 64 // Base sprite height
+    const scale = this.sprite.scale * UNIT * 3 // Scale matches the sprite's scale
+
+    // Set size based on base dimensions and scale
+    body.setSize(
+      (spriteBaseWidth * scale) - (padding * 2),
+      (spriteBaseHeight * scale) - (padding * 2)
+    )
+
+    // Center the physics body on the sprite
+    body.setOffset(
+      -(spriteBaseWidth * scale) / 2 + padding,
+      -(spriteBaseHeight * scale) / 2 + padding
+    )
   }
 
   private setupAnimations() {
@@ -189,10 +213,6 @@ export default class Player extends Phaser.GameObjects.Container {
     } else {
       this.handleNormalMovement()
     }
-
-    // Sync container position with physics sprite
-    this.x = this.sprite.x
-    this.y = this.sprite.y
     
     // Update game state
     this.store.setPlayerPosition(this.x, this.y)
@@ -216,35 +236,37 @@ export default class Player extends Phaser.GameObjects.Container {
 
   private handleNormalMovement() {
     const acceleration = this.acceleration.x * 1000 * UNIT
+    const body = this.body as Phaser.Physics.Arcade.Body
 
     if (this.controls.left) {
-      this.sprite.setAccelerationX(-acceleration)
+      body.setAccelerationX(-acceleration)
     } else if (this.controls.right) {
-      this.sprite.setAccelerationX(acceleration)
+      body.setAccelerationX(acceleration)
     } else {
-      this.sprite.setAccelerationX(0)
+      body.setAccelerationX(0)
     }
 
     if (this.controls.up) {
-      this.sprite.setAccelerationY(-acceleration)
+      body.setAccelerationY(-acceleration)
     } else if (this.controls.down) {
-      this.sprite.setAccelerationY(acceleration)
+      body.setAccelerationY(acceleration)
     } else {
-      this.sprite.setAccelerationY(0)
+      body.setAccelerationY(0)
     }
   }
 
   private handleDashMovement() {
-    const dx = this.dashDestinationPos.x - this.sprite.x
-    const dy = this.dashDestinationPos.y - this.sprite.y
+    const dx = this.dashDestinationPos.x - this.x
+    const dy = this.dashDestinationPos.y - this.y
     const distance = Math.sqrt(dx * dx + dy * dy)
+    const body = this.body as Phaser.Physics.Arcade.Body
     
     if (distance > 25) {
       // Temporarily remove velocity limits during dash
-      this.sprite.setMaxVelocity(Number.MAX_SAFE_INTEGER)
+      body.setMaxVelocity(Number.MAX_SAFE_INTEGER)
       
       const dashSpeed = config.player.dashSpeed * UNIT * 60
-      this.sprite.setVelocity(
+      body.setVelocity(
         (dx / distance) * dashSpeed,
         (dy / distance) * dashSpeed
       )
@@ -253,8 +275,8 @@ export default class Player extends Phaser.GameObjects.Container {
     } else {
       this.isDashing = false
       // Restore normal velocity limits
-      this.sprite.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
-      this.sprite.setVelocity(
+      body.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
+      body.setVelocity(
         this.controls.right ? this.maxVelocity.x * 60 : this.controls.left ? -this.maxVelocity.x * 60 : 0,
         this.controls.down ? this.maxVelocity.y * 60 : this.controls.up ? -this.maxVelocity.y * 60 : 0
       )
