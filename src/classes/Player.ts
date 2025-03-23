@@ -86,20 +86,19 @@ export default class Player extends Phaser.GameObjects.Container {
     
     // Set the physics body size to match the sprite's actual dimensions
     const padding = config.player.boundsPadding
-    const spriteBaseWidth = 128 // Base sprite width
-    const spriteBaseHeight = 64 // Base sprite height
-    const scale = this.sprite.scale * UNIT * 3 // Scale matches the sprite's scale
 
-    // Set size based on base dimensions and scale
+    console.log(this.sprite.displayWidth, this.sprite.displayHeight)
+    
+    // Use the sprite's actual display dimensions
     body.setSize(
-      (spriteBaseWidth * scale) - (padding * 2),
-      (spriteBaseHeight * scale) - (padding * 2)
+      this.sprite.displayWidth - (padding.left + padding.right),
+      this.sprite.displayHeight - (padding.top + padding.bottom)
     )
 
     // Center the physics body on the sprite
     body.setOffset(
-      -(spriteBaseWidth * scale) / 2 + padding,
-      -(spriteBaseHeight * scale) / 2 + padding
+      -this.sprite.displayWidth / 2 + padding.left,
+      -this.sprite.displayHeight / 2 + padding.top
     )
   }
 
@@ -196,10 +195,10 @@ export default class Player extends Phaser.GameObjects.Container {
     const padding = config.player.boundsPadding
     const playerBounds = this.sprite.getBounds()
     return new Phaser.Geom.Rectangle(
-      playerBounds.x + padding,
-      playerBounds.y + padding,
-      playerBounds.width - (padding * 2),
-      playerBounds.height - (padding * 2)
+      playerBounds.x + padding.left,
+      playerBounds.y + padding.top,
+      playerBounds.width - (padding.left + padding.right),
+      playerBounds.height - (padding.top + padding.bottom)
     )
   }
 
