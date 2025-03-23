@@ -32,7 +32,6 @@ export default class Player extends Phaser.GameObjects.Container {
   }
   public beam: Beam | null = null
   private energyDrainRate = config.player.energyDrainRate // Energy drain per frame while shooting
-  private body: Physics.Arcade.Body
 
   private _isDashing: boolean = false
   private dashDistance: number = config.player.dashDistance * UNIT
@@ -48,27 +47,23 @@ export default class Player extends Phaser.GameObjects.Container {
     this.audio = scene.audio
 
     const scaleSprite = 3 * UNIT
-
-    // Create the player sprite
-    this.sprite = scene.add.sprite(0, 0, 'player/idle')
-      .setScale(scaleSprite)
     
     // Create the beam first so it renders behind the player
     const playerSpriteSrc = { width: 128 * scaleSprite, height: 64 * scaleSprite }
     this.beam = new Beam(this.scene, { x: (playerSpriteSrc.width / 2) * UNIT, y: -35 * UNIT })
     
     // Add both to container
-    this.add([this.beam.sprite, this.sprite])
+    this.add(this.beam.sprite)
 
-    // Enable physics on the container
-    scene.physics.world.enable(this)
-    this.body = this.body as Physics.Arcade.Body
+    // Create the player sprite and enable physics
+    this.sprite = this.scene.physics.add.sprite(0, 0, 'player/idle')
+      .setScale(scaleSprite)
     
     // Set up physics properties
-    this.body.setCollideWorldBounds(true)
-    this.body.setBounce(0)
-    this.body.setDrag(this.deceleration.x * 1000 * UNIT, this.deceleration.y * 1000 * UNIT)
-    this.body.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
+    this.sprite.setCollideWorldBounds(true)
+    this.sprite.setBounce(0)
+    this.sprite.setDrag(this.deceleration.x * 1000 * UNIT, this.deceleration.y * 1000 * UNIT)
+    this.sprite.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
 
     this.scene.anims.create({
       key: 'player-idle',
@@ -182,6 +177,10 @@ export default class Player extends Phaser.GameObjects.Container {
       this.handleNormalMovement()
     }
 
+    // Update container position to match sprite
+    this.x = this.sprite.x
+    this.y = this.sprite.y
+    
     // Debug visualization
     this.scene.add.circle(this.x, this.y, 10, 0xff00ff)
     
@@ -203,30 +202,30 @@ export default class Player extends Phaser.GameObjects.Container {
     const acceleration = this.acceleration.x * 1000 * UNIT
 
     if (this.controls.left) {
-      this.body.setAccelerationX(-acceleration)
+      this.sprite.setAccelerationX(-acceleration)
     } else if (this.controls.right) {
-      this.body.setAccelerationX(acceleration)
+      this.sprite.setAccelerationX(acceleration)
     } else {
-      this.body.setAccelerationX(0)
+      this.sprite.setAccelerationX(0)
     }
 
     if (this.controls.up) {
-      this.body.setAccelerationY(-acceleration)
+      this.sprite.setAccelerationY(-acceleration)
     } else if (this.controls.down) {
-      this.body.setAccelerationY(acceleration)
+      this.sprite.setAccelerationY(acceleration)
     } else {
-      this.body.setAccelerationY(0)
+      this.sprite.setAccelerationY(0)
     }
   }
 
   private handleDashMovement() {
-    const dx = this.dashDestinationPos.x - this.x
-    const dy = this.dashDestinationPos.y - this.y
+    const dx = this.dashDestinationPos.x - this.sprite.x
+    const dy = this.dashDestinationPos.y - this.sprite.y
     const distance = Math.sqrt(dx * dx + dy * dy)
     
     if (distance > 25) {
       const dashSpeed = config.player.dashSpeed * UNIT * 60
-      this.body.setVelocity(
+      this.sprite.setVelocity(
         (dx / distance) * dashSpeed,
         (dy / distance) * dashSpeed
       )
@@ -234,6 +233,10 @@ export default class Player extends Phaser.GameObjects.Container {
       this.sprite.setPipeline('glow')
     } else {
       this.isDashing = false
+      this.sprite.setVelocity(
+        this.controls.right ? this.maxVelocity.x * 60 : this.controls.left ? -this.maxVelocity.x * 60 : 0,
+        this.controls.down ? this.maxVelocity.y * 60 : this.controls.up ? -this.maxVelocity.y * 60 : 0
+      )
       this.sprite.clearTint()
       this.sprite.resetPipeline()
     }
