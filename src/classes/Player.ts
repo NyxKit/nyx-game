@@ -14,6 +14,8 @@ export default class Player extends Phaser.GameObjects.Container {
   public scene: GameScene
   private controls: GameControls
   private store = useGameStore()
+  
+  // Physics-related properties
   private velocity = {
     x: config.player.velocity * UNIT,
     y: config.player.velocity * UNIT
@@ -30,9 +32,12 @@ export default class Player extends Phaser.GameObjects.Container {
     x: config.player.deceleration * UNIT,
     y: config.player.deceleration * UNIT
   }
-  public beam: Beam | null = null
-  private energyDrainRate = config.player.energyDrainRate // Energy drain per frame while shooting
 
+  // Visual attachments
+  public beam: Beam | null = null
+  
+  // Game mechanics
+  private energyDrainRate = config.player.energyDrainRate
   private _isDashing: boolean = false
   private dashDistance: number = config.player.dashDistance * UNIT
   private dashCooldown: number = config.player.dashCooldown
@@ -51,35 +56,42 @@ export default class Player extends Phaser.GameObjects.Container {
     // Create the beam first so it renders behind the player
     const playerSpriteSrc = { width: 128 * scaleSprite, height: 64 * scaleSprite }
     this.beam = new Beam(this.scene, { x: (playerSpriteSrc.width / 2) * UNIT, y: -35 * UNIT })
-    
-    // Add both to container
     this.add(this.beam.sprite)
 
-    // Create the player sprite and enable physics
+    // Create the physics-enabled player sprite
     this.sprite = this.scene.physics.add.sprite(0, 0, 'player/idle')
       .setScale(scaleSprite)
     
     // Set up physics properties
+    this.setupPhysics()
+    this.setupAnimations()
+
+    // Add container to scene and set up input
+    scene.add.existing(this)
+    this.setupInput()
+  }
+
+  private setupPhysics() {
     this.sprite.setCollideWorldBounds(true)
     this.sprite.setBounce(0)
     this.sprite.setDrag(this.deceleration.x * 1000 * UNIT, this.deceleration.y * 1000 * UNIT)
+    this.sprite.setVelocity(this.velocity.x, this.velocity.y)
     this.sprite.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
+  }
 
+  private setupAnimations() {
     this.scene.anims.create({
       key: 'player-idle',
       frames: this.scene.anims.generateFrameNames('player/idle', { start: 0, end: 28 }),
       frameRate: 8,
       repeat: -1
     })
-
     this.sprite.anims.play('player-idle')
+  }
 
-    // Add container to scene
-    scene.add.existing(this)
-
-    // Add mouse input handling
-    scene.input.on('pointerdown', this.startBeam, this)
-    scene.input.on('pointerup', this.stopBeam, this)
+  private setupInput() {
+    this.scene.input.on('pointerdown', this.startBeam, this)
+    this.scene.input.on('pointerup', this.stopBeam, this)
   }
 
   public get hp () {
@@ -171,21 +183,25 @@ export default class Player extends Phaser.GameObjects.Container {
     this.setDashTargetLocation()
     this.stamina += config.player.staminaRegen
 
+    // Update physics-based movement
     if (this.isDashing) {
       this.handleDashMovement()
     } else {
       this.handleNormalMovement()
     }
 
-    // Update container position to match sprite
+    // Sync container position with physics sprite
     this.x = this.sprite.x
     this.y = this.sprite.y
     
-    // Debug visualization
-    this.scene.add.circle(this.x, this.y, 10, 0xff00ff)
-    
+    // Update game state
     this.store.setPlayerPosition(this.x, this.y)
 
+    // Handle beam mechanics
+    this.updateBeamState(dt)
+  }
+
+  private updateBeamState(dt: number) {
     if (this.hasEnergyForBeam && this.beam?.isActive) {
       this.beam.handleScaling()
       this.updateBeam(dt)
