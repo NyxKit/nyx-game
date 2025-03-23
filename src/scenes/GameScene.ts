@@ -128,7 +128,9 @@ export default class GameScene extends Scene {
         this.player.y + this.player.beam.sprite.y + Math.sin(beam.rotation) * beam.displayWidth
       )
 
-      this.line = this.add.line(0, 0, beamLine.x1, beamLine.y1, beamLine.x2, beamLine.y2, 0xff0000).setOrigin(0, 0).setDepth(2000)
+      if (this.physics.world.drawDebug) {
+        this.line = this.add.line(0, 0, beamLine.x1, beamLine.y1, beamLine.x2, beamLine.y2, 0xff0000).setOrigin(0, 0).setDepth(2000)
+      }
 
       this.asteroids.forEach((asteroid) => {
         const asteroidBounds = asteroid.sprite.getBounds()
