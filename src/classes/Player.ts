@@ -240,6 +240,9 @@ export default class Player extends Phaser.GameObjects.Container {
     const distance = Math.sqrt(dx * dx + dy * dy)
     
     if (distance > 25) {
+      // Temporarily remove velocity limits during dash
+      this.sprite.setMaxVelocity(Number.MAX_SAFE_INTEGER)
+      
       const dashSpeed = config.player.dashSpeed * UNIT * 60
       this.sprite.setVelocity(
         (dx / distance) * dashSpeed,
@@ -249,6 +252,8 @@ export default class Player extends Phaser.GameObjects.Container {
       this.sprite.setPipeline('glow')
     } else {
       this.isDashing = false
+      // Restore normal velocity limits
+      this.sprite.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
       this.sprite.setVelocity(
         this.controls.right ? this.maxVelocity.x * 60 : this.controls.left ? -this.maxVelocity.x * 60 : 0,
         this.controls.down ? this.maxVelocity.y * 60 : this.controls.up ? -this.maxVelocity.y * 60 : 0

@@ -74,8 +74,6 @@ export default class Beam {
     const targetAngle = Phaser.Math.Angle.Between(x, y, pointer.worldX, pointer.worldY)
     const clampedTargetAngle = clamp(targetAngle, config.beam.minAngle, config.beam.maxAngle)
 
-    this.scene.add.circle(x, y, 10, 0x0000ff)
-
     // Smoothly interpolate between current angle and target angle
     this.currentAngle += (clampedTargetAngle - this.currentAngle) * this.weight * (dt * 60)
     
