@@ -25,6 +25,7 @@ export default class GameScene extends Scene {
   private powerUps: PowerUp[] = []
   public audio: Audio | null = null
   public unit: number = 1
+  private line: Phaser.GameObjects.Line | null = null
 
   constructor () {
     super('Game')
@@ -112,16 +113,22 @@ export default class GameScene extends Scene {
 
     this.trySpawnAsteroid()
 
+    if (this.line) {
+      this.line.destroy()
+    }
+
     // Check beam collision with asteroids
     if (this.player?.beam?.isActive) {
       const beam = this.player.beam.sprite
       // Calculate beam line starting from player position
       const beamLine = new Phaser.Geom.Line(
-        this.player.x + this.player.beam.position.x,
-        this.player.y + this.player.beam.position.y,
-        this.player.x + this.player.beam.position.x + Math.cos(beam.rotation) * beam.displayWidth,
-        this.player.y + this.player.beam.position.y + Math.sin(beam.rotation) * beam.displayWidth
+        this.player.x + this.player.beam.sprite.x,
+        this.player.y + this.player.beam.sprite.y,
+        this.player.x + this.player.beam.sprite.x + Math.cos(beam.rotation) * beam.displayWidth,
+        this.player.y + this.player.beam.sprite.y + Math.sin(beam.rotation) * beam.displayWidth
       )
+
+      this.line = this.add.line(0, 0, beamLine.x1, beamLine.y1, beamLine.x2, beamLine.y2, 0xff0000).setOrigin(0, 0).setDepth(2000)
 
       this.asteroids.forEach((asteroid) => {
         const asteroidBounds = asteroid.sprite.getBounds()
@@ -139,11 +146,11 @@ export default class GameScene extends Scene {
     if (this.store.debug.isCollisionDisabled) return
 
     // Type guard to ensure we have the correct sprite types
-    if (!this.player?.sprite || 
-        !(playerObj instanceof Phaser.Physics.Arcade.Sprite) || 
-        !(asteroidObj instanceof Phaser.Physics.Arcade.Sprite)) return
+    if (!this.player?.sprite) return
+    if (!(playerObj instanceof Phaser.Physics.Arcade.Sprite)) return
+    if (!(asteroidObj instanceof Phaser.Physics.Arcade.Sprite)) return
 
-    const asteroid = this.asteroids.find(a => a.sprite === asteroidObj)
+    const asteroid = this.asteroids.find((a) => a.sprite === asteroidObj)
     if (!asteroid) return
 
     this.audio?.playBeamHit()
