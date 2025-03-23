@@ -33,7 +33,7 @@ const toggleDebug = (value?: boolean) => {
 }
 
 const computedScore = computed({
-  get: () => score.value.toString(),
+  get: () => Math.floor(score.value).toString(),
   set: (value: string) => score.value = parseInt(value)
 })
 

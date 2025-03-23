@@ -53,12 +53,14 @@ export default class Beam {
     this.sprite
       .setAlpha(1)
       .setScale(this.scaleX * UNIT, this.scaleY * UNIT)
-      .setActive(true)
-      .setVisible(true)
+      // .setActive(true)
+      // .setVisible(true)
     
     if (!this.sprite.anims) return
-    this.sprite.anims.play('beam-start')
-      .once('animationcomplete', () => this.isActive && this.sprite.anims.play('beam-active'))
+    this.sprite.anims.play('beam-start').once('animationcomplete', () => {
+      if (!this.isActive) return
+      this.sprite.anims.play('beam-active')
+    })
     
     this.update(0)
     this.beamStartTime = this.scene.time.now
@@ -93,12 +95,11 @@ export default class Beam {
   end () {
     this.isActive = false
     this.sprite.anims.stop()
-    this.sprite.anims.play('beam-end')
-      .once('animationcomplete', () => {
-        this.sprite.setScale(this.scaleX * UNIT, this.scaleY * UNIT)
-        this.sprite.setActive(false)
-        this.sprite.setVisible(false)
-      })
+    this.sprite.anims.play('beam-end').once('animationcomplete', () => {
+      this.sprite.setScale(this.scaleX * UNIT, this.scaleY * UNIT)
+      // this.sprite.setActive(false)
+      // this.sprite.setVisible(false)
+    })
     this.beamStartTime = 0
   }
 
