@@ -53,17 +53,17 @@ export default class Player extends Phaser.GameObjects.Container {
 
     const scaleSprite = 3 * UNIT
     
-    // Create the sprite (no physics)
-    this.sprite = this.scene.add.sprite(0, 0, 'player/idle')
-      .setScale(scaleSprite)
-    this.add(this.sprite)
-    this.sprite.setDepth(1)
-
-    // Create the beam positioned relative to sprite's base dimensions
+    // Create and add beam first (so it renders below)
     const spriteBaseWidth = 128 // Base sprite width before scaling
     this.beam = new Beam(this.scene, { x: spriteBaseWidth / 2, y: -20 })
     this.add(this.beam.sprite)
     this.beam.sprite.setDepth(0)
+
+    // Create and add sprite last (so it renders on top)
+    this.sprite = this.scene.add.sprite(0, 0, 'player/idle')
+      .setScale(scaleSprite)
+    this.add(this.sprite)
+    this.sprite.setDepth(1)
     
     // Set up container physics
     scene.physics.world.enable(this)
