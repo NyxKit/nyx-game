@@ -88,7 +88,7 @@ export default defineConfigWithVueTs(
           'protected-instance-field',
           'private-instance-field',
 
-          // Constructors
+          // Constructor
           'constructor',
 
           // Static methods
