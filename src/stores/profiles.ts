@@ -1,6 +1,6 @@
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { defineStore, storeToRefs } from 'pinia'
-import { query, where } from 'firebase/firestore'
+import { query } from 'firebase/firestore'
 import { NyxCollection } from '@/types'
 import { nyxDatabase } from '@/main'
 import Profile from '@/classes/Profile'

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { NyxCheckbox, NyxForm, NyxFormField, NyxModal, NyxSlider } from 'nyx-kit/components'
-import useInterfaceStore from '@/stores/interface'
+import { NyxCheckbox, NyxForm, NyxFormField, NyxSlider } from 'nyx-kit/components'
 import useSettingsStore from '@/stores/settings'
 import { NyxShape } from 'nyx-kit/types'
 import { watch } from 'vue'

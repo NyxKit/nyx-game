@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { NyxButton, NyxModal, NyxTable, NyxTableCell } from 'nyx-kit/components'
 import { NyxSize, NyxVariant } from 'nyx-kit/types'
 import attributions from '@/data/attributions.json'

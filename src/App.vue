@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { Credits, Game, MainMenu, Hiscores, Settings, GameMenu, Debug, GameInterface, GameOver } from '@/components'
+import { ButtonCredits, GameContainer, MainMenu, ModalHiscores, GameMenu, FormSettings, ButtonDebug, GameInterface, GameOver } from '@/components'
 import { NyxProgress, NyxModal } from 'nyx-kit/components'
 import useGameStore from './stores/game'
 import useClientStore from './stores/client'
@@ -52,17 +52,17 @@ onBeforeUnmount(async () => {
     <div class="interface" v-if="isInMenu">
       <MainMenu class="view" />
       <NyxModal v-model="isSettingsVisible">
-        <Settings />
+        <FormSettings />
       </NyxModal>
-      <Hiscores />
+      <ModalHiscores />
       <GameMenu />
-      <Credits />
+      <ButtonCredits />
     </div>
   </transition>
 
-  <Debug v-if="debug.isEnabled" />
+  <ButtonDebug v-if="debug.isEnabled" />
   <GameMenu />
-  <Game />
+  <GameContainer />
   <GameInterface />
   <GameOver />
   <span class="version">{{ version }}</span>

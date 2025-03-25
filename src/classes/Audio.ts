@@ -1,4 +1,3 @@
-import { Scene } from 'phaser'
 import useSettingsStore from '@/stores/settings'
 import type { KeyDict } from 'nyx-kit/types'
 import { EventBus } from '@/classes'
@@ -104,7 +103,7 @@ export class Audio {
         sfx.play()
       }
       const targetVolume = this.store.currentVolume * _options.volume
-      const tween = this.scene.tweens.add({
+      this.scene.tweens.add({
         targets: sfx,
         volume: targetVolume,
         duration: _options.duration,

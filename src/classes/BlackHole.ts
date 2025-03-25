@@ -1,3 +1,5 @@
+console.log('BlackHole')
+
 /*
 
 const config = {

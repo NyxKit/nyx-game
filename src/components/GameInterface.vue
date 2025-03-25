@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onBeforeUnmount } from 'vue'
 import { useGameStore } from '@/stores'
 import { NyxProgress } from 'nyx-kit/components'
 import { NyxProgressVariant, NyxSize, NyxTheme } from 'nyx-kit/types'
 import { storeToRefs } from 'pinia'
 
-const { hp, energy, stamina, maxStamina, score, isPlaying, isPaused, debug, isInGame } = storeToRefs(useGameStore())
+const { hp, energy, stamina, maxStamina, score, debug, isInGame } = storeToRefs(useGameStore())
 
 const interval = ref<number | null>(null)
 const numClicksDebug = ref(0)

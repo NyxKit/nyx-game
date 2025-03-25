@@ -1,7 +1,7 @@
 import Profile from '@/classes/Profile'
 import { nyxDatabase } from '@/main'
 import { NyxCollection } from '@/types'
-import { signInWithPopup, signOut, type User, onAuthStateChanged } from 'firebase/auth'
+import { signOut, type User, onAuthStateChanged } from 'firebase/auth'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
@@ -40,7 +40,7 @@ export default defineStore('auth', () => {
     user.value = null
   }
 
-  const watchAuthState = (callback?: Function) => {
+  const watchAuthState = (callback?: (user: User|null) => void) => {
     onAuthStateChanged(nyxDatabase.auth, (firebaseUser) => {
       user.value = firebaseUser ?? null
       callback?.(user.value)

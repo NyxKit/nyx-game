@@ -4,11 +4,11 @@ import { storeToRefs } from 'pinia'
 import { NyxModal, NyxButton } from 'nyx-kit/components'
 import { NyxSize, NyxTheme } from 'nyx-kit/types'
 import useGameStore from '@/stores/game'
-import Settings from '@/components/Settings.vue'
+import FormSettings from '@/components/FormSettings.vue'
 import { GameState } from '@/types'
 
 const gameStore = useGameStore()
-const { isPlaying, isPaused } = storeToRefs(gameStore)
+const { isPaused } = storeToRefs(gameStore)
 
 const onKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
@@ -55,7 +55,7 @@ onUnmounted(() => {
     :size="NyxSize.Small"
     static
   >
-    <Settings />
+    <FormSettings />
     <template #footer>
       <div class="game-menu__buttons">
         <NyxButton @click="onRestart" :theme="NyxTheme.Warning">Restart</NyxButton>
