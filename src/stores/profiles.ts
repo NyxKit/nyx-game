@@ -70,7 +70,7 @@ const useProfilesStore = defineStore('profiles', () => {
 
   watch(profile, async (newVal, oldVal) => {
     if (!newVal || !!oldVal) return
-    updateLastLogin()
+    await updateLastLogin()
   })
 
   return {

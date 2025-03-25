@@ -12,17 +12,17 @@ import { GameEvents } from '@/classes/EventBus'
 export let UNIT = 1
 
 export default class GameScene extends Scene {
-  private controls: GameControls | null = null
-  private background: Background | null = null
   public player: Player | null = null
   public velocity = 1
+  public audio: Audio | null = null
+  public unit: number = 1
+  private controls: GameControls | null = null
+  private background: Background | null = null
   private asteroidSpeed = 0
   private store = useGameStore()
   private asteroids: Asteroid[] = []
   private lastSpawnTime = 0
   private powerUps: PowerUp[] = []
-  public audio: Audio | null = null
-  public unit: number = 1
 
   constructor () {
     super('Game')
@@ -30,7 +30,7 @@ export default class GameScene extends Scene {
     EventBus.addListener(GameEvents.TogglePaused, this.togglePaused.bind(this))
   }
 
-  reset () {
+  public reset () {
     this.asteroids.forEach((asteroid) => asteroid.destroy())
     this.asteroids = []
     this.powerUps.forEach((powerUp) => powerUp.destroy())
@@ -52,7 +52,7 @@ export default class GameScene extends Scene {
     }
   }
 
-  create () {
+  public create () {
     if (!this.input.keyboard) {
       throw new Error('No keyboard input found')
     }
@@ -74,7 +74,7 @@ export default class GameScene extends Scene {
     EventBus.emit(GameEvents.CurrentSceneReady, this)
   }
 
-  update (time: number, delta: number) {
+  public update (time: number, delta: number) {
     if (!this.player || !this.background) return
     if (this.store.isPaused) return
 
@@ -179,7 +179,7 @@ export default class GameScene extends Scene {
     return false
   }
 
-  public spawnAsteroid () {
+  private spawnAsteroid () {
     // this.asteroidSpeed = 1 + Math.log1p(this.store.score / 2000) * 1.5 + Math.pow(this.store.score / 5000, 1.05)
     // this.asteroidSpeed = clamp(this.asteroidSpeed, 1, this.velocity * 0.8)
     this.asteroidSpeed = this.velocity * 0.5
@@ -193,7 +193,7 @@ export default class GameScene extends Scene {
     this.asteroids.push(asteroid)
   }
 
-  public spawnPowerUp (position: { x: number; y: number }, isLarge: boolean) {
+  private spawnPowerUp (position: { x: number; y: number }, isLarge: boolean) {
     const powerUp = new PowerUp(this, {
       position,
       isLarge,

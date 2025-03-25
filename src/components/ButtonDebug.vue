@@ -4,13 +4,12 @@ import { storeToRefs } from 'pinia'
 import { NyxButton, NyxCard, NyxForm, NyxFormField, NyxInput, NyxSelect, NyxCheckbox, NyxModal } from 'nyx-kit/components'
 import { NyxPosition, NyxSize, NyxTheme, NyxInputType } from 'nyx-kit/types'
 import { useTeleportPosition } from 'nyx-kit/compositions'
-import { computed, ref, toRaw, useTemplateRef, type DefineComponent, watch } from 'vue'
+import { computed, ref, useTemplateRef, type DefineComponent, watch } from 'vue'
 import { GameState } from '@/types'
-import type { GameScene } from '@/scenes'
 import config from '@/config'
 
 const gameStore = useGameStore()
-const { debug, playerPosition, hp, score, state, energy, currentScene } = storeToRefs(gameStore)
+const { debug, playerPosition, hp, score, state, energy } = storeToRefs(gameStore)
 const { setPlayerHp, setPlayerEnergy } = gameStore
 
 const nyxButton = useTemplateRef<DefineComponent>('nyxButton')
@@ -53,12 +52,6 @@ const pos = computed(() => ({
 }))
 
 const gameStateOptions = computed(() => Object.values(GameState).map((state) => ({ label: state, value: state })))
-
-const addAsteroid = () => {
-  const scene = toRaw(currentScene.value) as GameScene
-  if (!scene) return
-  scene.spawnAsteroid()
-}
 
 const disableDebug = () => {
   debug.value.isEnabled = false
@@ -115,7 +108,6 @@ watch(state, () => isConfigModalVisible.value = false)
           <NyxFormField #default="{ id }">
             <NyxCheckbox :id="id" v-model="debug.isCollisionDisabled" label="Disable Collision" />
           </NyxFormField>
-          <NyxButton class="debug__card-button" @click="addAsteroid">Spawn Asteroid</NyxButton>
           <NyxButton class="debug__card-button" @click="isConfigModalVisible = true">View config</NyxButton>
           <NyxButton class="debug__card-button" @click="disableDebug">Disable debug</NyxButton>
         </NyxForm>

@@ -1,7 +1,16 @@
 import { Timestamp, type QueryDocumentSnapshot } from 'firebase/firestore'
 import { NyxLoader } from 'nyx-kit/classes'
 
+const PROFILE_CONVERTER = {
+  toFirestore: (profile: Profile) => profile.getRawData(),
+  fromFirestore: (snapshot: QueryDocumentSnapshot) => {
+    const data = snapshot.data()
+    return new Profile({ ...data, id: snapshot.id })
+  }
+}
+
 export default class Profile {
+  static Converter = PROFILE_CONVERTER
   public id: string = ''
   public displayName: string|null = null
   public firstName: string|null = null
@@ -54,14 +63,6 @@ export default class Profile {
       photoUrl: this.photoUrl,
       phoneNumber: this.phoneNumber,
       isSuperUser: this.isSuperUser
-    }
-  }
-
-  static Converter = {
-    toFirestore: (profile: Profile) => profile.getRawData(),
-    fromFirestore: (snapshot: QueryDocumentSnapshot) => {
-      const data = snapshot.data()
-      return new Profile({ ...data, id: snapshot.id })
     }
   }
 }

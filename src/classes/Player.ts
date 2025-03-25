@@ -11,6 +11,7 @@ import { UNIT } from '@/scenes/GameScene'
 export default class Player extends Phaser.GameObjects.Container {
   public sprite: GameObjects.Sprite
   public scene: GameScene
+  public beam: Beam | null = null
   private controls: GameControls
   private store = useGameStore()
   private velocity = {
@@ -29,9 +30,7 @@ export default class Player extends Phaser.GameObjects.Container {
     x: config.player.deceleration * UNIT,
     y: config.player.deceleration * UNIT
   }
-  public beam: Beam | null = null
   private energyDrainRate = config.player.energyDrainRate // Energy drain per frame while shooting
-
   private _isDashing: boolean = false
   private dashDistance: number = config.player.dashDistance * UNIT
   private dashCooldown: number = config.player.dashCooldown
@@ -184,6 +183,35 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
+  public destroy(): void {
+    if (this.beam) {
+      this.scene.input.off('pointerdown', this.startBeam, this)
+      this.scene.input.off('pointerup', this.stopBeam, this)
+      this.beam.destroy()
+    }
+
+    super.destroy()
+  }
+
+  public startBeam () {
+    if (!this.store.isPlaying) return
+    if (!this.hasEnergyForBeam) return
+    this.audio?.playAttack()
+    this.beam?.start(this.currentPosition)
+  }
+
+  public stopBeam () {
+    if (!this.beam?.isActive) return
+    this.audio?.stopAttack()
+    this.beam?.end()
+  }
+
+  private updateBeam (dt: number) {
+    if (!this.hasEnergyForBeam) return
+    if (!this.beam?.isActive) return
+    this.beam?.update(dt, this.currentPosition)
+  }
+
   private getPosition (vx: number, vy: number, dt: number): { x: number, y: number } {
     const newX = this.x + vx * (dt * 60)
     const newY = this.y + vy * (dt * 60)
@@ -282,25 +310,6 @@ export default class Player extends Phaser.GameObjects.Container {
     return { vx, vy }
   }
 
-  public startBeam () {
-    if (!this.store.isPlaying) return
-    if (!this.hasEnergyForBeam) return
-    this.audio?.playAttack()
-    this.beam?.start(this.currentPosition)
-  }
-
-  public stopBeam () {
-    if (!this.beam?.isActive) return
-    this.audio?.stopAttack()
-    this.beam?.end()
-  }
-
-  private updateBeam (dt: number) {
-    if (!this.hasEnergyForBeam) return
-    if (!this.beam?.isActive) return
-    this.beam?.update(dt, this.currentPosition)
-  }
-
   private playDamageAnimation () {
     this.sprite.setTint(config.player.colorDamage)
     this.sprite.setPipeline('glow')
@@ -315,15 +324,5 @@ export default class Player extends Phaser.GameObjects.Container {
       x: clamp(x, this.sprite.displayWidth / 2, this.scene.scale.width - this.sprite.displayWidth / 2),
       y: clamp(y, this.sprite.displayHeight / 2, this.scene.scale.height - this.sprite.displayHeight / 2)
     }
-  }
-
-  destroy(): void {
-    if (this.beam) {
-      this.scene.input.off('pointerdown', this.startBeam, this)
-      this.scene.input.off('pointerup', this.stopBeam, this)
-      this.beam.destroy()
-    }
-
-    super.destroy()
   }
 }

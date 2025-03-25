@@ -1,15 +1,15 @@
 import useGameStore from '@/stores/game'
 
 export default class GameControls {
+  public left: boolean = false
+  public right: boolean = false
+  public up: boolean = false
+  public down: boolean = false
+  public space: boolean = false
+  public esc: boolean = false
+  public special1: boolean = false
+  public special2: boolean = false
   private store = useGameStore()
-  left: boolean = false
-  right: boolean = false
-  up: boolean = false
-  down: boolean = false
-  space: boolean = false
-  esc: boolean = false
-  special1: boolean = false
-  special2: boolean = false
 
   constructor (keyboard: Phaser.Input.Keyboard.KeyboardPlugin) {
     keyboard.on('keydown', (event: KeyboardEvent) => {

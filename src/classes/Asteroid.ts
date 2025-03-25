@@ -15,12 +15,12 @@ interface AsteroidOptions {
 export default class Asteroid implements AsteroidOptions {
   public id: string
   public sprite: GameObjects.Image
-  private _hp: number = 1
-  private maxHp: number = 1
   public maxSpeed = 3 * UNIT
   public minSpeed = config.asteroid.minSpeed * UNIT
   public isLarge = false
   public onDestroy: OnDestroyEvent
+  private _hp: number = 1
+  private maxHp: number = 1
   private scene: GameScene
   private key: string
   private size = 1

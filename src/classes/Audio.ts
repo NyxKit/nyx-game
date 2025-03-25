@@ -21,8 +21,6 @@ const DEFAULT_AUDIO_EVENT_OPTIONS: AudioEventOptions = {
 }
 
 export class Audio {
-  private scene: GameScene
-  private store = useSettingsStore()
   public soundtracks: Phaser.Sound.WebAudioSound[] = []
   public sfx: KeyDict<Phaser.Sound.WebAudioSound | null> = {
     playerBeam: null,
@@ -34,6 +32,8 @@ export class Audio {
     powerUp: null,
     noEnergy: null
   }
+  private scene: GameScene
+  private store = useSettingsStore()
   private lastPlay: KeyDict<number> = {
     playerBeam: 0,
     playerDamage: 0,
@@ -75,10 +75,6 @@ export class Audio {
     EventBus.on(GameEvents.SetVolume, this.updateVolume.bind(this))
   }
 
-  private updateVolume (volume: number) {
-    this.scene.sound.setVolume(volume)
-  }
-
   public playSoundtrack (index: number = 0) {
     if (this.soundtracks.length === 0) return
     const track = this.soundtracks[index]
@@ -89,7 +85,7 @@ export class Audio {
 
   public playSfx (key: keyof typeof this.sfx, options: Partial<AudioEventOptions> = DEFAULT_AUDIO_EVENT_OPTIONS) {
     const _options: AudioEventOptions = { ...DEFAULT_AUDIO_EVENT_OPTIONS, ...options }
-    const sfx = this.sfx[key]!
+    const sfx = this.sfx[key] as Phaser.Sound.WebAudioSound
     if (sfx.isPlaying && !sfx.loop && !_options.force) return
     const now = this.scene.time.now
     if (_options.cooldown > 0 && now - this.lastPlay[key] < _options.cooldown) return
@@ -119,7 +115,7 @@ export class Audio {
 
   public stopSfx (key: keyof typeof this.sfx, options: Partial<AudioEventOptions> = DEFAULT_AUDIO_EVENT_OPTIONS) {
     const _options: AudioEventOptions = { ...DEFAULT_AUDIO_EVENT_OPTIONS, ...options }
-    const sfx = this.sfx[key]!
+    const sfx = this.sfx[key] as Phaser.Sound.WebAudioSound
     const useTween = _options.fade || sfx.loop
     if (!useTween) {
       sfx.stop()
@@ -170,7 +166,11 @@ export class Audio {
     // })
   }
 
-  stopAll () {
+  public stopAll () {
     this.scene.sound.stopAll()
+  }
+
+  private updateVolume (volume: number) {
+    this.scene.sound.setVolume(volume)
   }
 }

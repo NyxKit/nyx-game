@@ -7,14 +7,14 @@ import config from '@/config'
 import { UNIT } from '@/scenes/GameScene'
 
 export default class Beam {
-  private scene: GameScene
-  private key: string = 'beam'
   public origin: { x: number; y: number } = { x: 0, y: 0 }
-  private originOffset: { x: number, y: number } = { x: 0, y: 0 }
   public position: { x: number, y: number } = { x: 0, y: 0 }
   public id: string = uuidv4()
   public sprite: GameObjects.Sprite
   public isActive: boolean = false
+  private scene: GameScene
+  private key: string = 'beam'
+  private originOffset: { x: number, y: number } = { x: 0, y: 0 }
   private beamStartTime: number = 0
   private scaleX: number = config.beam.scaleX
   private currentAngle: number = 0
@@ -44,7 +44,7 @@ export default class Beam {
     return clamp(this.scene.player?.damage ?? 1, 1, 4)
   }
 
-  start (pos: { x: number, y: number }) {
+  public start (pos: { x: number, y: number }) {
     this.isActive = true
     this.sprite
       .setAlpha(1)
@@ -57,7 +57,7 @@ export default class Beam {
     this.beamStartTime = this.scene.time.now
   }
 
-  update (dt: number, pos: { x: number, y: number }) {
+  public update (dt: number, pos: { x: number, y: number }) {
     if (!this.isActive) return
     const pointer = this.scene.input.activePointer
     const { x, y } = { x: pos.x + this.position.x, y: pos.y + this.position.y }
@@ -71,7 +71,7 @@ export default class Beam {
     this.sprite.setRotation(this.currentAngle)
   }
 
-  end () {
+  public end () {
     this.isActive = false
     this.sprite.anims.stop()
     this.sprite.anims.play('beam-end')
@@ -79,7 +79,7 @@ export default class Beam {
     this.beamStartTime = 0
   }
 
-  destroy () {
+  public destroy () {
     this.sprite.destroy()
   }
 

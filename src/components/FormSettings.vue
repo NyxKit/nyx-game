@@ -7,11 +7,11 @@ import { watch } from 'vue'
 
 const { isFullscreen, currentVolume } = storeToRefs(useSettingsStore())
 
-watch(isFullscreen, (newVal) => {
+watch(isFullscreen, async (newVal) => {
   if (newVal) {
-    document.documentElement.requestFullscreen()
+    await document.documentElement.requestFullscreen()
   } else {
-    document.exitFullscreen()
+    await document.exitFullscreen()
   }
 })
 
