@@ -15,9 +15,7 @@ interface PowerUpOptions {
   onDestroy: OnDestroyEvent
 }
 
-export default class PowerUp {
-  private scene: GameScene
-  private store = useGameStore()
+export default class PowerUp implements PowerUpOptions {
   public position: { x: number; y: number }
   public onDestroy: OnDestroyEvent
   public id: string = uuidv4()
@@ -27,6 +25,8 @@ export default class PowerUp {
   public isLarge: boolean = false
   private attractionRange: number = 300
   private baseSpeed: number = 180 // 3 * 60 for physics system
+  private scene: GameScene
+  private store = useGameStore()
 
   constructor (scene: GameScene, options?: PowerUpOptions) {
     this.scene = scene
@@ -42,16 +42,7 @@ export default class PowerUp {
     return this.type
   }
 
-  private getRandomType (isLarge: boolean): PowerUpType {
-    if (!isLarge) return PowerUpType.EnergySmall
-    const energyTypes = [PowerUpType.EnergyMedium, PowerUpType.EnergyMedium, PowerUpType.EnergyMedium, PowerUpType.EnergyLarge]
-    const hpTypes = [PowerUpType.HpMedium, PowerUpType.HpMedium, PowerUpType.HpMedium, PowerUpType.HpLarge]
-    if (this.store.hp === config.player.hpMax) return getRandomFromArray(energyTypes)
-    const ratio = this.store.energy / 100
-    return Math.random() > ratio ? getRandomFromArray(energyTypes) : getRandomFromArray(hpTypes)
-  }
-
-  create () {
+  public create () {
     let scale = 2
     if ([PowerUpType.EnergyMedium, PowerUpType.HpMedium].includes(this.type)) {
       scale = 1.5
@@ -70,7 +61,7 @@ export default class PowerUp {
     return sprite
   }
 
-  update (dt: number, playerPosition: { x: number; y: number }) {
+  public update (dt: number, playerPosition: { x: number; y: number }) {
     const dx = playerPosition.x - this.sprite.x
     const dy = playerPosition.y - this.sprite.y
     const distance = Math.sqrt(dx * dx + dy * dy)
@@ -102,11 +93,20 @@ export default class PowerUp {
     if (shouldDestroy) this.destroy()
   }
 
-  destroy (isDestroyedByPlayer: boolean = false) {
+  public destroy (isDestroyedByPlayer: boolean = false) {
     this.sprite.destroy()
     if (isDestroyedByPlayer && this.type !== PowerUpType.EnergySmall) {
       this.scene.audio?.playSfx('powerUp')
     }
     this.onDestroy(this.id, { isDestroyedByPlayer, type: this.type, position: this.position })
+  }
+
+  private getRandomType (isLarge: boolean): PowerUpType {
+    if (!isLarge) return PowerUpType.EnergySmall
+    const energyTypes = [PowerUpType.EnergyMedium, PowerUpType.EnergyMedium, PowerUpType.EnergyMedium, PowerUpType.EnergyLarge]
+    const hpTypes = [PowerUpType.HpMedium, PowerUpType.HpMedium, PowerUpType.HpMedium, PowerUpType.HpLarge]
+    if (this.store.hp === config.player.hpMax) return getRandomFromArray(energyTypes)
+    const ratio = this.store.energy / 100
+    return Math.random() > ratio ? getRandomFromArray(energyTypes) : getRandomFromArray(hpTypes)
   }
 }

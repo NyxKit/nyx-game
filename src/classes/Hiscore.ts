@@ -2,7 +2,16 @@ import { GameMode } from '@/types'
 import type { QueryDocumentSnapshot } from 'firebase/firestore'
 import { NyxLoader } from 'nyx-kit/classes'
 
+const HISCORE_CONVERTER = {
+  toFirestore: (hiscore: Hiscore) => hiscore.getRawData(),
+  fromFirestore: (snapshot: QueryDocumentSnapshot) => {
+    const data = snapshot.data()
+    return new Hiscore({ ...data, id: snapshot.id })
+  }
+}
+
 export default class Hiscore {
+  static Converter = HISCORE_CONVERTER
   public id: string = ''
   public score: number = 0
   public createdAt: Date = new Date()
@@ -30,14 +39,6 @@ export default class Hiscore {
       version: this.version,
       gameMode: this.gameMode,
       hasDebugged: this.hasDebugged,
-    }
-  }
-
-  static Converter = {
-    toFirestore: (hiscore: Hiscore) => hiscore.getRawData(),
-    fromFirestore: (snapshot: QueryDocumentSnapshot) => {
-      const data = snapshot.data()
-      return new Hiscore({ ...data, id: snapshot.id })
     }
   }
 }

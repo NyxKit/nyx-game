@@ -36,8 +36,6 @@ interface NyxSubscriptionParams<T> {
 }
 
 export default class NyxDatabase {
-  private subscriptions: KeyDict<NyxSubscription> = {}
-
   public app: FirebaseApp
   public db: Firestore
   // public analytics: Analytics
@@ -45,6 +43,7 @@ export default class NyxDatabase {
   public authProviders: KeyDict<AuthProvider> = {
     google: new GoogleAuthProvider()
   }
+  private subscriptions: KeyDict<NyxSubscription> = {}
 
   constructor (options: FirebaseOptions = __CONFIG__) {
     this.app = initializeApp(options)
@@ -62,7 +61,7 @@ export default class NyxDatabase {
     return Object.keys(this.subscriptions).filter((key) => key.startsWith(prefix))
   }
 
-  async getDocument<T>(
+  public async getDocument<T>(
     collectionName: NyxCollection,
     docId: string,
     converter?: FirestoreDataConverter<T>,
@@ -75,7 +74,7 @@ export default class NyxDatabase {
     return null
   }
 
-  async addDocument<T>(
+  public async addDocument<T>(
     collectionName: NyxCollection,
     data: T,
     converter?: FirestoreDataConverter<T>
@@ -86,7 +85,7 @@ export default class NyxDatabase {
     return docRef.id
   }
 
-  async setDocument<T>(
+  public async setDocument<T>(
     collectionName: NyxCollection,
     docId: string,
     data: T,
@@ -96,7 +95,7 @@ export default class NyxDatabase {
     await setDoc(docRef, data)
   }
 
-  async updateDocument<T>(
+  public async updateDocument<T>(
     collectionName: NyxCollection,
     docId: string,
     data: Partial<T>,
@@ -106,7 +105,7 @@ export default class NyxDatabase {
     await updateDoc(docRef, data)
   }
 
-  async subscribe<T>({ key, docRef, queryRef, callback, error, converter }: NyxSubscriptionParams<T>) {
+  public async subscribe<T>({ key, docRef, queryRef, callback, error, converter }: NyxSubscriptionParams<T>) {
     if (this.subscriptions[key] === undefined) {
       this.subscriptions[key] = { key, count: 0 }
     }
@@ -126,7 +125,7 @@ export default class NyxDatabase {
     }
   }
 
-  unsubscribe = (key: string, cleanup?: () => void) => {
+  public unsubscribe = (key: string, cleanup?: () => void) => {
     if (!this.subscriptions[key]) {
       console.warn(`You should not unsubscribe if you have not yet subscribed to key "${key}".`)
       return
@@ -147,7 +146,7 @@ export default class NyxDatabase {
   public getCollectionRef = <T = DocumentData>(
     collectionName: NyxCollection,
     converter?: FirestoreDataConverter<T>
-    ) => {
+  ) => {
     return converter
       ? collection(this.db, collectionName).withConverter(converter)
       : collection(this.db, collectionName) as CollectionReference<T>

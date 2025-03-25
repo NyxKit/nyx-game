@@ -7,12 +7,12 @@ import config from '@/config'
 import { UNIT } from '@/scenes/GameScene'
 
 export default class Beam {
-  private scene: GameScene
-  private key: string = 'beam'
   public origin: { x: number; y: number } = { x: 0, y: 0 }
   public id: string = uuidv4()
   public sprite: Physics.Arcade.Sprite
   public isActive: boolean = false
+  private scene: GameScene
+  private key: string = 'beam'
   private beamStartTime: number = 0
   private scaleX: number = config.beam.scaleX
   private currentAngle: number = 0
@@ -48,7 +48,7 @@ export default class Beam {
     return clamp(this.scene.player?.damage ?? 1, 1, 4)
   }
 
-  start () {
+  public start () {
     this.isActive = true
     this.sprite
       .setAlpha(1)
@@ -66,7 +66,7 @@ export default class Beam {
     this.beamStartTime = this.scene.time.now
   }
 
-  update (dt: number) {
+  public update (dt: number) {
     if (!this.isActive) return
 
     const x = this.scene.player!.x + this.origin.x
@@ -92,7 +92,7 @@ export default class Beam {
     // }
   }
 
-  end () {
+  public end () {
     this.isActive = false
     this.sprite.anims.stop()
     this.sprite.anims.play('beam-end').once('animationcomplete', () => {
@@ -103,7 +103,7 @@ export default class Beam {
     this.beamStartTime = 0
   }
 
-  destroy () {
+  public destroy () {
     this.sprite.destroy()
   }
 

@@ -17,7 +17,7 @@ const useHiscoresStore = defineStore('hiscores', () => {
   const subscribeHiscores = async () => {
     const collection = nyxDatabase.getCollectionRef(NyxCollection.Hiscores)
     const queryWhere = where('hasDebugged', '==', false)
-    nyxDatabase.subscribe<Hiscore>({
+    await nyxDatabase.subscribe<Hiscore>({
       key: 'hiscores',
       queryRef: query(collection, queryWhere).withConverter(Hiscore.Converter),
       callback: updateHiscores,
@@ -28,7 +28,7 @@ const useHiscoresStore = defineStore('hiscores', () => {
   }
 
   const unsubscribeHiscores = async () => {
-    nyxDatabase.unsubscribe('hiscores')
+    await nyxDatabase.unsubscribe('hiscores')
   }
 
   const addNewHiscore = async (userId: string, score: number) => {

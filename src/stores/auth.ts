@@ -22,7 +22,7 @@ export default defineStore('auth', () => {
       createdAt: profile ? profile.createdAt : new Date(),
       updatedAt: profile ? profile.updatedAt : new Date()
     })
-    nyxDatabase.setDocument(NyxCollection.Profiles, user.value.uid, newProfile, Profile.Converter)
+    await nyxDatabase.setDocument(NyxCollection.Profiles, user.value.uid, newProfile, Profile.Converter)
   }
 
   const loginWithGoogle = async () => {

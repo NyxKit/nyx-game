@@ -11,6 +11,8 @@ import { UNIT } from '@/scenes/GameScene'
 export default class Player extends Phaser.GameObjects.Container {
   public sprite: Phaser.GameObjects.Sprite
   public scene: GameScene
+  public beam: Beam | null = null
+  
   private controls: GameControls
   private store = useGameStore()
   
@@ -31,9 +33,6 @@ export default class Player extends Phaser.GameObjects.Container {
     x: config.player.deceleration * UNIT,
     y: config.player.deceleration * UNIT
   }
-
-  // Visual attachments
-  public beam: Beam | null = null
   
   // Game mechanics
   private energyDrainRate = config.player.energyDrainRate
@@ -217,6 +216,35 @@ export default class Player extends Phaser.GameObjects.Container {
     this.updateBeamState(dt)
   }
 
+  public destroy(): void {
+    if (this.beam) {
+      this.scene.input.off('pointerdown', this.startBeam, this)
+      this.scene.input.off('pointerup', this.stopBeam, this)
+      this.beam.destroy()
+    }
+    this.sprite.destroy()
+    super.destroy()
+  }
+
+  public startBeam () {
+    if (!this.store.isPlaying) return
+    if (!this.hasEnergyForBeam) return
+    this.audio?.playAttack()
+    this.beam?.start()
+  }
+
+  public stopBeam () {
+    if (!this.beam?.isActive) return
+    this.audio?.stopAttack()
+    this.beam?.end()
+  }
+
+  private updateBeam (dt: number) {
+    if (!this.hasEnergyForBeam) return
+    if (!this.beam?.isActive) return
+    this.beam?.update(dt)
+  }
+
   private updateBeamState(dt: number) {
     if (this.hasEnergyForBeam && this.beam?.isActive) {
       this.beam.handleScaling()
@@ -308,25 +336,6 @@ export default class Player extends Phaser.GameObjects.Container {
     this.controls.space = false
   }
 
-  public startBeam () {
-    if (!this.store.isPlaying) return
-    if (!this.hasEnergyForBeam) return
-    this.audio?.playAttack()
-    this.beam?.start()
-  }
-
-  public stopBeam () {
-    if (!this.beam?.isActive) return
-    this.audio?.stopAttack()
-    this.beam?.end()
-  }
-
-  private updateBeam (dt: number) {
-    if (!this.hasEnergyForBeam) return
-    if (!this.beam?.isActive) return
-    this.beam?.update(dt)
-  }
-
   private playDamageAnimation () {
     this.sprite.setTint(config.player.colorDamage)
     this.sprite.setPipeline('glow')
@@ -341,15 +350,5 @@ export default class Player extends Phaser.GameObjects.Container {
       x: clamp(x, this.sprite.displayWidth / 2, this.scene.scale.width - this.sprite.displayWidth / 2),
       y: clamp(y, this.sprite.displayHeight / 2, this.scene.scale.height - this.sprite.displayHeight / 2)
     }
-  }
-
-  destroy(): void {
-    if (this.beam) {
-      this.scene.input.off('pointerdown', this.startBeam, this)
-      this.scene.input.off('pointerup', this.stopBeam, this)
-      this.beam.destroy()
-    }
-    this.sprite.destroy()
-    super.destroy()
   }
 }

@@ -16,14 +16,14 @@ const useHiscores = () => {
     }).sort((a, b) => b.score - a.score)
   })
 
-  onBeforeMount(() => {
-    profilesStore.subscribeProfiles()
-    hiscoresStore.subscribeHiscores()
+  onBeforeMount(async () => {
+    await profilesStore.subscribeProfiles()
+    await hiscoresStore.subscribeHiscores()
   })
 
-  onBeforeUnmount(() => {
-    hiscoresStore.unsubscribeHiscores()
-    profilesStore.unsubscribeProfiles()
+  onBeforeUnmount(async () => {
+    await hiscoresStore.unsubscribeHiscores()
+    await profilesStore.unsubscribeProfiles()
   })
 
   return { hiscoresData }
