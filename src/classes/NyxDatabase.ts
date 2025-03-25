@@ -8,7 +8,7 @@ import type {
 } from 'firebase/firestore'
 import { initializeApp, type FirebaseApp, type FirebaseOptions } from 'firebase/app'
 // import { getAnalytics, type Analytics } from 'firebase/analytics'
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, type Auth, type AuthProvider } from 'firebase/auth'
+import { getAuth, GoogleAuthProvider, signInWithPopup, type Auth, type AuthProvider } from 'firebase/auth'
 // import { GoogleAuthProvider } from 'firebase/auth/web-extension'
 
 const __CONFIG__ = {
@@ -148,7 +148,7 @@ export default class NyxDatabase {
     collectionName: NyxCollection,
     converter?: FirestoreDataConverter<T>
     ) => {
-    return !!converter
+    return converter
       ? collection(this.db, collectionName).withConverter(converter)
       : collection(this.db, collectionName) as CollectionReference<T>
   }
@@ -159,10 +159,10 @@ export default class NyxDatabase {
     converter?: FirestoreDataConverter<T>
   ) => {
     const colRef = this.getCollectionRef<T>(collectionName)
-    if (docId !== null) return !!converter
+    if (docId !== null) return converter
       ? doc(colRef, docId).withConverter(converter)
       : doc(colRef, docId) as DocumentReference<T>
-    else return !!converter
+    else return converter
       ? doc(colRef).withConverter(converter)
       : doc(colRef) as DocumentReference<T>
   }

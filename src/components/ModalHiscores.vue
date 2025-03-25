@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onBeforeUnmount, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { NyxModal, NyxTable } from 'nyx-kit/components'
 import { NyxSize } from 'nyx-kit/types'

@@ -15,7 +15,7 @@ const { setGameState } = useGameStore()
 const { loginWithGoogle, logout } = authStore
 const { isLoggedIn } = storeToRefs(authStore)
 
-//@ts-ignore
+//@ts-expect-error: TODO: Fix this
 const avatarColor: HexCode = '#71657A'
 
 const params = new URLSearchParams(document.location.search)

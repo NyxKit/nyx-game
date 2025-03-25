@@ -7,7 +7,6 @@ import type { GameScene } from '@/scenes'
 import config from '@/config'
 import type { Audio } from './Audio'
 import { UNIT } from '@/scenes/GameScene'
-import { createSpriteAnimation } from '@/utils'
 
 export default class Player extends Phaser.GameObjects.Container {
   public sprite: GameObjects.Sprite

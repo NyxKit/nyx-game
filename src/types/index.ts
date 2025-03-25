@@ -1,7 +1,5 @@
 export * from './database'
 
-import type { KeyDict } from 'nyx-kit/types'
-
 export enum GameState {
   Preload = 'preload',
   Menu = 'menu',
@@ -17,7 +15,14 @@ export enum GameMode {
   Battle = 'battle',
 }
 
-export type OnDestroyEvent = (id: string, options?: KeyDict<any>) => void
+export interface DestroyOptions {
+  isDestroyedByPlayer?: boolean
+  position?: { x: number, y: number }
+  isLarge?: boolean
+  type?: PowerUpType
+}
+
+export type OnDestroyEvent = (id: string, options?: DestroyOptions) => void
 
 export enum PowerUpType {
   HpSmall = 'powerup/hp-small',

@@ -2,8 +2,7 @@ import { Scene } from 'phaser'
 import { EventBus, GameControls, Player, Background, Asteroid } from '@/classes'
 import useGameStore from '@/stores/game'
 import { clamp } from 'nyx-kit/utils'
-import { PowerUpType } from '@/types'
-import type { KeyDict } from 'nyx-kit/types'
+import { PowerUpType, type DestroyOptions } from '@/types'
 import PowerUp from '@/classes/PowerUp'
 import { createSpriteAnimation } from '@/utils'
 import { Audio } from '@/classes/Audio'
@@ -204,15 +203,16 @@ export default class GameScene extends Scene {
     this.powerUps.push(powerUp)
   }
 
-  private onDestroyAsteroid (id: string, options?: KeyDict<any>) {
+  private onDestroyAsteroid (id: string, options?: DestroyOptions) {
     this.asteroids = this.asteroids.filter((asteroid) => asteroid.id !== id)
     if (!options?.isDestroyedByPlayer) return
     this.store.increaseScore(options.isLarge ? config.asteroid.large.score : config.asteroid.small.score)
     if (Math.random() <= config.powerUp.baseSpawnRate) return
-    this.spawnPowerUp(options.position, options.isLarge)
+    if (!options.position) return
+    this.spawnPowerUp(options.position, !!options.isLarge)
   }
 
-  private onDestroyPowerUp (id: string, options?: KeyDict<any>) {
+  private onDestroyPowerUp (id: string, options?: DestroyOptions) {
     this.powerUps = this.powerUps.filter((powerUp) => powerUp.id !== id)
     if (!options?.isDestroyedByPlayer || !this.player) return
     switch (options.type) {
