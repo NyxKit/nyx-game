@@ -10,7 +10,7 @@ const useClientStore = defineStore('client', () => {
     SCREEN_WIDTH.value = window.innerWidth
     SCREEN_HEIGHT.value = window.innerHeight
   }
-  
+
   return {
     SCREEN_WIDTH,
     SCREEN_HEIGHT,

@@ -87,8 +87,6 @@ export default class Asteroid {
 
     let startX: number
     let startY: number
-    let velocityX: number
-    let velocityY: number
 
     if (isSpawnOnRight) {
       // Spawn on right side with random Y position
@@ -114,8 +112,8 @@ export default class Asteroid {
       .setDepth(100)
 
     // Calculate velocity based on angle and speed
-    velocityX = -Math.cos(this.angle) * this.speed
-    velocityY = Math.sin(this.angle) * (this.speed * 0.5)
+    const velocityX = -Math.cos(this.angle) * this.speed
+    const velocityY = Math.sin(this.angle) * (this.speed * 0.5)
 
     // Set initial velocity
     sprite.setVelocity(velocityX, velocityY)

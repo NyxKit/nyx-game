@@ -72,10 +72,10 @@ export default class GameScene extends Scene {
     // Set up collision groups
     if (this.player) {
       // Initial asteroids will be handled when spawned
-      this.asteroids.forEach(asteroid => {
-        if (asteroid.sprite instanceof Phaser.Physics.Arcade.Sprite) {
+      this.asteroids.forEach((asteroid) => {
+        if (asteroid.sprite instanceof Phaser.Physics.Arcade.Sprite && this.player) {
           this.physics.add.collider(
-            this.player!,
+            this.player,
             asteroid.sprite,
             this.handlePlayerAsteroidCollision.bind(this) as Types.Physics.Arcade.ArcadePhysicsCallback
           )

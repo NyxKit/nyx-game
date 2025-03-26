@@ -45,11 +45,18 @@ export default defineConfigWithVueTs(
       'quotes': ['error', 'single'],
       'semi': ['error', 'never'],
       'indent': ['error', 2, {
-        SwitchCase: 1,
         flatTernaryExpressions: false,
-        ignoredNodes: []
+        ignoredNodes: [],
+        SwitchCase: 1,
+        ArrayExpression: 1,
+        ObjectExpression: 1,
+        ImportDeclaration: 1,
+        MemberExpression: 1
       }],
       'no-unexpected-multiline': 'error',
+      'no-mixed-spaces-and-tabs': 'error',
+      'no-tabs': 'error',
+      'no-trailing-spaces': 'error',
 
       // Function style rules
       'func-style': ['error', 'expression'],

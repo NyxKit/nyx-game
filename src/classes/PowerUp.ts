@@ -71,7 +71,7 @@ export default class PowerUp implements PowerUpOptions {
       // Calculate normalized direction to player
       const dirX = dx / distance
       const dirY = dy / distance
-      
+
       // Set velocity towards player with increased speed when in range
       this.sprite.setVelocity(
         dirX * this.speed,
