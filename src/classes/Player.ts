@@ -1,4 +1,3 @@
-import { GameObjects } from 'phaser'
 import type GameControls from './GameControls'
 import { clamp } from 'nyx-kit/utils'
 import useGameStore from '@/stores/game'
@@ -9,11 +8,14 @@ import type { Audio } from './Audio'
 import { UNIT } from '@/scenes/GameScene'
 
 export default class Player extends Phaser.GameObjects.Container {
-  public sprite: GameObjects.Sprite
+  public sprite: Phaser.GameObjects.Sprite
   public scene: GameScene
   public beam: Beam | null = null
+
   private controls: GameControls
   private store = useGameStore()
+
+  // Physics-related properties
   private velocity = {
     x: config.player.velocity * UNIT,
     y: config.player.velocity * UNIT
@@ -30,7 +32,9 @@ export default class Player extends Phaser.GameObjects.Container {
     x: config.player.deceleration * UNIT,
     y: config.player.deceleration * UNIT
   }
-  private energyDrainRate = config.player.energyDrainRate // Energy drain per frame while shooting
+
+  // Game mechanics
+  private energyDrainRate = config.player.energyDrainRate
   private _isDashing: boolean = false
   private dashDistance: number = config.player.dashDistance * UNIT
   private dashCooldown: number = config.player.dashCooldown
@@ -46,32 +50,27 @@ export default class Player extends Phaser.GameObjects.Container {
 
     const scaleSprite = 3 * UNIT
 
-    // Create the beam first so it renders behind the player
-    // const playerSpriteSrc = this.scene.textures.get('player').getSourceImage()
-    const playerSpriteSrc = { width: 128 * scaleSprite, height: 64 * scaleSprite }
-    this.beam = new Beam(this.scene, { x: (playerSpriteSrc.width / 2), y: -35 })
+    // Create and add beam first (so it renders below)
+    const spriteBaseWidth = 128 // Base sprite width before scaling
+    this.beam = new Beam(this.scene, { x: spriteBaseWidth / 2, y: -20 })
     this.add(this.beam.sprite)
+    this.beam.sprite.setDepth(0)
 
-    // Create the player sprite after so it renders on top
-    // this.sprite = scene.add.image(0, 0, 'playerImage').setScale(UNIT)
-    this.sprite = this.scene.add.sprite(0, 0, 'player/idle').setScale(scaleSprite)
+    // Create and add sprite last (so it renders on top)
+    this.sprite = this.scene.add.sprite(0, 0, 'player/idle')
+      .setScale(scaleSprite)
     this.add(this.sprite)
+    this.sprite.setDepth(1)
 
-    this.scene.anims.create({
-      key: 'player-idle',
-      frames: this.scene.anims.generateFrameNames('player/idle', { start: 0, end: 28 }),
-      frameRate: 8,
-      repeat: -1
-    })
+    // Set up container physics
+    scene.physics.world.enable(this)
+    this.setupPhysics()
+    this.setupAnimations()
 
-    this.sprite.anims.play('player-idle')
-
-    // Add container to scene
+    // Add container to scene and set up input
     scene.add.existing(this)
-
-    // Add mouse input handling
-    scene.input.on('pointerdown', this.startBeam, this)
-    scene.input.on('pointerup', this.stopBeam, this)
+    this.setDepth(1000)
+    this.setupInput()
   }
 
   public get hp () {
@@ -127,14 +126,6 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
-  private get hasEnergyForBeam () {
-    return this.energy >= this.energyDrainRate || this.store.debug.hasInfiniteEnergy
-  }
-
-  private get hasStaminaForDash () {
-    return this.stamina >= config.player.dashStaminaCost || this.store.debug.hasInfiniteStamina
-  }
-
   public get currentPosition () {
     return {
       x: this.x,
@@ -152,25 +143,69 @@ export default class Player extends Phaser.GameObjects.Container {
     const padding = config.player.boundsPadding
     const playerBounds = this.sprite.getBounds()
     return new Phaser.Geom.Rectangle(
-      playerBounds.x + padding,
-      playerBounds.y + padding,
-      playerBounds.width - (padding * 2),
-      playerBounds.height - (padding * 2)
+      playerBounds.x + padding.left,
+      playerBounds.y + padding.top,
+      playerBounds.width - (padding.left + padding.right),
+      playerBounds.height - (padding.top + padding.bottom)
     )
+  }
+
+  private get hasEnergyForBeam () {
+    return this.energy >= this.energyDrainRate || this.store.debug.hasInfiniteEnergy
+  }
+
+  private get hasStaminaForDash () {
+    return this.stamina >= config.player.dashStaminaCost || this.store.debug.hasInfiniteStamina
   }
 
   public update (dt: number) {
     this.setDashTargetLocation()
     this.stamina += config.player.staminaRegen
-    const { vx, vy } = this.isDashing ? this.getVelocityDash() : this.getVelocity()
 
-    const newPos = this.getPosition(vx, vy, dt)
-    this.x = newPos.x
-    this.y = newPos.y
-    this.velocity.x = vx
-    this.velocity.y = vy
+    // Update physics-based movement
+    if (this.isDashing) {
+      this.handleDashMovement()
+    } else {
+      this.handleNormalMovement()
+    }
+
+    // Update game state
     this.store.setPlayerPosition(this.x, this.y)
 
+    // Handle beam mechanics
+    this.updateBeamState(dt)
+  }
+
+  public destroy(): void {
+    if (this.beam) {
+      this.scene.input.off('pointerdown', this.startBeam, this)
+      this.scene.input.off('pointerup', this.stopBeam, this)
+      this.beam.destroy()
+    }
+    this.sprite.destroy()
+    super.destroy()
+  }
+
+  public startBeam () {
+    if (!this.store.isPlaying) return
+    if (!this.hasEnergyForBeam) return
+    this.audio?.playAttack()
+    this.beam?.start()
+  }
+
+  public stopBeam () {
+    if (!this.beam?.isActive) return
+    this.audio?.stopAttack()
+    this.beam?.end()
+  }
+
+  private updateBeam (dt: number) {
+    if (!this.hasEnergyForBeam) return
+    if (!this.beam?.isActive) return
+    this.beam?.update(dt)
+  }
+
+  private updateBeamState(dt: number) {
     if (this.hasEnergyForBeam && this.beam?.isActive) {
       this.beam.handleScaling()
       this.updateBeam(dt)
@@ -183,71 +218,55 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
-  public destroy(): void {
-    if (this.beam) {
-      this.scene.input.off('pointerdown', this.startBeam, this)
-      this.scene.input.off('pointerup', this.stopBeam, this)
-      this.beam.destroy()
-    }
-
-    super.destroy()
-  }
-
-  public startBeam () {
-    if (!this.store.isPlaying) return
-    if (!this.hasEnergyForBeam) return
-    this.audio?.playAttack()
-    this.beam?.start(this.currentPosition)
-  }
-
-  public stopBeam () {
-    if (!this.beam?.isActive) return
-    this.audio?.stopAttack()
-    this.beam?.end()
-  }
-
-  private updateBeam (dt: number) {
-    if (!this.hasEnergyForBeam) return
-    if (!this.beam?.isActive) return
-    this.beam?.update(dt, this.currentPosition)
-  }
-
-  private getPosition (vx: number, vy: number, dt: number): { x: number, y: number } {
-    const newX = this.x + vx * (dt * 60)
-    const newY = this.y + vy * (dt * 60)
-    const pos = this.getClampedPosition(newX, newY)
-    return pos
-  }
-
-  private getVelocity (): { vx: number, vy: number } {
-    let vx = this.velocity.x
-    let vy = this.velocity.y
+  private handleNormalMovement() {
+    const acceleration = this.acceleration.x * 2000 * UNIT
+    const body = this.body as Phaser.Physics.Arcade.Body
 
     if (this.controls.left) {
-      vx = clamp(vx - this.acceleration.x, -this.maxVelocity.x, this.maxVelocity.x)
+      body.setAccelerationX(-acceleration)
     } else if (this.controls.right) {
-      vx = clamp(vx + this.acceleration.x, -this.maxVelocity.x, this.maxVelocity.x)
+      body.setAccelerationX(acceleration)
     } else {
-      if (vx > 0) {
-        vx = clamp(Math.max(0, vx - this.deceleration.x), -this.maxVelocity.x, this.maxVelocity.x)
-      } else if (vx < 0) {
-        vx = clamp(Math.min(0, vx + this.deceleration.x), -this.maxVelocity.x, this.maxVelocity.x)
-      }
+      body.setAccelerationX(0)
     }
 
     if (this.controls.up) {
-      vy = clamp(vy - this.acceleration.y, -this.maxVelocity.y, this.maxVelocity.y)
+      body.setAccelerationY(-acceleration)
     } else if (this.controls.down) {
-      vy = clamp(vy + this.acceleration.y, -this.maxVelocity.y, this.maxVelocity.y)
+      body.setAccelerationY(acceleration)
     } else {
-      if (vy > 0) {
-        vy = clamp(Math.max(0, vy - this.deceleration.y), -this.maxVelocity.y, this.maxVelocity.y)
-      } else if (vy < 0) {
-        vy = clamp(Math.min(0, vy + this.deceleration.y), -this.maxVelocity.y, this.maxVelocity.y)
-      }
+      body.setAccelerationY(0)
     }
+  }
 
-    return { vx, vy }
+  private handleDashMovement() {
+    const dx = this.dashDestinationPos.x - this.x
+    const dy = this.dashDestinationPos.y - this.y
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    const body = this.body as Phaser.Physics.Arcade.Body
+
+    if (distance > 25) {
+      // Temporarily remove velocity limits during dash
+      body.setMaxVelocity(Number.MAX_SAFE_INTEGER)
+
+      const dashSpeed = config.player.dashSpeed * UNIT * 60
+      body.setVelocity(
+        (dx / distance) * dashSpeed,
+        (dy / distance) * dashSpeed
+      )
+      this.sprite.setTint(config.player.colorDash)
+      this.sprite.setPipeline('glow')
+    } else {
+      this.isDashing = false
+      // Restore normal velocity limits
+      body.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
+      body.setVelocity(
+        this.controls.right ? this.maxVelocity.x * 60 : this.controls.left ? -this.maxVelocity.x * 60 : 0,
+        this.controls.down ? this.maxVelocity.y * 60 : this.controls.up ? -this.maxVelocity.y * 60 : 0
+      )
+      this.sprite.clearTint()
+      this.sprite.resetPipeline()
+    }
   }
 
   private setDashTargetLocation () {
@@ -277,39 +296,6 @@ export default class Player extends Phaser.GameObjects.Container {
     this.controls.space = false
   }
 
-  private getVelocityDash (): { vx: number, vy: number } {
-    // Calculate direction to destination
-    const dx = this.dashDestinationPos.x - this.x
-    const dy = this.dashDestinationPos.y - this.y
-    let vx = this.velocity.x
-    let vy = this.velocity.y
-
-    // Calculate distance to destination
-    const distance = Math.max(Math.sqrt(dx * dx + dy * dy), 0)
-
-    if (distance > 25) {
-      // Normalize direction and apply dash speed
-      const dashSpeed = config.player.dashSpeed * UNIT
-      vx = (dx / distance) * dashSpeed
-      vy = (dy / distance) * dashSpeed
-
-      // Add blue/white shine effect while dashing
-      this.sprite.setTint(config.player.colorDash)
-      this.sprite.setPipeline('glow')
-    } else {
-      // Reached destination, stop dashing
-      vx = this.controls.right ? this.maxVelocity.x : this.controls.left ? -this.maxVelocity.x : 0
-      vy = this.controls.down ? this.maxVelocity.y : this.controls.up ? -this.maxVelocity.y : 0
-      this.isDashing = false
-
-      // Remove shine effect
-      this.sprite.clearTint()
-      this.sprite.resetPipeline()
-    }
-
-    return { vx, vy }
-  }
-
   private playDamageAnimation () {
     this.sprite.setTint(config.player.colorDamage)
     this.sprite.setPipeline('glow')
@@ -324,5 +310,44 @@ export default class Player extends Phaser.GameObjects.Container {
       x: clamp(x, this.sprite.displayWidth / 2, this.scene.scale.width - this.sprite.displayWidth / 2),
       y: clamp(y, this.sprite.displayHeight / 2, this.scene.scale.height - this.sprite.displayHeight / 2)
     }
+  }
+
+  private setupPhysics() {
+    const body = this.body as Phaser.Physics.Arcade.Body
+    body.setCollideWorldBounds(true)
+    body.setBounce(0)
+    body.setDrag(this.deceleration.x * 1000 * UNIT, this.deceleration.y * 500 * UNIT)
+    body.setVelocity(this.velocity.x, this.velocity.y)
+    body.setMaxVelocity(this.maxVelocity.x * 60 * UNIT, this.maxVelocity.y * 60 * UNIT)
+
+    // Set the physics body size to match the sprite's actual dimensions
+    const padding = config.player.boundsPadding
+
+    // Use the sprite's actual display dimensions
+    body.setSize(
+      this.sprite.displayWidth - (padding.left + padding.right),
+      this.sprite.displayHeight - (padding.top + padding.bottom)
+    )
+
+    // Center the physics body on the sprite
+    body.setOffset(
+      -this.sprite.displayWidth / 2 + padding.left,
+      -this.sprite.displayHeight / 2 + padding.top
+    )
+  }
+
+  private setupAnimations() {
+    this.scene.anims.create({
+      key: 'player-idle',
+      frames: this.scene.anims.generateFrameNames('player/idle', { start: 0, end: 28 }),
+      frameRate: 8,
+      repeat: -1
+    })
+    this.sprite.anims.play('player-idle')
+  }
+
+  private setupInput() {
+    this.scene.input.on('pointerdown', this.startBeam, this)
+    this.scene.input.on('pointerup', this.stopBeam, this)
   }
 }

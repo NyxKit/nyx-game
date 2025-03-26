@@ -20,6 +20,7 @@ export interface DestroyOptions {
   position?: { x: number, y: number }
   isLarge?: boolean
   type?: PowerUpType
+  size?: number
 }
 
 export type OnDestroyEvent = (id: string, options?: DestroyOptions) => void

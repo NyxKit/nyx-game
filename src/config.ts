@@ -24,7 +24,12 @@ export default {
     maxVelocity: 4,
     acceleration: 0.2,
     deceleration: 0.1,
-    boundsPadding: 50,
+    boundsPadding: {
+      top: 10,
+      bottom: 30,
+      left: 20,
+      right: 20
+    },
     colorDash: 0x00aaff,
     colorDamage: 0xffaaaa,
   },

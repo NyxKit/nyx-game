@@ -4,7 +4,7 @@ import { UNIT } from '@/scenes/GameScene'
 import { useGameStore } from '@/stores'
 import { PowerUpType, type OnDestroyEvent } from '@/types'
 import { getRandomBetween, getRandomFromArray } from 'nyx-kit/utils'
-import type { GameObjects } from 'phaser'
+import { Physics } from 'phaser'
 import { v4 as uuidv4 } from 'uuid'
 
 interface PowerUpOptions {
@@ -20,9 +20,11 @@ export default class PowerUp implements PowerUpOptions {
   public onDestroy: OnDestroyEvent
   public id: string = uuidv4()
   public type: PowerUpType = PowerUpType.EnergySmall
-  public sprite: GameObjects.Image
+  public sprite: Physics.Arcade.Sprite
   public speed: number
   public isLarge: boolean = false
+  private attractionRange: number = 300
+  private baseSpeed: number = 180 // 3 * 60 for physics system
   private scene: GameScene
   private store = useGameStore()
 
@@ -31,8 +33,8 @@ export default class PowerUp implements PowerUpOptions {
     this.type = options?.type ?? this.getRandomType(options?.isLarge ?? false)
     this.isLarge = options?.isLarge ?? false
     this.position = options?.position ?? { x: 0, y: 0 }
+    this.speed = (options?.speed ?? 5) * 60 // Convert to physics system speed
     this.sprite = this.create()
-    this.speed = options?.speed ?? 5
     this.onDestroy = options?.onDestroy ?? (() => {})
   }
 
@@ -45,33 +47,46 @@ export default class PowerUp implements PowerUpOptions {
     if ([PowerUpType.EnergyMedium, PowerUpType.HpMedium].includes(this.type)) {
       scale = 1.5
     }
-    return this.scene.add
-      .image(this.position.x, this.position.y, this.key)
+
+    // Create physics sprite
+    const sprite = this.scene.physics.add.sprite(this.position.x, this.position.y, this.key)
       .setOrigin(0.5, 0.5)
       .setRotation(getRandomBetween(0, Math.PI * 2))
       .setScale(scale * UNIT)
       .setDepth(100)
+
+    // Set initial velocity (moving left)
+    sprite.setVelocityX(-this.baseSpeed)
+
+    return sprite
   }
 
   public update (dt: number, playerPosition: { x: number; y: number }) {
     const dx = playerPosition.x - this.sprite.x
     const dy = playerPosition.y - this.sprite.y
     const distance = Math.sqrt(dx * dx + dy * dy)
-    const threshold = 300
 
-    // Only move if within range
-    if (distance < threshold) {
-      const vx = (dx / distance) * this.speed * 3
-      const vy = (dy / distance) * this.speed * 3
+    // Only move towards player if within range
+    if (distance < this.attractionRange) {
+      // Calculate normalized direction to player
+      const dirX = dx / distance
+      const dirY = dy / distance
 
-      this.sprite.x += vx * (dt * 60)
-      this.sprite.y += vy * (dt * 60)
+      // Set velocity towards player with increased speed when in range
+      this.sprite.setVelocity(
+        dirX * this.speed,
+        dirY * this.speed
+      )
     } else {
-      this.sprite.x -= this.speed * 3 * (dt * 60)
+      // Move left at base speed when out of range
+      this.sprite.setVelocityX(-this.baseSpeed)
+      this.sprite.setVelocityY(0)
     }
 
+    // Update rotation
     this.sprite.rotation += config.powerUp.rotationSpeed * dt
 
+    // Check if power-up should be destroyed (off screen)
     const shouldDestroy = this.sprite.x < -this.sprite.width
       || this.sprite.y > this.scene.scale.height + this.sprite.height
 
