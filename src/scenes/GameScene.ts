@@ -1,5 +1,5 @@
 import { Scene } from 'phaser'
-import { EventBus, GameControls, Player, Background, Asteroid } from '@/classes'
+import { EventBus, GameControls, Player, Background, Asteroid, BlackHole } from '@/classes'
 import useGameStore from '@/stores/game'
 import { clamp } from 'nyx-kit/utils'
 import { PowerUpType, type DestroyOptions } from '@/types'
@@ -22,7 +22,9 @@ export default class GameScene extends Scene {
   private asteroidSpeed = 0
   private store = useGameStore()
   private asteroids: Asteroid[] = []
+  private blackHoles: BlackHole[] = []
   private lastSpawnTime = 0
+  private lastBlackHoleSpawnTime = 0
   private powerUps: PowerUp[] = []
   private line: Phaser.GameObjects.Line | null = null
 
@@ -34,11 +36,14 @@ export default class GameScene extends Scene {
   public reset () {
     this.asteroids.forEach((asteroid) => asteroid.destroy())
     this.asteroids = []
+    this.blackHoles.forEach((blackHole) => blackHole.destroy())
+    this.blackHoles = []
     this.powerUps.forEach((powerUp) => powerUp.destroy())
     this.powerUps = []
     this.player?.setPosition(200, this.scale.height / 2)
     this.player?.stopBeam()
     this.lastSpawnTime = 0
+    this.lastBlackHoleSpawnTime = 0
     this.togglePaused(false)
   }
 
@@ -68,6 +73,12 @@ export default class GameScene extends Scene {
     this.player.setPosition(200, this.scale.height / 2)
 
     createSpriteAnimation(this.anims, 'explosion/md', 'explosion/md', [0, 1, 2, 3], 0)
+    this.anims.create({
+      key: 'blackhole',
+      frames: this.anims.generateFrameNames('blackhole', { start: 0, end: 77 }),
+      frameRate: 24,
+      repeat: -1
+    })
 
     // Set up collision groups
     if (this.player) {
@@ -106,11 +117,13 @@ export default class GameScene extends Scene {
     const playerPos = this.player.currentPosition
 
     this.asteroids.forEach((asteroid) => asteroid.update(dt))
+    this.blackHoles.forEach((blackHole) => blackHole.update(dt))
     this.powerUps.forEach((powerUp) => powerUp.update(dt, playerPos))
     this.background.update(dt, this.velocity)
     this.player.update(dt)
 
     this.trySpawnAsteroid()
+    this.trySpawnBlackHole()
 
     if (this.line) {
       this.line.destroy()
@@ -249,5 +262,33 @@ export default class GameScene extends Scene {
         this.player.energy += config.powerUp.energySmall
         break
     }
+  }
+
+  private trySpawnBlackHole () {
+    // Don't spawn if we already have a black hole
+    if (this.blackHoles.length >= 1) return
+
+    let spawnRate = config.blackHole.baseSpawnRate / this.velocity
+    const scoreModifier = Math.log1p(this.store.score / 1000)
+    spawnRate = spawnRate / (1 + scoreModifier)
+
+    const timeSinceLastSpawn = this.time.now - this.lastBlackHoleSpawnTime
+
+    if (timeSinceLastSpawn >= spawnRate) {
+      this.lastBlackHoleSpawnTime = this.time.now
+      this.spawnBlackHole()
+    }
+  }
+
+  private spawnBlackHole () {
+    const blackHole = new BlackHole(this, {
+      onDestroy: this.onDestroyBlackHole.bind(this),
+    })
+
+    this.blackHoles.push(blackHole)
+  }
+
+  private onDestroyBlackHole (id: string) {
+    this.blackHoles = this.blackHoles.filter((blackHole) => blackHole.id !== id)
   }
 }

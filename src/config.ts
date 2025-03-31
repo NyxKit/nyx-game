@@ -1,5 +1,3 @@
-
-
 export default {
   player: {
     hpStart: 100,
@@ -74,5 +72,13 @@ export default {
   },
   hiscores: {
     threshold: 1000,
-  }
+  },
+  blackHole: {
+    basePullForce: 200,
+    maxPullForce: 400,
+    speed: 1,
+    size: [0.5, 1],
+    rotationSpeed: 0.5,
+    baseSpawnRate: 60000,
+  },
 }

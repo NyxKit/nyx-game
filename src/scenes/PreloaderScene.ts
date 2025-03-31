@@ -18,7 +18,6 @@ export default class PreloaderScene extends Scene {
   preload () {
     this.load.setPath('assets')
     this.load.image('playerImage', 'whale.png')
-    this.load.image('blackhole', 'blackhole.png')
 
     this.load.image('background/stars', 'background/stars.png')
     this.load.image('background/dust', 'background/dust.png')
@@ -41,6 +40,7 @@ export default class PreloaderScene extends Scene {
 
     this.load.spritesheet('beam', 'beam.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('player/idle', 'player/idle.png', { frameWidth: 128, frameHeight: 64 })
+    this.load.spritesheet('blackhole', 'blackhole.png', { frameWidth: 512, frameHeight: 512 })
     // this.load.spritesheet('explosion/sm', 'explosion/sm.png', { frameWidth: 16, frameHeight: 16 })
     this.load.spritesheet('explosion/md', 'explosion/md.png', { frameWidth: 32, frameHeight: 32 })
     // this.load.spritesheet('explosion/lg', 'explosion/lg.png', { frameWidth: 48, frameHeight: 48 })

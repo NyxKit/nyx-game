@@ -5,6 +5,8 @@ import Background from './Background'
 import GameControls from './GameControls'
 import EventBus from './EventBus'
 import Beam from './Beam'
+import BlackHole from './BlackHole'
+import PowerUp from './PowerUp'
 
 export {
   Debug,
@@ -13,5 +15,7 @@ export {
   Background,
   GameControls,
   EventBus,
-  Beam
+  Beam,
+  BlackHole,
+  PowerUp
 }

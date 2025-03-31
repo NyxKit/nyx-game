@@ -1,85 +1,97 @@
-console.log('BlackHole')
+import config from '@/config'
+import type { GameScene } from '@/scenes'
+import { UNIT } from '@/scenes/GameScene'
+import type { OnDestroyEvent } from '@/types'
+import { getRandomBetween } from 'nyx-kit/utils'
+import { Physics } from 'phaser'
+import { v4 as uuidv4 } from 'uuid'
 
-/*
-
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    physics: {
-        default: 'arcade',
-        arcade: {
-            debug: true, // Enable to see physics
-            gravity: { y: 0 }
-        }
-    },
-    scene: {
-        preload,
-        create,
-        update
-    }
-};
-
-const game = new Phaser.Game(config);
-
-let player, blackHole;
-
-function preload() {
-    this.load.image('player', 'player.png');  // Replace with your sprite
-    this.load.image('blackHole', 'blackhole.png'); // Replace with your sprite
+interface BlackHoleOptions {
+  onDestroy: OnDestroyEvent
 }
 
-function create() {
-    player = this.physics.add.sprite(400, 500, 'player');
-    blackHole = this.add.sprite(400, 300, 'blackHole');
+export default class BlackHole {
+  public id: string
+  public sprite: Physics.Arcade.Sprite
+  public onDestroy: OnDestroyEvent
+  private scene: GameScene
+  private pullForce: number = config.blackHole.basePullForce * UNIT
+  private maxPullForce: number = config.blackHole.maxPullForce * UNIT
+  private size: number
 
-    player.setCollideWorldBounds(true);
-    player.setDamping(true).setDrag(0.98); // Adds slight friction to stabilize movement
-}
+  constructor (scene: GameScene, options: BlackHoleOptions) {
+    this.id = uuidv4()
+    this.scene = scene
+    this.onDestroy = options.onDestroy
+    this.size = getRandomBetween(config.blackHole.size[0], config.blackHole.size[1], 0.1)
+    this.sprite = this.create()
+  }
 
-function update() {
-    const speed = 200;
-    let velocity = new Phaser.Math.Vector2(0, 0);
+  private create () {
+    // Spawn on right side with random Y position
+    const startX = this.scene.scale.width + 100
+    const startY = getRandomBetween(0, this.scene.scale.height)
 
-    if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown) velocity.y = -1;
-    if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown) velocity.y = 1;
-    if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown) velocity.x = -1;
-    if (this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown) velocity.x = 1;
+    // Create physics sprite
+    const sprite = this.scene.physics.add.sprite(startX, startY, 'blackhole')
+      .setScale(this.size * UNIT)
+      .setDepth(25)
 
-    velocity.normalize().scale(speed);
+    // Play the rotation animation
+    sprite.anims.play('blackhole')
 
-    applyBlackHoleEffect(player, velocity, blackHole, 500);
-}
+    // Set initial velocity (moving left)
+    sprite.setVelocity(-config.blackHole.speed * UNIT * 60, 0)
 
-function applyBlackHoleEffect(player, velocity, blackHole, pullForce) {
-    let playerPos = new Phaser.Math.Vector2(player.x, player.y);
-    let holePos = new Phaser.Math.Vector2(blackHole.x, blackHole.y);
+    return sprite
+  }
 
-    // Vector from player to black hole (pull direction)
-    let pullDirection = holePos.clone().subtract(playerPos).normalize();
-
-    // Perpendicular force (orbital force)
-    let orbitalDirection = new Phaser.Math.Vector2(-pullDirection.y, pullDirection.x); // 90° rotation
-    let orbitStrength = 100; // Control how strong the orbit effect is
-
-    // Dot product to check movement direction
-    let dot = pullDirection.dot(velocity.clone().normalize());
-
-    if (dot > 0) {
-        velocity.scale(2); // Moving toward the black hole → speed up
-    } else if (dot < 0) {
-        velocity.scale(0.5); // Moving away → slow down
+  public update (dt: number) {
+    // Check if black hole is off screen
+    const padding = 500
+    if (this.sprite.x < -this.sprite.width - padding) {
+      this.destroy()
+      return
     }
 
-    // Apply black hole attraction force
-    let attraction = pullDirection.scale(pullForce / Phaser.Math.Distance.Between(player.x, player.y, blackHole.x, blackHole.y));
+    // Apply gravitational pull to player
+    if (this.scene.player) {
+      this.applyGravitationalPull(this.scene.player, dt)
+    }
+  }
 
-    // Apply orbital force
-    let orbitForce = orbitalDirection.scale(orbitStrength / Phaser.Math.Distance.Between(player.x, player.y, blackHole.x, blackHole.y));
+  private applyGravitationalPull (player: any, dt: number) {
+    // Calculate vector from player to black hole
+    const dx = this.sprite.x - player.x
+    const dy = this.sprite.y - player.y
+    const distance = Math.sqrt(dx * dx + dy * dy)
 
-    velocity.add(attraction).add(orbitForce);
+    // Calculate pull force based on distance (inverse square law)
+    // The closer the player is, the stronger the pull
+    const pullForce = Math.min(
+      this.pullForce / (distance * distance),
+      this.maxPullForce
+    )
 
-    player.setVelocity(velocity.x, velocity.y);
+    // Apply force to player (pulling towards black hole)
+    const body = player.body as Phaser.Physics.Arcade.Body
+    const forceX = (dx / distance) * pullForce * dt * 60
+    const forceY = (dy / distance) * pullForce * dt * 60
+
+    // Add the force to the current velocity
+    body.setVelocity(
+      body.velocity.x + forceX,
+      body.velocity.y + forceY
+    )
+
+    // Check if player is too close (collision)
+    if (distance < this.sprite.displayWidth / 2) {
+      player.hp = 0 // Kill player
+    }
+  }
+
+  public destroy () {
+    this.onDestroy(this.id)
+    this.sprite.destroy()
+  }
 }
-
-*/
