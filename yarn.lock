@@ -3234,7 +3234,7 @@ nwsapi@^2.2.16:
   resolved "https://registry.yarnpkg.com/nwsapi/-/nwsapi-2.2.19.tgz#586660f7c24c34691907002309a8dc28064c9c0b"
   integrity sha512-94bcyI3RsqiZufXjkr3ltkI86iEl+I7uiHVDtcq9wJUTwYQJ5odHDeSzkkrRzi80jJ8MaeZgqKjH1bAWAFw9bA==
 
-nyx-kit@^1.0.0:
+nyx-kit@^1.1.23:
   version "1.1.23"
   resolved "https://registry.yarnpkg.com/nyx-kit/-/nyx-kit-1.1.23.tgz#76db0f34ec5a8ce04262cad262d0bd643d6a376c"
   integrity sha512-x4IvLSXZhPpmmGT6MAFR0iiG2SfzvT5bi23IHBQd/mbAOzV/ZSNIz5u6rNAi1IQU6Xw1603kIgld6i8Yfo9VYg==
